@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - {{ guide_profile.user.get_full_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            color: #27ae60;
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 1.1em;
+        }
+
+        .user-info strong {
+            color: #2c3e50;
+        }
+
+        .logout-form {
+            display: inline;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1em;
+            text-decoration: underline;
+        }
+
+        .logout-btn:hover {
+            color: #c0392b;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #555;
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #27ae60;
+        }
+
+        .stat-card p {
+            margin: 10px 0 0;
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #27ae60;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .btn-confirm {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-create {
+            display: block;
+            width: 300px;
+            margin: 30px auto;
+            padding: 15px;
+            background: #27ae60;
+            color: white;
+            text-align: center;
+            font-size: 1.4em;
+            border-radius: 10px;
+            text-decoration: none;
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-create:hover {
+            background: #219a52;
+            transform: translateY(-3px);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 1.3em;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-info {
+                margin-top: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header me emër përdoruesi dhe logout -->
+        <div class="header">
+            <h1>📊 Dashboard i Guidës</h1>
+            <div class="user-info">
+                <strong>{{ user.get_full_name|default:user.username }}</strong> |
+                <form method="post" action="{% url 'users:logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Dalje (Logout)</button>
+                </form>
+            </div>
+        </div>
+
+        <p class="welcome">Mirëseerdhët përsëri,
+            <strong>{{ guide_profile.user.get_full_name|default:guide_profile.user.username }}</strong>!
+        </p>
+
+        <!-- Statistikat -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ tours.count }}</h3>
+                <p>Ture të krijuara</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ total_bookings }}</h3>
+                <p>Rezervime totale</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ pending_bookings }}</h3>
+                <p>Në pritje konfirmimi</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ revenue }} Lekë</h3>
+                <p>Të ardhura të pritshme</p>
+            </div>
+        </div>
+
+        <!-- Krijo tur të ri -->
+        <a href="{% url 'tours:create_tour' %}" class="btn-create">
+            ➕ Krijo Tur të Ri
+        </a>
+
+        <!-- Rezervimet -->
+        <div class="section">
+            <h2>📋 Rezervimet e fundit</h2>
+            {% if bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data rezervimit</th>
+                        <th>Tur</th>
+                        <th>Tourist</th>
+                        <th>Persona</th>
+                        <th>Çmim total</th>
+                        <th>Status</th>
+                        <th>Veprime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.created_at|date:"d M Y H:i" }}</td>
+                        <td><a href="{% url 'tours:tour_detail' booking.tour.slug %}">{{ booking.tour.title }}</a><br>
+                            <small>{{ booking.tour.date|date:"d M Y" }}</small>
+                        </td>
+                        <td>{{ booking.tourist.user.get_full_name|default:booking.tourist.user.username }}<br>
+                            <small>{{ booking.tourist.phone|default:"Pa telefon" }}</small>
+                        </td>
+                        <td>{{ booking.num_people }}</td>
+                        <td><strong>{{ booking.total_price }} Lekë</strong></td>
+                        <td>
+                            <span class="status-{{ booking.status }}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if booking.status == 'pending' %}
+                            <a href="{% url 'users:booking_action' booking.id 'confirm' %}"
+                                class="btn btn-confirm">Konfirmo</a>
+                            <a href="{% url 'users:booking_action' booking.id 'cancel' %}"
+                                class="btn btn-cancel">Anullo</a>
+                            {% else %}
+                            <em>Pa veprim</em>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">Ende nuk ke asnjë rezervim. Kur turistët të rezervojnë ture tënde, do të shfaqen këtu!
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Turet e mia -->
+        <div class="section">
+            <h2>🌄 Turet e mia</h2>
+            {% if tours %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titull</th>
+                        <th>Data</th>
+                        <th>Lloji</th>
+                        <th>Vende të lira</th>
+                        <th>Çmim</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tour in tours %}
+                    <tr>
+                        <td><a href="{% url 'tours:tour_detail' tour.slug %}">{{ tour.title }}</a></td>
+                        <td>{{ tour.date|date:"d M Y" }}</td>
+                        <td>{{ tour.get_tour_type_display }}</td>
+                        <td>{{ tour.available_spots }} / {{ tour.max_participants }}</td>
+                        <td>{{ tour.price_per_person }} Lekë</td>
+                        <td>{% if tour.is_active %}Aktiv{% else %}Joaktiv{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">Nuk ke krijuar ende asnjë tur. Filloni duke krijuar një aventurë të re!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

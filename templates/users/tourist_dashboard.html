@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Paneli im — Pion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0369a1;
+            --primary-light: #38bdf8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-light: #475569;
+            --text-lighter: #64748b;
+            --border: #e2e8f0;
+            --radius: 16px;
+            --shadow: 0 4px 20px -2px rgba(15,23,42,0.08);
+            --shadow-lg: 0 12px 40px -8px rgba(15,23,42,0.12);
+            --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255,255,255,0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 1.1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.98rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+        }
+
+        .page-title {
+            font-size: clamp(2.2rem, 5vw, 2.8rem);
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--text), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.4rem;
+        }
+
+        .subtitle {
+            color: var(--text-lighter);
+            font-size: 1.1rem;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.6rem;
+            margin: 2.5rem 0 3.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.6rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-lighter);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 0.4rem;
+        }
+
+        /* Urgent Warning */
+        .urgent-warning {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: var(--radius);
+            padding: 1.4rem 1.8rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            box-shadow: 0 2px 12px rgba(245,158,11,0.12);
+        }
+
+        .urgent-warning .icon {
+            font-size: 2.4rem;
+        }
+
+        /* Section Title */
+        h2.section-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 4rem 0 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        h2.section-title i {
+            color: var(--primary);
+        }
+
+        /* Booking Card */
+        .booking-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.8rem;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .booking-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .booking-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-placeholder {
+            height: 100%;
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            display: grid;
+            place-items: center;
+            color: var(--text-lighter);
+        }
+
+        .booking-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .booking-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1.1rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-pending   { background: #fef3c7; color: #92400e; }
+        .status-confirmed { background: #d1fae5; color: #065f46; }
+        .status-24h       { background: #dbeafe; color: #1e40af; }
+
+        .booking-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.6rem 2.5rem;
+            color: var(--text-lighter);
+            font-size: 0.98rem;
+        }
+
+        .booking-info i {
+            color: var(--primary);
+            width: 22px;
+            text-align: center;
+        }
+
+        .price-big {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .btn-primary     { background: var(--primary);     color: white; }
+        .btn-primary:hover   { background: var(--primary-dark); }
+        .btn-warning     { background: var(--warning);     color: white; }
+        .btn-warning:hover   { background: #d97706; }
+        .btn-outline-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+        .btn-outline-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 7rem 2rem;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-top: 2rem;
+        }
+
+        .empty-state p {
+            color: var(--text-lighter);
+            font-size: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        @media (max-width: 1024px) {
+            .booking-card { grid-template-columns: 1fr; }
+            .booking-image, .image-placeholder { height: 260px; }
+        }
+
+        @media (max-width: 640px) {
+            .nav-container { flex-direction: column; gap: 1.4rem; }
+            .nav-links { flex-direction: column; gap: 1rem; width: 100%; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{% url 'home' %}" class="logo">Pion</a>
+
+        <div class="nav-links">
+            <a href="{% url 'tours:tour_list' %}">Shfletoni Turet</a>
+            <a href="{% url 'users:tourist_dashboard' %}" class="active">Paneli im</a>
+            <form method="post" action="{% url 'users:logout' %}" style="margin:0">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout">Dilni</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <header>
+        <h1 class="page-title">Mirë se vini, {{ user.first_name }}! 🌄</h1>
+        <p class="subtitle">Menaxho rezervimet dhe aventurat e tua në një vend</p>
+    </header>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div style="padding:1.3rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:var(--radius); margin:1.8rem 0;">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_bookings }}</div>
+            <div class="stat-label">Rezervime Totale</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ confirmed_bookings }}</div>
+            <div class="stat-label">Konfirmuar</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_bookings }}</div>
+            <div class="stat-label">Në Pritje</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_spent|floatformat:0 }}</div>
+            <div class="stat-label">Shpenzime (Lekë)</div>
+        </div>
+    </div>
+
+    {% if needs_confirmation %}
+    <div class="urgent-warning">
+        <div class="icon">⚠️</div>
+        <div>
+            <strong style="font-size:1.2rem; display:block; margin-bottom:0.4rem; color:#92400e;">
+                Konfirmim urgjent i nevojshëm!
+            </strong>
+            <span>Ke {{ needs_confirmation|length }} tur(e) që duhet konfirmuar brenda 24 orëve.</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <h2 class="section-title"><i class="fa-regular fa-calendar-check"></i> Turet e Ardhshme</h2>
+
+    {% if upcoming_bookings %}
+    {% for booking in upcoming_bookings %}
+    <div class="booking-card">
+        <div>
+            {% if booking.tour.main_image %}
+            <img src="{{ booking.tour.main_image.url }}" alt="{{ booking.tour.title }}" class="booking-image">
+            {% else %}
+            <div class="image-placeholder">
+                <i class="fa-solid fa-mountain fa-4x"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="booking-content">
+            <div class="booking-header">
+                <h3 class="booking-title">{{ booking.tour.title }}</h3>
+                <span class="status-badge 
+                    {% if booking.is_confirmed_24h %}status-24h
+                    {% elif booking.status == 'confirmed' %}status-confirmed
+                    {% else %}status-pending{% endif %}">
+                    {% if booking.is_confirmed_24h %}Konfirmuar 24h
+                    {% elif booking.status == 'confirmed' %}Konfirmuar
+                    {% else %}Në Pritje{% endif %}
+                </span>
+            </div>
+
+            <div class="booking-info">
+                <span><i class="fa-solid fa-user-tie"></i> {{ booking.tour.guide.user.get_full_name|default:booking.tour.guide.user.username }}</span>
+                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.location_start }}</span>
+            </div>
+
+            <div class="booking-info" style="border-top:1px solid var(--border); padding-top:1.2rem;">
+                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
+                <span><i class="fa-regular fa-clock"></i> {{ booking.tour.time_start|time:"H:i" }}</span>
+                <span><i class="fa-solid fa-users"></i> {{ booking.num_people }} persona</span>
+            </div>
+
+            <div class="price-big">{{ booking.total_price }} Lekë</div>
+
+            <div class="action-buttons">
+                {% if booking.status == 'confirmed' and not booking.is_confirmed_24h %}
+                <form action="{% url 'users:confirm_participation' booking.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning">✓ Konfirmo 24h</button>
+                </form>
+                {% endif %}
+
+                <a href="{% url 'tours:tour_detail' booking.tour.slug %}" class="btn btn-primary">Shiko Detajet</a>
+
+                {% if booking.status != 'cancelled' %}
+                <form action="{% url 'users:cancel_booking' booking.id %}" method="post" 
+                      onsubmit="return confirm('Vërtet dëshiron ta anulosh?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">Anullo</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <p>Akoma nuk ke asnjë aventurë të planifikuar... 🏔️</p>
+        <a href="{% url 'tours:tour_list' %}" class="btn btn-primary" style="font-size:1.1rem; padding:0.9rem 2rem;">
+            <i class="fa-solid fa-compass"></i> Gjej një tur tani
+        </a>
+    </div>
+    {% endif %}
+
+    <h2 class="section-title" style="color:var(--text-lighter);"><i class="fa-solid fa-history"></i> Ture të Kaluara</h2>
+
+    {% if past_bookings %}
+    {% for booking in past_bookings %}
+    <div class="booking-card" style="opacity:0.92; filter:grayscale(0.12);">
+        <div class="booking-content" style="grid-column: 1 / -1;">
+            <div class="booking-header">
+                <h3 class="booking-title" style="font-size:1.28rem;">{{ booking.tour.title }}</h3>
+                <span class="status-badge" style="background:#e5e7eb; color:#4b5563;">Përfunduar</span>
+            </div>
+            <div class="booking-info" style="margin-top:0.8rem;">
+                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
+                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} Lekë</span>
+            </div>
+            <div style="margin-top:1.4rem;">
+                <a href="{% url 'tours:create_review' booking.tour.slug %}" class="btn btn-primary" 
+                   style="background:linear-gradient(90deg, #6366f1,#8b5cf6);">
+                    <i class="fa-solid fa-star"></i> Vlerëso përvojën
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+</div>
+</body>
+</html>

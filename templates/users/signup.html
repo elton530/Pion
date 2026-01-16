@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regjistrohu - Pion</title>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0369a1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-light: #475569;
+            --border: #e2e8f0;
+            --radius: 18px;
+            --shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background:
+                radial-gradient(circle at top, #e0f2fe, transparent 60%),
+                linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2.6rem 2.2rem;
+            animation: fadeUp 0.6s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            margin: 0 auto 0.8rem;
+            padding: 0.4rem 0.9rem;
+            background: #e0f2fe;
+            color: var(--primary-dark);
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.3rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+        }
+
+        .role-group {
+            margin: 2rem 0;
+            padding: 1.4rem;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+
+        .role-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.2rem 1.4rem;
+            border-radius: 14px;
+            background: white;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-bottom: 1rem;
+        }
+
+        .role-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);
+        }
+
+        /* ✨ Selected state */
+        .role-option:has(input:checked) {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #f0f9ff, white);
+        }
+
+        .role-option input {
+            transform: scale(1.4);
+            accent-color: var(--primary);
+        }
+
+        .icon {
+            font-size: 1.8rem;
+        }
+
+        .messages {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .messages li {
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 0.6rem;
+        }
+
+        .success {
+            background: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid var(--success);
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
+
+        button {
+            width: 100%;
+            padding: 1.1rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.8rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="badge">Pion Community</div>
+        <h1>🌄 Mirë se vini!</h1>
+        <p class="subtitle">
+            Regjistrohu dhe bëhu pjesë e guidave dhe aventurierëve në Shqipëri
+        </p>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>{{ form.username.label }}</label>
+                {{ form.username }}{{ form.username.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.first_name.label }}</label>
+                {{ form.first_name }}{{ form.first_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.last_name.label }}</label>
+                {{ form.last_name }}{{ form.last_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.email.label }}</label>
+                {{ form.email }}{{ form.email.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.password1.label }}</label>
+                {{ form.password1 }}{{ form.password1.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.password2.label }}</label>
+                {{ form.password2 }}{{ form.password2.errors }}
+            </div>
+
+            <div class="role-group">
+                <label class="role-option">
+                    <input type="radio" name="role" value="tourist" required
+                        {% if form.role.value == "tourist" or not form.role.value %}checked{% endif %}>
+                    <span class="icon">🧳</span>
+                    <span><strong>Turist</strong><br><small>Zbulo aventura unike</small></span>
+                </label>
+
+                <label class="role-option">
+                    <input type="radio" name="role" value="guide" required
+                        {% if form.role.value == "guide" %}checked{% endif %}>
+                    <span class="icon">🗺️</span>
+                    <span><strong>Guide</strong><br><small>Ndaj pasionin & fito</small></span>
+                </label>
+
+                {{ form.role.errors }}
+            </div>
+
+            <button type="submit">
+                <i class="fas fa-user-plus"></i> Regjistrohu Tani
+            </button>
+        </form>
+
+        <div class="login-link">
+            Ke tashmë llogari?
+            <a href="{% url 'users:login' %}">Kyçu këtu</a>
+        </div>
+
+    </div>
+</body>
+
+</html>

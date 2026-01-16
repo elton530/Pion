@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pion — Zbulo Natyrën Shqiptare{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Zbulo bukuritë e egra<br>të Shqipërisë</h1>
+        <p>Platforma më e mirë për të gjetur dhe rezervuar aventura autentike në natyrë me guida lokale profesioniste.</p>
+
+        <div class="hero-cta">
+            <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
+                <i class="fa-solid fa-compass"></i> Shiko të gjitha turët
+            </a>
+            <a href="{% url 'users:signup' %}" class="btn btn-outline">
+                Krijo llogari
+            </a>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">{{ tours_count|default:"24" }}</div>
+                <div class="stat-label">Ture aktive</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ guides_count|default:"12" }}</div>
+                <div class="stat-label">Guida lokale</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">4.9<span style="font-size:1.4rem">★</span></div>
+                <div class="stat-label">Vlerësim mesatar</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-slider">
+        {% if top_rated_tours %}
+            {% for tour in top_rated_tours %}
+            <a href="{% url 'tours:tour_detail' tour.slug %}" class="slide {% if forloop.first %}active{% endif %}">
+                {% if tour.main_image %}
+                <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" loading="lazy">
+                {% endif %}
+                <div class="slide-gradient"></div>
+                <div class="slide-content">
+                    <span class="tag">⭐ Turi më i vlerësuar</span>
+                    <h3>{{ tour.title }}</h3>
+                    <div style="margin-top:0.5rem; opacity:0.9; font-weight:500;">
+                        {{ tour.average_rating|default:"5.0" }} ★★★★★
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="slide active" style="background:#e2e8f0; display:grid; place-items:center; color:#64748b;">
+                <div style="font-size:1.5rem; font-weight:600;">Imazhe të tureve do të shfaqen këtu</div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">✨ Turet e ardhshme</h2>
+
+    <div class="tour-grid">
+        {% if upcoming_tours %}
+            {% for tour in upcoming_tours %}
+            <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card">
+                {% if tour.main_image %}
+                <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" loading="lazy">
+                {% endif %}
+                <div class="card-content">
+                    <div class="tour-type">{{ tour.get_tour_type_display|default:"Aventurë në natyrë" }}</div>
+                    <h3 class="tour-title">{{ tour.title }}</h3>
+                    <div class="tour-date">
+                        <i class="far fa-calendar-alt"></i> {{ tour.date|date:"d F Y" }}
+                    </div>
+                    <div class="tour-price">{{ tour.price_per_person }} Lekë</div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align:center; padding:4rem; color:var(--text-lighter);">
+                <p style="font-size:1.3rem; margin-bottom:1rem;">Aktualisht nuk ka ture të planifikuara</p>
+                <a href="{% url 'tours:tour_list' %}" class="btn btn-primary" style="font-size:1.1rem;">
+                    Shiko të gjitha turët →
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple slider
+    (function () {
+        const slides = document.querySelectorAll('.hero-slider .slide');
+        if (slides.length <= 1) return;
+
+        let current = 0;
+        const next = () => {
+            slides[current].classList.remove('active');
+            current = (current + 1) % slides.length;
+            slides[current].classList.add('active');
+        };
+
+        setInterval(next, 5500);
+    })();
+</script>
+{% endblock %}

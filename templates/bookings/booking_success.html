@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rezervim i Suksesshëm!</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 100px;
+            background: #f0f2f5;
+        }
+
+        .box {
+            background: white;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #27ae60;
+        }
+
+        p {
+            font-size: 1.2em;
+        }
+
+        a {
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h1>🎉 Rezervimi u krye me sukses!</h1>
+        <p>Faleminderit! Rezervimi yt për "<strong>{{ tour.title }}</strong>" është regjistruar.</p>
+        <p>Guida do ta konfirmojë shpejt. Do të njoftohesh me email ose në platformë.</p>
+        <br>
+        <a href="{% url 'tours:tour_list' %}">Shiko ture të tjera</a>
+    </div>
+</body>
+
+</html>

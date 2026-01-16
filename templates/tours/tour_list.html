@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ture Turistike në Shqipëri - Pion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tour-list-container">
+    <h1 class="tour-list-title">Ture Turistike në Shqipëri</h1>
+
+    {% if tours %}
+        <div class="tour-grid">
+            {% for tour in tours %}
+                <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card">
+                    {% if tour.main_image %}
+                        <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="tour-image">
+                    {% else %}
+                        <div style="height:240px;background:#e2e8f0;display:grid;place-items:center;color:#64748b;">
+                            Pa foto
+                        </div>
+                    {% endif %}
+
+                    <div class="tour-info">
+                        <h3 class="tour-title">{{ tour.title }}</h3>
+                        
+                        <div class="tour-meta">
+                            <span class="tour-meta-item">
+                                <i class="far fa-calendar-alt"></i> {{ tour.date|date:"d M Y" }}
+                            </span>
+                            <span class="tour-meta-item">
+                                <i class="fas fa-hiking"></i> {{ tour.get_tour_type_display }}
+                            </span>
+                            <span class="tour-meta-item">
+                                <i class="fas fa-mountain"></i> {{ tour.get_difficulty_display }}
+                            </span>
+                        </div>
+
+                        <div class="tour-guide">
+                            Guidë: {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
+                        </div>
+
+                        <div class="tour-price">
+                            {{ tour.price_per_person }} Lekë / person
+                        </div>
+
+                        <div class="tour-spots">
+                            {{ tour.available_spots }} vende të lira nga {{ tour.max_participants }}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-tours">
+            <h2>Ende nuk ka ture të disponueshme</h2>
+            <p>Guidat tona po përgatisin aventura të reja emocionuese!</p>
+            <a href="{% url 'tours:tour_list' %}">Shiko të gjitha turët</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

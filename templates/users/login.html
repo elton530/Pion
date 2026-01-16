@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyçu në Platformë</title>
+
+    <style>
+        :root {
+            --primary: #16a085;
+            --primary-dark: #138d75;
+            --bg-gradient: linear-gradient(135deg, #1abc9c, #2ecc71);
+            --text-dark: #2c3e50;
+            --border-light: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 40px 36px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .login-box h2 {
+            margin: 0 0 30px;
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.9rem;
+            font-weight: 700;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(22, 160, 133, 0.35);
+        }
+
+        .links {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 6px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px;
+        }
+
+        .errorlist li {
+            background: #fdecea;
+            color: #c0392b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-box">
+        <h2>🔑 Kyçu në Platformë</h2>
+
+        {% if form.non_field_errors %}
+        <ul class="errorlist">
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div>
+                <label for="id_username">Emri i përdoruesit</label>
+                <input
+                    type="text"
+                    name="username"
+                    id="id_username"
+                    required
+                    autocomplete="username"
+                    placeholder="Shkruaj emrin e përdoruesit"
+                >
+
+                {% if form.username.errors %}
+                <ul class="errorlist">
+                    {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_password">Fjalëkalimi</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Shkruaj fjalëkalimin"
+                >
+
+                {% if form.password.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+
+            <button type="submit">Kyçu</button>
+        </form>
+
+        <div class="links">
+            <a href="{% url 'users:signup' %}">Regjistrohu</a>
+            ·
+            <a href="/">Kthehu në fillim</a>
+        </div>
+    </div>
+</body>
+</html>

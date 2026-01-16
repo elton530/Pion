@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plotëso Profilin tënd si Guide Lokal - Pion{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/guide_profile_edit.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-edit-wrapper">
+    <div class="container">
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active">
+                <div class="step-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span>Profili</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-mountain"></i>
+                </div>
+                <span>Ture</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <span>Dashboard</span>
+            </div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="header-content">
+            <div class="icon-badge">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="header-text">
+                <h1>Plotëso Profilin tënd si Guide Lokal</h1>
+                <p class="subtitle">
+                    Përshëndetje, <strong>{{ request.user.first_name|default:request.user.username }}</strong>! 
+                    Plotësimi i profilit është hapi i parë për të filluar të ofrosh ture të paharrueshme.
+                </p>
+            </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="close-message">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form Content -->
+        <form method="post" enctype="multipart/form-data" class="profile-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Left Column - Photo & Basic Info -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-camera"></i>
+                        <h2>Foto Profili</h2>
+                    </div>
+
+                    <div class="photo-upload-area">
+                        {% if profile.photo %}
+                        <div class="current-photo">
+                            <img src="{{ profile.photo.url }}" alt="Foto profilit aktuale" id="preview-image">
+                            <div class="photo-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Ndrysho foton</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="photo-placeholder" id="photo-placeholder">
+                            <i class="fas fa-user-circle"></i>
+                            <p>Ngarko foto</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="file-input-wrapper">
+                            {{ form.photo }}
+                            <label for="{{ form.photo.id_for_label }}" class="file-input-label">
+                                <i class="fas fa-upload"></i>
+                                Zgjidh foto
+                            </label>
+                        </div>
+                        <p class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            Ngarko një foto të qartë të fytyrës tënde. Formatet: JPG, PNG (max 5MB)
+                        </p>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="form-group">
+                        <label for="{{ form.bio.id_for_label }}">
+                            <i class="fas fa-pen"></i>
+                            {{ form.bio.label }}
+                        </label>
+                        {{ form.bio }}
+                        <p class="help-text">
+                            <i class="fas fa-lightbulb"></i>
+                            Trego pak për përvojën tënde si guide, pasionet dhe çfarë e bën unik stilin tënd.
+                        </p>
+                        <div class="char-counter">
+                            <span id="bio-count">0</span> / 500 karaktere
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Details -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h2>Informacione Kontakti</h2>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}">
+                            <i class="fas fa-phone"></i>
+                            {{ form.phone.label }}
+                        </label>
+                        <div >
+                            {{ form.phone }}
+                        </div>
+                        <p class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            Numri me kod vendi, p.sh. +355 69 123 4567
+                        </p>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ form.location.label }}
+                        </label>
+                        <div >
+                            {{ form.location }}
+                        </div>
+                        <p class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            p.sh. Theth, Valbonë, Tiranë, Durrës, Gjirokastër
+                        </p>
+                    </div>
+
+                    <!-- Languages -->
+                    <div class="form-group">
+                        <label for="{{ form.languages.id_for_label }}">
+                            <i class="fas fa-language"></i>
+                            {{ form.languages.label }}
+                        </label>
+                        <div>
+                            {{ form.languages }}
+                        </div>
+                        <p class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            p.sh. Shqip, Anglisht, Italisht, Gjermanisht
+                        </p>
+                    </div>
+
+                    <!-- Certifications -->
+                    <div class="form-group">
+                        <label for="{{ form.certifications.id_for_label }}">
+                            <i class="fas fa-certificate"></i>
+                            {{ form.certifications.label }}
+                        </label>
+                        {{ form.certifications }}
+                        <p class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            Certifikime alpinizmi, ndihma e parë, guidë turistike, etj.
+                        </p>
+                    </div>
+
+                    <!-- Specialty -->
+                    <div class="form-group">
+                        <label for="{{ form.specialty.id_for_label }}">
+                            <i class="fas fa-star"></i>
+                            {{ form.specialty.label }}
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-star"></i>
+                            {{ form.specialty }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span>Ruaj Profilin</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <a href="{% url 'users:guide_dashboard' %}" class="quick-link">
+                <div class="quick-link-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="quick-link-content">
+                    <h3>Dashboard</h3>
+                    <p>Shiko statistikat e turave</p>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+
+            <a href="{% url 'tours:create_tour' %}" class="quick-link">
+                <div class="quick-link-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="quick-link-content">
+                    <h3>Krijo Tur të Ri</h3>
+                    <p>Shto një aventurë të re</p>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+
+            <a href="/" class="quick-link">
+                <div class="quick-link-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="quick-link-content">
+                    <h3>Faqja Kryesore</h3>
+                    <p>Kthehu në homepage</p>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Preview image before upload
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('{{ form.photo.id_for_label }}');
+    const previewImage = document.getElementById('preview-image');
+    const placeholder = document.getElementById('photo-placeholder');
+    
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (previewImage) {
+                        previewImage.src = e.target.result;
+                    } else if (placeholder) {
+                        placeholder.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Character counter for bio
+    const bioTextarea = document.querySelector('textarea[name="bio"]');
+    const charCounter = document.getElementById('bio-count');
+    
+    if (bioTextarea && charCounter) {
+        bioTextarea.addEventListener('input', function() {
+            charCounter.textContent = this.value.length;
+        });
+        // Initialize counter
+        charCounter.textContent = bioTextarea.value.length;
+    }
+    
+    // Close message buttons
+    document.querySelectorAll('.close-message').forEach(button => {
+        button.addEventListener('click', function() {
+            this.parentElement.style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

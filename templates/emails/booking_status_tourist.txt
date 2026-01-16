@@ -1,0 +1,22 @@
+Përshëndetje {{ tourist_name }},
+
+Rezervimi juaj për turin "{{ tour_title }}" u përditësua.
+
+Statusi i ri: {{ status_display }}
+
+Detajet e rezervimit:
+- Data: {{ tour_date|date:"d M Y" }} në {{ tour_time }}
+- Numri i personave: {{ num_people }}
+- Çmim total: {{ total_price }} Lekë
+- Guida: {{ guide_name }} ({{ guide_phone }})
+
+{% if status == 'confirmed' %}
+Turi është konfirmuar! Guida do t'ju presë në vendin e takimit: {{ tour_location_start }}.
+{% elif status == 'cancelled' %}
+Fatkeqësisht rezervimi u anulua. Vendet u kthyen dhe mund të provoni një datë tjetër.
+{% endif %}
+
+Nëse keni pyetje, kontaktoni guidën direkt.
+
+Faleminderit që përdorni platformën tonë!
+Platforma e Guidave Lokale

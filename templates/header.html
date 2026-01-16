@@ -1,0 +1,262 @@
+{% load static %}
+<header class="site-header">
+    <div class="header-container">
+        <!-- Logo Section -->
+        <div class="logo">
+            <a href="{% url 'home' %}" class="logo-link">
+                <div class="logo-content">
+                    <img src="{% static 'images/logo.png' %}" alt="Open Map Logo" class="logo-img">
+                    <div class="logo-text-wrapper">
+                        <span class="logo-text">Open Map</span>
+                        <span class="logo-tagline">Explore Connect Experience</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="main-nav" aria-label="Main navigation">
+            <ul class="nav-links">
+                <li>
+                    <a href="{% url 'tours:tour_list' %}" class="nav-link">
+                        <i class="fas fa-mountain"></i>
+                        <span>Ture</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Rreth Nesh</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Kontakti</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- User Actions -->
+        <div class="user-actions">
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <button class="user-menu-toggle" aria-label="Menu e përdoruesit">
+                        <div class="user-avatar">
+                            {% if user.profile.photo %}
+                                <img src="{{ user.profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                            {% else %}
+                                <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </div>
+                        <span class="user-name">{{ user.first_name|default:user.username }}</span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+
+                    <!-- Dropdown me logout si formë POST -->
+                    <div class="user-dropdown">
+                        <a href="{% url 'users:tourist_dashboard' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profili im</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Ture të ruajtura</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        
+                        <!-- Logout me POST -->
+                        <form method="post" action="{% url 'users:logout' %}" class="dropdown-item logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Dalje</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'users:login' %}" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Kyçu</span>
+                </a>
+                <a href="{% url 'users:signup' %}" class="btn btn-signup">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Regjistrohu</span>
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+            <span class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-overlay"></div>
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-logo">
+                    <img src="{% static 'images/logo.png' %}" alt="Open Map Logo" class="logo-img">
+                    <span class="logo-text">Open Map</span>
+                </div>
+                <button class="menu-close" aria-label="Close menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <nav class="mobile-nav" aria-label="Mobile navigation">
+                <ul class="mobile-nav-links">
+                    <li>
+                        <a href="{% url 'tours:tour_list' %}" class="mobile-nav-link">
+                            <i class="fas fa-mountain"></i>
+                            <span>Ture</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {# <li>
+                        <a href="#" class="mobile-nav-link">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Rreth Nesh</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="mobile-nav-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>Kontakti</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li> #}
+                </ul>
+
+                <div class="mobile-divider"></div>
+
+                {% if user.is_authenticated %}
+                    <div class="mobile-user-section">
+                        <div class="mobile-user-info">
+                            <div class="mobile-user-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="mobile-user-details">
+                                <span class="mobile-user-name">{{ user.first_name|default:user.username }}</span>
+                                <span class="mobile-user-email">{{ user.email }}</span>
+                            </div>
+                        </div>
+                        <ul class="mobile-user-links">
+                            <li>
+                                <a href="{% url 'users:tourist_dashboard' %}" class="mobile-nav-link">
+                                    <i class="fas fa-user"></i>
+                                    <span>Profili im</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="mobile-nav-link">
+                                    <i class="fas fa-bookmark"></i>
+                                    <span>Ture të ruajtura</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'users:logout' %}" class="mobile-nav-link logout">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Dalje</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="mobile-auth-buttons">
+                        <a href="{% url 'users:login' %}" class="btn btn-login-mobile">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Kyçu</span>
+                        </a>
+                        <a href="{% url 'users:signup' %}" class="btn btn-signup-mobile">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Regjistrohu</span>
+                        </a>
+                    </div>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</header>
+
+<script>
+// Mobile menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuClose = document.querySelector('.menu-close');
+    const overlay = document.querySelector('.mobile-menu-overlay');
+    const userMenuToggle = document.querySelector('.user-menu-toggle');
+    const userDropdown = document.querySelector('.user-dropdown');
+
+    // Toggle mobile menu
+    if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            menuToggle.setAttribute('aria-expanded', 'true');
+        });
+    }
+
+    // Close mobile menu
+    function closeMobileMenu() {
+        if (mobileMenu) {
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+            if (menuToggle) {
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        }
+    }
+
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMobileMenu);
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // User dropdown menu (desktop)
+    if (userMenuToggle && userDropdown) {
+        userMenuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userMenuToggle.contains(e.target)) {
+                userDropdown.classList.remove('active');
+            }
+        });
+    }
+
+    // Hamburger animation
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+    }
+
+    if (menuClose) {
+        menuClose.addEventListener('click', function() {
+            if (menuToggle) {
+                menuToggle.classList.remove('active');
+            }
+        });
+    }
+});
+</script>

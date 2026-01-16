@@ -1,0 +1,18 @@
+Përshëndetje {{ guide_name }},
+
+Keni një rezervim të ri për turin:
+
+"{{ tour_title }}" ({{ tour_date|date:"d M Y" }} në {{ tour_time }})
+
+Detajet:
+- Tourist: {{ tourist_name }} ({{ tourist_phone|default:"pa telefon" }})
+- Numri i personave: {{ num_people }}
+- Çmim total: {{ total_price }} Lekë
+- Shënime nga turisti: 
+{{ notes|default:"Pa shënime" }}
+
+Ju lutem konfirmo ose anullo rezervimin nga dashboard-i juaj:
+http://127.0.0.1:8000/accounts/guide/dashboard/
+
+Faleminderit!
+Platforma e Guidave Lokale
