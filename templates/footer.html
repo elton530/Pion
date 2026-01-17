@@ -2,6 +2,7 @@
 {% now "Y" as current_year %}
 
 <footer class="site-footer">
+    <!-- Footer Wave SVG -->
     <div class="footer-wave">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
             <path fill="currentColor" d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
@@ -9,17 +10,17 @@
     </div>
 
     <div class="footer-container">
-        <!-- Footer Top -->
+        <!-- Footer Top Section -->
         <div class="footer-top">
             <!-- Brand Column -->
             <div class="footer-col footer-brand">
-                <div class="footer-logo">
+                <a href="{% url 'home' %}" class="footer-logo">
                     <img src="{% static 'images/logo.png' %}" alt="Open Map Logo" class="footer-logo-img">
                     <div class="footer-logo-text">
                         <h3>Open Map</h3>
-                        <span>Explore Connect Experience</span>
+                        <span>Explore. Connect. Experience.</span>
                     </div>
-                </div>
+                </a>
                 <p class="footer-description">
                     Zbulo natyrën shqiptare me guida lokale profesioniste. Aventura të paharrueshme dhe eksperienca unike në malët dhe peizazhet më të bukura.
                 </p>
@@ -48,7 +49,7 @@
                 </div>
             </div>
 
-            <!-- Links Column 1 -->
+            <!-- Platforma Column -->
             <div class="footer-col">
                 <h4 class="footer-title">
                     <i class="fas fa-compass"></i>
@@ -67,28 +68,31 @@
                             <span>Bëhu Guide</span>
                         </a>
                     </li>
+                    
                     <li>
                         <a href="#">
                             <i class="fas fa-chevron-right"></i>
                             <span>Rreth Nesh</span>
                         </a>
-                    </li> 
+                    </li>
                     <li>
                         <a href="#">
                             <i class="fas fa-chevron-right"></i>
                             <span>Blog & Këshilla</span>
                         </a>
                     </li>
+                   
                 </ul>
             </div>
 
-            <!-- Links Column 2 -->
+            <!-- Lidhje të dobishme Column -->
             <div class="footer-col">
                 <h4 class="footer-title">
                     <i class="fas fa-link"></i>
                     Lidhje të dobishme
                 </h4>
                 <ul class="footer-links">
+                    
                     <li>
                         <a href="#">
                             <i class="fas fa-chevron-right"></i>
@@ -106,17 +110,18 @@
                             <i class="fas fa-chevron-right"></i>
                             <span>Politika e Privatësisë</span>
                         </a>
-                    </li> 
+                    </li>
                     <li>
                         <a href="#">
                             <i class="fas fa-chevron-right"></i>
                             <span>Pyetje të Shpeshta</span>
                         </a>
                     </li>
+                   
                     <li>
-                        <a href="mailto:info@pion.al">
+                        <a href="mailto:info@openmap.al">
                             <i class="fas fa-chevron-right"></i>
-                            <span>info@pion.al</span>
+                            <span>info@openmap.al</span>
                         </a>
                     </li>
                 </ul>
@@ -135,8 +140,8 @@
                 <form class="newsletter-form" id="footerNewsletterForm">
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" placeholder="Email-i juaj..." required>
-                        <button type="submit" aria-label="Subscribe">
+                        <input type="email" name="email" placeholder="Email-i juaj..." required aria-label="Email address">
+                        <button type="submit" aria-label="Regjistrohu në newsletter">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
@@ -145,19 +150,19 @@
                 <div class="footer-social">
                     <h5>Rrjetet Sociale</h5>
                     <div class="social-icons">
-                        <a href="#" aria-label="Facebook" class="social-link facebook">
+                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="social-link facebook">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="#" aria-label="Instagram" class="social-link instagram">
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-link instagram">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="#" aria-label="Twitter" class="social-link twitter">
+                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link twitter">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="#" aria-label="TikTok" class="social-link tiktok">
+                        <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="social-link tiktok">
                             <i class="fab fa-tiktok"></i>
                         </a>
-                        <a href="#" aria-label="YouTube" class="social-link youtube">
+                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="social-link youtube">
                             <i class="fab fa-youtube"></i>
                         </a>
                     </div>
@@ -165,32 +170,38 @@
             </div>
         </div>
 
-        <!-- Footer Bottom -->
+        <!-- Footer Bottom Section -->
         <div class="footer-bottom">
-            <div class="footer-bottom-left">
-                <p class="copyright">
-                    &copy; {{ current_year }} <strong>Pion</strong>. Të gjitha të drejtat e rezervuara.
-                </p>
-                <div class="footer-badges">
-                    <span class="badge">
-                        <i class="fas fa-shield-alt"></i>
-                        Pagesa të sigurta
-                    </span>
-                    <span class="badge">
-                        <i class="fas fa-lock"></i>
-                        SSL Encrypted
-                    </span>
+            <div class="footer-bottom-content">
+                <div class="footer-bottom-left">
+                    <div class="footer-copyright">
+                        <p class="copyright">
+                            &copy; {{ current_year }} <strong>Open Map</strong>. Të gjitha të drejtat e rezervuara.
+                        </p>
+                    </div>
+                    <div class="footer-badges">
+                        <span class="badge">
+                            <i class="fas fa-shield-alt"></i>
+                            Pagesa të sigurta
+                        </span>
+                        <span class="badge">
+                            <i class="fas fa-lock"></i>
+                            SSL Encrypted
+                        </span>
+                    </div>
                 </div>
-            </div>
-            <div class="footer-bottom-right">
-                <p class="made-with">
-                    Zbulo Shqipërinë me ne
-                    <i class="fas fa-heart"></i>
-                </p>
-                <div class="footer-payments">
-                    <i class="fab fa-cc-visa"></i>
-                    <i class="fab fa-cc-mastercard"></i>
-                    <i class="fab fa-cc-paypal"></i>
+                <div class="footer-bottom-right">
+                    <div class="footer-credits">
+                        <p class="made-with">
+                            Zbulo Shqipërinë me ne
+                            <i class="fas fa-heart"></i>
+                        </p>
+                    </div>
+                    <div class="footer-payments">
+                        <i class="fab fa-cc-visa" aria-label="Visa"></i>
+                        <i class="fab fa-cc-mastercard" aria-label="Mastercard"></i>
+                        <i class="fab fa-cc-paypal" aria-label="PayPal"></i>
+                    </div>
                 </div>
             </div>
         </div>
