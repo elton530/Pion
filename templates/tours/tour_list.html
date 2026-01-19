@@ -15,13 +15,16 @@
         <div class="tour-grid">
             {% for tour in tours %}
                 <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card">
-                    {% if tour.main_image %}
-                        <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="tour-image">
-                    {% else %}
-                        <div style="height:240px;background:#e2e8f0;display:grid;place-items:center;color:#64748b;">
-                            Pa foto
-                        </div>
-                    {% endif %}
+                    <div class="tour-image-wrapper">
+                        {% if tour.main_image %}
+                            <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="tour-image" loading="lazy">
+                        {% else %}
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-mountain"></i>
+                                <span>Pa foto</span>
+                            </div>
+                        {% endif %}
+                    </div>
 
                     <div class="tour-info">
                         <h3 class="tour-title">{{ tour.title }}</h3>
@@ -56,7 +59,7 @@
     {% else %}
         <div class="no-tours">
             <h2>Ende nuk ka ture të disponueshme</h2>
-            <p>Guidat tona po përgatisin aventura të reja emocionuese!</p>
+            <p>Guidat tona po përgatisin aventura të reja emocionuese për ty!</p>
             <a href="{% url 'tours:tour_list' %}">Shiko të gjitha turët</a>
         </div>
     {% endif %}
