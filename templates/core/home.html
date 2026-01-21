@@ -12,266 +12,266 @@ Zbulo aventurat më të bukura në natyrën shqiptare. Rezervo ture me guida lok
 {% endblock %}
 
 {% block content %}
-
-<!-- Hero Section -->
-<section class="hero">
-    <div class="hero-content">
-        <div class="hero-badge">
-            <i class="fas fa-mountain"></i>
-            <span>Platform për aventura në Shqipëri</span>
-        </div>
-        
-        <h1 class="hero-title">
-            Zbulo bukuritë e egra
-            <span class="gradient-text">të Shqipërisë</span>
-        </h1>
-        
-        <p class="hero-description">
-            Platforma më e mirë për të gjetur dhe rezervuar aventura autentike në natyrë 
-            me guida lokale profesioniste. Eksploro, lidhu dhe përjeto!
-        </p>
-
-        <div class="hero-cta">
-            <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
-                <i class="fas fa-compass"></i>
-                <span>Shiko të gjitha turët</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-            <a href="{% url 'users:signup' %}" class="btn btn-outline">
-                <i class="fas fa-user-plus"></i>
-                <span>Krijo llogari</span>
-            </a>
-        </div>
-
-        <div class="stats-bar">
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-mountain"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-number" data-target="{{ tours_count|default:'24' }}">0</div>
-                    <div class="stat-label">Ture aktive</div>
-                </div>
+<div class="home-page">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-mountain"></i>
+                <span>Platform për aventura në Shqipëri</span>
             </div>
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-number" data-target="{{ guides_count|default:'12' }}">0</div>
-                    <div class="stat-label">Guida lokale</div>
-                </div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-number">4.9</div>
-                    <div class="stat-label">Vlerësim mesatar</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hero Slider -->
-    <div class="hero-slider">
-        {% if top_rated_tours %}
-            {% for tour in top_rated_tours %}
-            <a href="{% url 'tours:tour_detail' tour.slug %}" 
-               class="slide {% if forloop.first %}active{% endif %}"
-               aria-label="{{ tour.title }}">
-                {% if tour.main_image %}
-                    <img src="{{ tour.main_image.url }}" 
-                         alt="{{ tour.title }}" 
-                         loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
-                {% else %}
-                    <div class="slide-placeholder">
-                        <i class="fas fa-image"></i>
-                    </div>
-                {% endif %}
-                <div class="slide-gradient"></div>
-                <div class="slide-content">
-                    <span class="tag">
-                        <i class="fas fa-trophy"></i>
-                        Turi më i vlerësuar
-                    </span>
-                    <h3>{{ tour.title }}</h3>
-                    <div class="slide-rating">
-                        <span class="rating-number">{{ tour.average_rating|default:"5.0" }}</span>
-                        <div class="stars">
-                            {% for i in "12345" %}
-                                <i class="fas fa-star"></i>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </a>
-            {% endfor %}
-        {% else %}
-            <div class="slide active slide-empty">
-                <div class="empty-state">
-                    <i class="fas fa-mountain"></i>
-                    <p>Imazhe të tureve do të shfaqen këtu</p>
-                </div>
-            </div>
-        {% endif %}
-        
-        <!-- Slider Controls -->
-        {% if top_rated_tours and top_rated_tours|length > 1 %}
-        <div class="slider-controls">
-            <button class="slider-control prev" aria-label="Previous slide">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="slider-control next" aria-label="Next slide">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="slider-indicators">
-            {% for tour in top_rated_tours %}
-            <button class="indicator {% if forloop.first %}active{% endif %}" 
-                    data-slide="{{ forloop.counter0 }}"
-                    aria-label="Go to slide {{ forloop.counter }}"></button>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-</section>
-
-<!-- Features Section -->
-<section class="features">
-    <div class="features-container">
-        <div class="feature-card">
-            <div class="feature-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <h3>Siguri e garantuar</h3>
-            <p>Guida të licencuara dhe ekuipim profesional për çdo aventurë</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">
-                <i class="fas fa-map-marked-alt"></i>
-            </div>
-            <h3>Destinacione unike</h3>
-            <p>Zbulo vende të fshehura që vetëm lokalët i njohin</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">
-                <i class="fas fa-headset"></i>
-            </div>
-            <h3>Mbështetje 24/7</h3>
-            <p>Ekipi ynë është gjithmonë gati të ndihmojë</p>
-        </div>
-    </div>
-</section>
-
-<!-- Tours Section -->
-<section class="section tours-section">
-    <div class="section-header">
-        <div class="section-header-content">
-            <h2 class="section-title">
-                <i class="fas fa-calendar-alt"></i>
-                Turet e ardhshme
-            </h2>
-            <p class="section-subtitle">
-                Rezervo vendin tënd në aventurën e radhës
+            
+            <h1 class="hero-title">
+                Zbulo bukuritë e egra
+                <span class="gradient-text">të Shqipërisë</span>
+            </h1>
+            
+            <p class="hero-description">
+                Platforma më e mirë për të gjetur dhe rezervuar aventura autentike në natyrë 
+                me guida lokale profesioniste. Eksploro, lidhu dhe përjeto!
             </p>
-        </div>
-        <a href="{% url 'tours:tour_list' %}" class="btn btn-text">
-            Shiko të gjitha
-            <i class="fas fa-arrow-right"></i>
-        </a>
-    </div>
 
-    <div class="tour-grid">
-        {% if upcoming_tours %}
-            {% for tour in upcoming_tours %}
-            <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card">
-                <div class="tour-image">
+            <div class="hero-cta">
+                <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
+                    <i class="fas fa-compass"></i>
+                    <span>Shiko të gjitha turët</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="{% url 'users:signup' %}" class="btn btn-outline">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Krijo llogari</span>
+                </a>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-mountain"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" data-target="{{ tours_count|default:'24' }}">0</div>
+                        <div class="stat-label">Ture aktive</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" data-target="{{ guides_count|default:'12' }}">0</div>
+                        <div class="stat-label">Guida lokale</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">4.9</div>
+                        <div class="stat-label">Vlerësim mesatar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Slider -->
+        <div class="hero-slider">
+            {% if top_rated_tours %}
+                {% for tour in top_rated_tours %}
+                <a href="{% url 'tours:tour_detail' tour.slug %}" 
+                   class="slide {% if forloop.first %}active{% endif %}"
+                   aria-label="{{ tour.title }}">
                     {% if tour.main_image %}
                         <img src="{{ tour.main_image.url }}" 
                              alt="{{ tour.title }}" 
-                             loading="lazy">
+                             loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
                     {% else %}
-                        <div class="image-placeholder">
-                            <i class="fas fa-mountain"></i>
+                        <div class="slide-placeholder">
+                            <i class="fas fa-image"></i>
                         </div>
                     {% endif %}
-                    <div class="tour-badge">
-                        <i class="fas fa-fire"></i>
-                        <span>Popullore</span>
+                    <div class="slide-gradient"></div>
+                    <div class="slide-content">
+                        <span class="tag">
+                            <i class="fas fa-trophy"></i>
+                            Turi më i vlerësuar
+                        </span>
+                        <h3>{{ tour.title }}</h3>
+                        <div class="slide-rating">
+                            <span class="rating-number">{{ tour.average_rating|default:"5.0" }}</span>
+                            <div class="stars">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="slide active slide-empty">
+                    <div class="empty-state">
+                        <i class="fas fa-mountain"></i>
+                        <p>Imazhe të tureve do të shfaqen këtu</p>
                     </div>
                 </div>
-                <div class="card-content">
-                    <div class="tour-type">
-                        <i class="fas fa-hiking"></i>
-                        {{ tour.get_tour_type_display|default:"Aventurë në natyrë" }}
-                    </div>
-                    <h3 class="tour-title">{{ tour.title }}</h3>
-                    <div class="tour-meta">
-                        <div class="tour-date">
-                            <i class="far fa-calendar-alt"></i>
-                            <span>{{ tour.date|date:"d M Y" }}</span>
-                        </div>
-                        <div class="tour-difficulty">
-                            <i class="fas fa-signal"></i>
-                            <span>Mesatar</span>
-                        </div>
-                    </div>
-                    <div class="tour-footer">
-                        <div class="tour-price">
-                            <span class="price-label">Nga</span>
-                            <span class="price-amount">{{ tour.price_per_person }}</span>
-                            <span class="price-currency">Lekë</span>
-                        </div>
-                        <div class="tour-action">
-                            <span>Rezervo</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </div>
-                    </div>
+            {% endif %}
+            
+            <!-- Slider Controls -->
+            {% if top_rated_tours and top_rated_tours|length > 1 %}
+            <div class="slider-controls">
+                <button class="slider-control prev" aria-label="Previous slide">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="slider-control next" aria-label="Next slide">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="slider-indicators">
+                {% for tour in top_rated_tours %}
+                <button class="indicator {% if forloop.first %}active{% endif %}" 
+                        data-slide="{{ forloop.counter0 }}"
+                        aria-label="Go to slide {{ forloop.counter }}"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
                 </div>
+                <h3>Siguri e garantuar</h3>
+                <p>Guida të licencuara dhe ekuipim profesional për çdo aventurë</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3>Destinacione unike</h3>
+                <p>Zbulo vende të fshehura që vetëm lokalët i njohin</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>Mbështetje 24/7</h3>
+                <p>Ekipi ynë është gjithmonë gati të ndihmojë</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tours Section -->
+    <section class="section tours-section">
+        <div class="section-header">
+            <div class="section-header-content">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Turet e ardhshme
+                </h2>
+                <p class="section-subtitle">
+                    Rezervo vendin tënd në aventurën e radhës
+                </p>
+            </div>
+            <a href="{% url 'tours:tour_list' %}" class="btn btn-text">
+                Shiko të gjitha
+                <i class="fas fa-arrow-right"></i>
             </a>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state-tours">
-                <div class="empty-icon">
-                    <i class="fas fa-calendar-times"></i>
+        </div>
+
+        <div class="tour-grid">
+            {% if upcoming_tours %}
+                {% for tour in upcoming_tours %}
+                <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card">
+                    <div class="tour-image">
+                        {% if tour.main_image %}
+                            <img src="{{ tour.main_image.url }}" 
+                                 alt="{{ tour.title }}" 
+                                 loading="lazy">
+                        {% else %}
+                            <div class="image-placeholder">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                        {% endif %}
+                        <div class="tour-badge">
+                            <i class="fas fa-fire"></i>
+                            <span>Popullore</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="tour-type">
+                            <i class="fas fa-hiking"></i>
+                            {{ tour.get_tour_type_display|default:"Aventurë në natyrë" }}
+                        </div>
+                        <h3 class="tour-title">{{ tour.title }}</h3>
+                        <div class="tour-meta">
+                            <div class="tour-date">
+                                <i class="far fa-calendar-alt"></i>
+                                <span>{{ tour.date|date:"d M Y" }}</span>
+                            </div>
+                            <div class="tour-difficulty">
+                                <i class="fas fa-signal"></i>
+                                <span>Mesatar</span>
+                            </div>
+                        </div>
+                        <div class="tour-footer">
+                            <div class="tour-price">
+                                <span class="price-label">Nga</span>
+                                <span class="price-amount">{{ tour.price_per_person }}</span>
+                                <span class="price-currency">Lekë</span>
+                            </div>
+                            <div class="tour-action">
+                                <span>Rezervo</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state-tours">
+                    <div class="empty-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h3>Aktualisht nuk ka ture të planifikuara</h3>
+                    <p>Kontrollo përsëri së shpejti ose shiko të gjitha turet tona</p>
+                    <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        <span>Shiko të gjitha turët</span>
+                    </a>
                 </div>
-                <h3>Aktualisht nuk ka ture të planifikuara</h3>
-                <p>Kontrollo përsëri së shpejti ose shiko të gjitha turet tona</p>
-                <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    <span>Shiko të gjitha turët</span>
-                </a>
-            </div>
-        {% endif %}
-    </div>
-</section>
+            {% endif %}
+        </div>
+    </section>
 
-<!-- CTA Section -->
-<section class="cta-section">
-    <div class="cta-container">
-        <div class="cta-content">
-            <h2>Gati për aventurën e radhës?</h2>
-            <p>Bashkohu me mijëra aventurierë që kanë zbuluar bukuritë e Shqipërisë me ne</p>
-            <div class="cta-buttons">
-                <a href="{% url 'users:signup' %}" class="btn btn-white">
-                    <i class="fas fa-rocket"></i>
-                    <span>Fillo tani</span>
-                </a>
-                <a href="{% url 'tours:tour_list' %}" class="btn btn-outline-white">
-                    <i class="fas fa-compass"></i>
-                    <span>Eksploro turet</span>
-                </a>
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <div class="cta-content">
+                <h2>Gati për aventurën e radhës?</h2>
+                <p>Bashkohu me mijëra aventurierë që kanë zbuluar bukuritë e Shqipërisë me ne</p>
+                <div class="cta-buttons">
+                    <a href="{% url 'users:signup' %}" class="btn btn-white">
+                        <i class="fas fa-rocket"></i>
+                        <span>Fillo tani</span>
+                    </a>
+                    <a href="{% url 'tours:tour_list' %}" class="btn btn-outline-white">
+                        <i class="fas fa-compass"></i>
+                        <span>Eksploro turet</span>
+                    </a>
+                </div>
+            </div>
+            <div class="cta-image">
+                <div class="cta-shape"></div>
+                <img src="{% static 'images/cta-adventure.svg' %}" alt="Adventure" loading="lazy">
             </div>
         </div>
-        <div class="cta-image">
-            <div class="cta-shape"></div>
-            <img src="{% static 'images/cta-adventure.svg' %}" alt="Adventure" loading="lazy">
-        </div>
-    </div>
-</section>
-
+    </section>
+</div>
 {% endblock %}
 
 {% block extra_js %}

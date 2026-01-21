@@ -13,7 +13,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 {% endblock %}
 
 {% block content %}
-<div class="container tour-detail">
+<div class="tour-detail-wrapper">
     <!-- Header -->
     <div class="header">
         <h1>{{ tour.title }}</h1>
@@ -23,7 +23,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
         </p>
     </div>
 
-    <!-- Foto kryesore -->
+    <!-- Main Image -->
     {% if tour.main_image %}
     <div class="main-image-wrapper">
         <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="main-image" loading="lazy">
@@ -195,7 +195,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                 <div class="form-group">
                     <label>Vlerëso këtë tur</label>
                     <div class="star-rating" id="star-rating">
-                        <span class="star" data-value="1" title="1 yllk">★</span>
+                        <span class="star" data-value="1" title="1 yll">★</span>
                         <span class="star" data-value="2" title="2 ylla">★</span>
                         <span class="star" data-value="3" title="3 ylla">★</span>
                         <span class="star" data-value="4" title="4 ylla">★</span>
@@ -206,7 +206,8 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 
                 <div class="form-group">
                     <label for="comment">Komentari yt</label>
-                    {{ review_form.comment }}
+                    <textarea name="comment" id="comment" rows="4" 
+                              placeholder="Shkruani komentin tuaj këtu..."></textarea>
                 </div>
 
                 <button type="submit" class="btn-submit">

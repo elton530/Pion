@@ -4,7 +4,7 @@
 {% block title %}Ture Turistike në Shqipëri - Open Map{% endblock %}
 
 {% block meta_description %}
-Shfleto dhjetëra ture të emocionuese në natyrën shqiptare. Ture alpinizmi, çiklizmi, 
+Shfleto dhjetëra ture emocionuese në natyrën shqiptare. Ture alpinizmi, çiklizmi, 
 shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
 {% endblock %}
 
@@ -27,98 +27,16 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
         </div>
     </section>
 
-    <!-- Filter & Search Section -->
-    <section class="filter-section">
-        <div class="filter-container">
-            <!-- Search Bar -->
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input 
-                    type="text" 
-                    id="search-input" 
-                    placeholder="Kërko ture..." 
-                    class="search-input"
-                    aria-label="Kërko ture"
-                >
-                <button class="search-clear" id="search-clear" aria-label="Pastro kërkimin">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <!-- Filters -->
-            <div class="filters">
-                <!-- Filter by Type -->
-                <div class="filter-group">
-                    <label for="filter-type">Lloji i turit:</label>
-                    <select id="filter-type" class="filter-select" aria-label="Filtro sipas llojit">
-                        <option value="">Të gjitha</option>
-                        <option value="hiking">Hiking</option>
-                        <option value="cycling">Cycling</option>
-                        <option value="climbing">Alpinizmi</option>
-                        <option value="cultural">Kulturë</option>
-                        <option value="adventure">Aventurë</option>
-                    </select>
-                </div>
-
-                <!-- Filter by Difficulty -->
-                <div class="filter-group">
-                    <label for="filter-difficulty">Vështirësia:</label>
-                    <select id="filter-difficulty" class="filter-select" aria-label="Filtro sipas vështirësisë">
-                        <option value="">Të gjitha</option>
-                        <option value="easy">E lehtë</option>
-                        <option value="medium">Mesatare</option>
-                        <option value="hard">Vështirë</option>
-                    </select>
-                </div>
-
-                <!-- Filter by Price Range -->
-                <div class="filter-group">
-                    <label for="filter-price">Çmimi maksimal:</label>
-                    <input 
-                        type="range" 
-                        id="filter-price" 
-                        class="filter-range" 
-                        min="0" 
-                        max="10000" 
-                        step="500"
-                        value="10000"
-                        aria-label="Filtro sipas çmimit"
-                    >
-                    <div class="price-display">
-                        Deri në <span id="price-value">10000</span> Lekë
-                    </div>
-                </div>
-
-                <!-- Reset Filters -->
-                <button class="filter-reset" id="filter-reset" aria-label="Rivendos filtrat">
-                    <i class="fas fa-redo"></i> Rivendos
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tours Count -->
-    <div class="tours-count">
-        <span id="tours-count-text">Shfaqja e <strong>0</strong> turash</span>
-        
-        <!-- Sort Options -->
-        <div class="sort-options">
-            <label for="sort-by">Rendit sipas:</label>
-            <select id="sort-by" class="sort-select" aria-label="Rendit sipas">
-                <option value="newest">Më të rejat</option>
-                <option value="oldest">Më të vjetrat</option>
-                <option value="price-asc">Çmimi (më lirë)</option>
-                <option value="price-desc">Çmimi (më shtrenjtë)</option>
-                <option value="rating">Vlerësimi më i lartë</option>
-            </select>
-        </div>
-    </div>
-
     <!-- Tours Grid -->
     {% if tours %}
     <div class="tour-grid" id="tour-grid">
         {% for tour in tours %}
-        <div class="tour-card" data-tour-id="{{ tour.id }}" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+        <div class="tour-card" 
+            data-tour-id="{{ tour.id }}"
+            data-tour-type="{{ tour.get_tour_type_display|lower }}"
+            data-tour-date="{{ tour.date|date:'Y-m-d' }}"
+            data-tour-rating="{{ tour.average_rating|default:'0' }}"
+            data-tour-price="{{ tour.price_per_person }}">
             <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
                 <!-- Image Section -->
                 <div class="tour-image-wrapper">
@@ -135,7 +53,7 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                         </div>
                     {% endif %}
 
-                    <!-- Badge -->
+                    <!-- Availability Badge -->
                     {% if tour.available_spots > 0 %}
                     <div class="tour-badge available">
                         <i class="fas fa-check-circle"></i>
@@ -149,7 +67,7 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                     {% endif %}
 
                     <!-- Difficulty Badge -->
-                    <div class="difficulty-badge difficulty-{{ tour.get_difficulty_display|lower }}">
+                    <div class="difficulty-badge difficulty-{{ tour.difficulty }}">
                         {{ tour.get_difficulty_display }}
                     </div>
                 </div>
@@ -213,16 +131,6 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
         {% endfor %}
     </div>
 
-    <!-- No Results Message -->
-    <div id="no-results" class="no-tours hidden">
-        <i class="fas fa-search"></i>
-        <h2>Nuk u gjetën ture</h2>
-        <p>Provo të ndryshosh filtrat ose kërkimin tuaj</p>
-        <button class="btn-reset-all" id="reset-all-btn">
-            <i class="fas fa-redo"></i> Rivendos të gjithë
-        </button>
-    </div>
-
     {% else %}
     <!-- Empty State -->
     <div class="no-tours">
@@ -234,12 +142,6 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
         </div>
     </div>
     {% endif %}
-
-    <!-- Loading Indicator -->
-    <div id="loading-spinner" class="loading-spinner hidden">
-        <div class="spinner"></div>
-        <p>Po ngarkohen turet...</p>
-    </div>
 </div>
 {% endblock %}
 
