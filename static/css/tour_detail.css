@@ -1,788 +1,1209 @@
-/* ==================== TOUR DETAIL STYLES ==================== */
+/* ==================== TOUR DETAIL STYLES - MODERN GLASSMORPHISM ==================== */
 
-:root {
-    --primary: #0ea5e9;
-    --primary-dark: #0284c7;
-    --success: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --info: #3b82f6;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --text: #1f2937;
-    --text-light: #6b7280;
-    --border: #e5e7eb;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
-    --radius: 16px;
-    --transition: all 0.3s ease;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
+.tour-detail-wrapper {
+    /* CSS Variables - Modern Color Palette */
+    --detail-primary: #0ea5e9;
+    --detail-primary-dark: #0284c7;
+    --detail-primary-light: #38bdf8;
+    --detail-success: #10b981;
+    --detail-success-light: #34d399;
+    --detail-danger: #ef4444;
+    --detail-warning: #f59e0b;
+    --detail-info: #3b82f6;
+    --detail-bg: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    --detail-card: rgba(255, 255, 255, 0.85);
+    --detail-text: #0f172a;
+    --detail-text-light: #64748b;
+    --detail-border: rgba(226, 232, 240, 0.6);
+    --detail-shadow: 0 8px 32px rgba(2, 132, 199, 0.12);
+    --detail-shadow-lg: 0 20px 50px rgba(2, 132, 199, 0.18);
+    --detail-radius: 20px;
+    --detail-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    background: var(--detail-bg);
+    min-height: 100vh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
+    color: var(--detail-text);
+    line-height: 1.7;
+    padding-bottom: 60px;
+    backdrop-filter: blur(10px);
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
+/* ==================== HEADER - MODERN HERO ==================== */
 
-/* ==================== HEADER ==================== */
-
-.tour-detail .header {
+.tour-detail-wrapper .header {
     text-align: center;
-    margin: 60px 0 40px;
+    margin: 80px 0 60px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+    position: relative;
 }
 
-.tour-detail .header h1 {
-    font-size: 3rem;
-    color: var(--primary);
-    margin-bottom: 16px;
-    font-weight: 700;
-    line-height: 1.2;
+.tour-detail-wrapper .header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--detail-primary-light) 0%, transparent 70%);
+    opacity: 0.15;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(40px);
 }
 
-.tour-meta {
-    font-size: 1.1rem;
-    color: var(--text-light);
+.tour-detail-wrapper .header h1 {
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    color: var(--detail-text);
+    margin-bottom: 20px;
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.tour-detail-wrapper .tour-meta {
+    font-size: 1.15rem;
+    color: var(--detail-text-light);
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 30px;
     flex-wrap: wrap;
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 16px 32px;
+    border-radius: 50px;
+    box-shadow: var(--detail-shadow);
+    border: 1px solid var(--detail-border);
+    max-width: fit-content;
+    margin: 0 auto;
 }
 
-.tour-meta i {
-    color: var(--primary);
-    margin-right: 6px;
+.tour-detail-wrapper .tour-meta i {
+    color: var(--detail-primary);
+    margin-right: 8px;
+    font-size: 1.1em;
 }
 
-/* ==================== MAIN IMAGE ==================== */
+/* ==================== MAIN IMAGE - MODERN HOVER EFFECT ==================== */
 
-.main-image-wrapper {
-    border-radius: var(--radius);
+.tour-detail-wrapper .main-image-wrapper {
+    border-radius: var(--detail-radius);
     overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    margin-bottom: 60px;
+    box-shadow: var(--detail-shadow-lg);
+    margin-bottom: 80px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+    position: relative;
 }
 
-.main-image {
+.tour-detail-wrapper .main-image {
     width: 100%;
-    height: 500px;
+    height: clamp(350px, 50vh, 600px);
     object-fit: cover;
     display: block;
-    transition: transform 0.4s ease;
+    transition: var(--detail-transition);
+    border-radius: var(--detail-radius);
 }
 
-.main-image-wrapper:hover .main-image {
-    transform: scale(1.02);
+.tour-detail-wrapper .main-image-wrapper:hover .main-image {
+    transform: scale(1.03) rotate(0.5deg);
+    filter: brightness(1.05) contrast(1.1);
 }
 
-/* ==================== INFO GRID ==================== */
+.tour-detail-wrapper .main-image-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
 
-.info-grid {
+.tour-detail-wrapper .main-image-wrapper:hover::after {
+    opacity: 1;
+}
+
+/* ==================== INFO GRID - GLASS CARDS ==================== */
+
+.tour-detail-wrapper .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 24px;
-    margin: 60px 0;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 28px;
+    margin: 80px auto;
+    max-width: 1200px;
+    padding: 0 24px;
 }
 
-.info-card {
-    background: var(--card);
-    padding: 28px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+.tour-detail-wrapper .info-card {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 32px 24px;
+    border-radius: var(--detail-radius);
+    box-shadow: var(--detail-shadow);
     text-align: center;
-    transition: var(--transition);
-    border: 1px solid var(--border);
+    transition: var(--detail-transition);
+    border: 1px solid var(--detail-border);
+    position: relative;
+    overflow: hidden;
 }
 
-.info-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
+.tour-detail-wrapper .info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--detail-primary), var(--detail-success));
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.info-icon {
-    font-size: 2.2rem;
-    color: var(--primary);
-    margin-bottom: 12px;
+.tour-detail-wrapper .info-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: var(--detail-shadow-lg);
+    border-color: rgba(14, 165, 233, 0.4);
 }
 
-.info-card strong {
+.tour-detail-wrapper .info-card:hover::before {
+    opacity: 1;
+}
+
+.tour-detail-wrapper .info-icon {
+    font-size: 2.5rem;
+    color: var(--detail-primary);
+    margin-bottom: 16px;
+    display: inline-block;
+    padding: 16px;
+    background: rgba(14, 165, 233, 0.1);
+    border-radius: 50%;
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .info-card:hover .info-icon {
+    transform: scale(1.15) rotate(5deg);
+    background: rgba(14, 165, 233, 0.2);
+}
+
+.tour-detail-wrapper .info-card strong {
     display: block;
-    font-size: 1.8rem;
-    color: var(--primary);
+    font-size: clamp(1.5rem, 2vw, 2.2rem);
+    color: var(--detail-primary);
     margin: 12px 0 8px;
     font-weight: 700;
 }
 
-.info-card span {
-    color: var(--text-light);
+.tour-detail-wrapper .info-card span {
+    color: var(--detail-text-light);
     font-weight: 500;
     font-size: 0.95rem;
+    display: block;
 }
 
-/* ==================== GUIDE SECTION ==================== */
+/* ==================== GUIDE SECTION - GLASS CARD ==================== */
 
-.guide-section {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+.tour-detail-wrapper .guide-section {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
     padding: 48px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
     display: flex;
     align-items: center;
     gap: 40px;
-    margin: 60px 0;
+    margin: 80px auto;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
 }
 
-.guide-photo-wrapper {
+.tour-detail-wrapper .guide-section::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--detail-primary-light) 0%, transparent 70%);
+    opacity: 0.08;
+    border-radius: 50%;
+    filter: blur(40px);
+}
+
+.tour-detail-wrapper .guide-photo-wrapper {
     flex-shrink: 0;
+    position: relative;
+    z-index: 2;
 }
 
-.guide-photo {
+.tour-detail-wrapper .guide-photo {
     width: 160px;
     height: 160px;
     border-radius: 50%;
     object-fit: cover;
-    border: 5px solid var(--primary);
-    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.2);
-    transition: var(--transition);
+    border: 6px solid var(--detail-card);
+    box-shadow: 0 15px 40px rgba(14, 165, 233, 0.25);
+    transition: var(--detail-transition);
+    position: relative;
 }
 
-.guide-photo:hover {
-    transform: scale(1.05);
+.tour-detail-wrapper .guide-photo:hover {
+    transform: scale(1.1) rotate(2deg);
 }
 
-.guide-initial {
+.tour-detail-wrapper .guide-initial {
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(135deg, var(--detail-primary), var(--detail-primary-dark));
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 4rem;
     font-weight: 700;
-    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.2);
+    box-shadow: 0 15px 40px rgba(14, 165, 233, 0.25);
+    transition: var(--detail-transition);
 }
 
-.guide-info {
+.tour-detail-wrapper .guide-initial:hover {
+    transform: scale(1.1) rotate(2deg);
+}
+
+.tour-detail-wrapper .guide-info {
     flex: 1;
+    position: relative;
+    z-index: 2;
 }
 
-.guide-info h3 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: var(--text);
-}
-
-.guide-info h3 i {
-    color: var(--primary);
-    margin-right: 10px;
-}
-
-.guide-details p {
-    margin-bottom: 12px;
-    color: var(--text-light);
-    line-height: 1.8;
-}
-
-.guide-details i {
-    color: var(--primary);
-    width: 20px;
-    margin-right: 10px;
-}
-
-.guide-details strong {
-    color: var(--text);
-}
-
-.bio {
-    margin-top: 16px !important;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-}
-
-/* ==================== DESCRIPTION ==================== */
-
-.description {
-    background: var(--card);
-    padding: 48px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    margin: 60px 0;
-}
-
-.description h2 {
-    font-size: 2rem;
-    color: var(--primary);
+.tour-detail-wrapper .guide-info h3 {
+    font-size: clamp(1.5rem, 2vw, 2rem);
     margin-bottom: 24px;
+    color: var(--detail-text);
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.description h2 i {
-    font-size: 1.8rem;
+.tour-detail-wrapper .guide-info h3 i {
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 8px;
+    border-radius: 50%;
+    font-size: 1.2em;
 }
 
-.description p {
-    font-size: 1.1rem;
-    color: var(--text-light);
-    line-height: 2;
-    margin-bottom: 20px;
-}
-
-.location-info {
-    margin-top: 32px;
-    padding: 20px;
-    background: var(--bg);
-    border-radius: 12px;
-    border-left: 4px solid var(--primary);
+.tour-detail-wrapper .guide-details p {
+    margin-bottom: 12px;
+    color: var(--detail-text-light);
+    line-height: 1.8;
     display: flex;
-    gap: 12px;
     align-items: flex-start;
 }
 
-.location-info i {
-    color: var(--primary);
+.tour-detail-wrapper .guide-details i {
+    color: var(--detail-primary);
+    width: 24px;
+    margin-right: 12px;
     margin-top: 4px;
-    font-size: 1.3rem;
+    font-size: 1.1em;
 }
 
-/* ==================== GALLERY ==================== */
-
-.gallery-section {
-    margin: 60px 0;
+.tour-detail-wrapper .guide-details strong {
+    color: var(--detail-text);
+    font-weight: 600;
 }
 
-.gallery-section h2 {
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 32px;
+.tour-detail-wrapper .bio {
+    margin-top: 20px !important;
+    padding-top: 20px;
+    border-top: 1px solid var(--detail-border);
+}
+
+/* ==================== DESCRIPTION - MODERN CARD ==================== */
+
+.tour-detail-wrapper .description {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 48px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+    margin: 80px auto;
+    max-width: 1200px;
+    position: relative;
+}
+
+.tour-detail-wrapper .description h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--detail-text);
+    margin-bottom: 28px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+    font-weight: 700;
 }
 
-.gallery-section h2 i {
-    font-size: 1.8rem;
+.tour-detail-wrapper .description h2 i {
+    font-size: 1.5em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
 }
 
-.gallery {
+.tour-detail-wrapper .description p {
+    font-size: 1.05rem;
+    color: var(--detail-text-light);
+    line-height: 1.9;
+    margin-bottom: 24px;
+}
+
+.tour-detail-wrapper .location-info {
+    margin-top: 40px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+    border-radius: 16px;
+    border-left: 5px solid var(--detail-primary);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    font-size: 1.05rem;
+}
+
+.tour-detail-wrapper .location-info i {
+    color: var(--detail-primary);
+    margin-top: 4px;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+/* ==================== GALLERY - MODERN GRID ==================== */
+
+.tour-detail-wrapper .gallery-section {
+    margin: 80px auto;
+    max-width: 1200px;
+    padding: 0 24px;
+}
+
+.tour-detail-wrapper .gallery-section h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--detail-text);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .gallery-section h2 i {
+    font-size: 1.5em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.tour-detail-wrapper .gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 28px;
 }
 
-.gallery-item {
-    border-radius: var(--radius);
+.tour-detail-wrapper .gallery-item {
+    border-radius: var(--detail-radius);
     overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
+    box-shadow: var(--detail-shadow);
+    transition: var(--detail-transition);
     cursor: pointer;
+    position: relative;
+    transform: perspective(1000px) rotateX(0) rotateY(0);
+    transform-style: preserve-3d;
 }
 
-.gallery-item:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
+.tour-detail-wrapper .gallery-item:hover {
+    transform: translateY(-8px) perspective(1000px) rotateX(2deg) rotateY(2deg);
+    box-shadow: var(--detail-shadow-lg);
 }
 
-.gallery-img {
+.tour-detail-wrapper .gallery-img {
     width: 100%;
-    height: 250px;
+    height: 280px;
     object-fit: cover;
     display: block;
-    transition: transform 0.4s ease;
+    transition: var(--detail-transition);
 }
 
-.gallery-item:hover .gallery-img {
-    transform: scale(1.08);
+.tour-detail-wrapper .gallery-item:hover .gallery-img {
+    transform: scale(1.1);
 }
 
-.gallery-caption {
-    padding: 12px;
-    background: var(--card);
-    color: var(--text-light);
+.tour-detail-wrapper .gallery-caption {
+    padding: 16px;
+    background: var(--detail-card);
+    color: var(--detail-text-light);
     font-size: 0.95rem;
     text-align: center;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
 }
 
-/* ==================== RESERVE SECTION ==================== */
+/* ==================== RESERVE SECTION - MODERN CTA ==================== */
 
-.reserve-section {
+.tour-detail-wrapper .reserve-section {
     text-align: center;
-    margin: 80px 0 60px;
-    padding: 40px;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
-    border-radius: var(--radius);
+    margin: 100px auto 80px;
+    padding: 60px 40px;
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    border-radius: var(--detail-radius);
+    max-width: 1200px;
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+    position: relative;
+    overflow: hidden;
 }
 
-.reserve-btn {
+.tour-detail-wrapper .reserve-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    pointer-events: none;
+}
+
+.tour-detail-wrapper .reserve-btn {
     display: inline-block;
-    padding: 20px 60px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 22px 64px;
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
     text-decoration: none;
-    border-radius: var(--radius);
-    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.3);
-    transition: var(--transition);
+    border-radius: 50px;
+    box-shadow: 0 15px 40px rgba(14, 165, 233, 0.4);
+    transition: var(--detail-transition);
     border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    font-family: inherit;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
 }
 
-.reserve-btn:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.4);
+.tour-detail-wrapper .reserve-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.6s;
 }
 
-.reserve-btn:active {
+.tour-detail-wrapper .reserve-btn:hover::before {
+    left: 100%;
+}
+
+.tour-detail-wrapper .reserve-btn:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 25px 50px rgba(14, 165, 233, 0.5);
+}
+
+.tour-detail-wrapper .reserve-btn:active {
     transform: translateY(-2px);
 }
 
-.reserve-btn i {
-    font-size: 1.3rem;
+.tour-detail-wrapper .reserve-btn i {
+    font-size: 1.4rem;
 }
 
-.spots-count {
-    font-size: 0.95rem;
-    opacity: 0.9;
+.tour-detail-wrapper .spots-count {
+    font-size: 1rem;
+    opacity: 0.95;
+    display: block;
+    margin-top: 8px;
 }
 
-.signup-prompt {
-    background: linear-gradient(135deg, var(--success), var(--primary));
-    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.3);
+.tour-detail-wrapper .signup-prompt {
+    background: linear-gradient(135deg, var(--detail-success) 0%, var(--detail-primary) 100%);
+    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
 }
 
-.signup-prompt:hover {
-    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
+.tour-detail-wrapper .signup-prompt:hover {
+    box-shadow: 0 25px 50px rgba(16, 185, 129, 0.5);
 }
 
-.no-spots {
-    font-size: 1.5rem;
-    color: var(--danger);
+.tour-detail-wrapper .no-spots {
+    font-size: clamp(1.3rem, 2vw, 1.7rem);
+    color: var(--detail-danger);
     font-weight: 700;
     margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
+    background: rgba(239, 68, 68, 0.08);
+    padding: 24px;
+    border-radius: 16px;
 }
 
-/* ==================== REVIEWS SECTION ==================== */
+/* ==================== REVIEWS SECTION - MODERN GLASS ==================== */
 
-.reviews-section {
-    background: var(--card);
+.tour-detail-wrapper .reviews-section {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
     padding: 48px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    margin: 60px 0;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+    margin: 80px auto;
+    max-width: 1200px;
 }
 
-.reviews-header {
+.tour-detail-wrapper .reviews-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid var(--border);
+    gap: 24px;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--detail-border);
 }
 
-.reviews-header h2 {
-    font-size: 2rem;
-    color: var(--primary);
+.tour-detail-wrapper .reviews-header h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--detail-text);
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+    font-weight: 700;
 }
 
-.reviews-header h2 i {
-    font-size: 1.8rem;
+.tour-detail-wrapper .reviews-header h2 i {
+    font-size: 1.5em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
 }
 
-.rating-badge {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+.tour-detail-wrapper .rating-badge {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     color: white;
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-size: 1.1rem;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 1.15rem;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+    transition: var(--detail-transition);
 }
 
-.reviews-count {
+.tour-detail-wrapper .rating-badge:hover {
+    transform: scale(1.05);
+}
+
+.tour-detail-wrapper .reviews-count {
     font-size: 0.95rem;
     font-weight: 500;
+    opacity: 0.95;
 }
 
-/* ==================== REVIEW FORM ==================== */
+/* ==================== REVIEW FORM - MODERN GLASS ==================== */
 
-.review-form {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-    padding: 32px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    margin-bottom: 40px;
+.tour-detail-wrapper .review-form {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    margin-bottom: 48px;
+    box-shadow: var(--detail-shadow);
 }
 
-.review-form h3 {
-    font-size: 1.3rem;
-    color: var(--text);
-    margin-bottom: 24px;
+.tour-detail-wrapper .review-form h3 {
+    font-size: 1.4rem;
+    color: var(--detail-text);
+    margin-bottom: 28px;
+    font-weight: 600;
 }
 
-.form-group {
-    margin-bottom: 24px;
+.tour-detail-wrapper .form-group {
+    margin-bottom: 28px;
 }
 
-.form-group label {
+.tour-detail-wrapper .form-group label {
     display: block;
     font-weight: 600;
-    color: var(--text);
+    color: var(--detail-text);
     margin-bottom: 12px;
+    font-size: 1.05rem;
 }
 
-.star-rating {
-    font-size: 2.8rem;
+.tour-detail-wrapper .star-rating {
+    font-size: 3.2rem;
     display: flex;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 16px;
-}
-
-.star {
     cursor: pointer;
-    color: #ddd;
-    transition: var(--transition);
+    width: fit-content;
+}
+
+.tour-detail-wrapper .star {
+    color: #e2e8f0;
+    transition: var(--detail-transition);
     user-select: none;
+    position: relative;
 }
 
-.star:hover,
-.star.active {
+.tour-detail-wrapper .star::before {
+    content: '★';
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--detail-warning);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .star.hover,
+.tour-detail-wrapper .star.active {
     color: #fbbf24;
-    transform: scale(1.2);
+    transform: scale(1.25);
+    animation: starPulse 0.4s ease;
 }
 
-#comment {
+.tour-detail-wrapper .star.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1.25); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1.25); }
+}
+
+.tour-detail-wrapper #comment {
     width: 100%;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    padding: 18px;
+    border: 1px solid var(--detail-border);
+    border-radius: 16px;
     font-family: inherit;
     font-size: 1rem;
     resize: vertical;
-    min-height: 120px;
-    transition: var(--transition);
+    min-height: 140px;
+    transition: var(--detail-transition);
+    background: white;
 }
 
-#comment:focus {
+.tour-detail-wrapper #comment:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    border-color: var(--detail-primary);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
 }
 
-.btn-submit {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+.tour-detail-wrapper .btn-submit {
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
     color: white;
-    padding: 14px 32px;
+    padding: 16px 40px;
     border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.05rem;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--detail-transition);
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
 }
 
-.btn-submit:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+.tour-detail-wrapper .btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.6s;
 }
 
-.review-prompt {
-    background: var(--bg);
-    padding: 32px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+.tour-detail-wrapper .btn-submit:hover::before {
+    left: 100%;
+}
+
+.tour-detail-wrapper .btn-submit:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.4);
+}
+
+.tour-detail-wrapper .review-prompt {
+    background: var(--detail-bg);
+    backdrop-filter: blur(10px);
+    padding: 36px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 48px;
+    box-shadow: var(--detail-shadow);
 }
 
-.review-prompt p {
-    color: var(--text-light);
-    font-size: 1.05rem;
+.tour-detail-wrapper .review-prompt p {
+    color: var(--detail-text-light);
+    font-size: 1.1rem;
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.review-prompt a {
-    color: var(--primary);
-    font-weight: 600;
+.tour-detail-wrapper .review-prompt a {
+    color: var(--detail-primary);
+    font-weight: 700;
     text-decoration: none;
+    position: relative;
 }
 
-.review-prompt a:hover {
-    text-decoration: underline;
+.tour-detail-wrapper .review-prompt a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--detail-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
-.review-prompt i {
+.tour-detail-wrapper .review-prompt a:hover::after {
+    transform: scaleX(1);
+}
+
+.tour-detail-wrapper .review-prompt i {
     margin-right: 8px;
-    color: var(--warning);
+    color: var(--detail-warning);
+    font-size: 1.2em;
 }
 
-/* ==================== REVIEWS LIST ==================== */
+/* ==================== REVIEWS LIST - MODERN CARDS ==================== */
 
-.reviews-list {
+.tour-detail-wrapper .reviews-list {
     display: grid;
-    gap: 20px;
+    gap: 24px;
 }
 
-.review-item {
-    background: var(--bg);
-    padding: 24px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    transition: var(--transition);
+.tour-detail-wrapper .review-item {
+    background: var(--detail-bg);
+    backdrop-filter: blur(10px);
+    padding: 28px;
+    border-radius: 16px;
+    border: 1px solid var(--detail-border);
+    transition: var(--detail-transition);
 }
 
-.review-item:hover {
-    border-color: var(--primary);
-    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.1);
+.tour-detail-wrapper .review-item:hover {
+    border-color: var(--detail-primary);
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.15);
+    transform: translateY(-4px);
 }
 
-.review-header {
+.tour-detail-wrapper .review-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
 }
 
-.reviewer-info {
+.tour-detail-wrapper .reviewer-info {
     display: flex;
     flex-direction: column;
+    gap: 6px;
+}
+
+.tour-detail-wrapper .reviewer-name {
+    font-weight: 600;
+    color: var(--detail-text);
+    font-size: 1.1rem;
+}
+
+.tour-detail-wrapper .review-date {
+    font-size: 0.85rem;
+    color: var(--detail-text-light);
+    background: rgba(100, 116, 139, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.tour-detail-wrapper .review-rating {
+    color: #fbbf24;
+    font-size: 1.3rem;
+    display: flex;
     gap: 4px;
 }
 
-.reviewer-name {
-    font-weight: 600;
-    color: var(--text);
+.tour-detail-wrapper .review-rating i {
+    width: 22px;
+    transition: transform 0.3s ease;
+}
+
+.tour-detail-wrapper .review-rating i:hover {
+    transform: scale(1.2);
+}
+
+.tour-detail-wrapper .review-text {
+    color: var(--detail-text-light);
+    line-height: 1.8;
+    margin: 0;
     font-size: 1.05rem;
 }
 
-.review-date {
-    font-size: 0.9rem;
-    color: var(--text-light);
-}
-
-.review-rating {
-    color: #fbbf24;
-    font-size: 1.2rem;
-    display: flex;
-    gap: 4px;
-}
-
-.review-rating i {
-    width: 20px;
-}
-
-.review-text {
-    color: var(--text-light);
-    line-height: 1.8;
-    margin: 0;
-}
-
-.no-reviews {
+.tour-detail-wrapper .no-reviews {
     text-align: center;
-    color: var(--text-light);
+    color: var(--detail-text-light);
     font-size: 1.1rem;
-    padding: 40px 20px;
-    background: var(--bg);
-    border-radius: 12px;
-    border: 1px dashed var(--border);
+    padding: 48px 24px;
+    background: var(--detail-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px dashed var(--detail-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.no-reviews i {
-    font-size: 1.5rem;
-    color: var(--warning);
-    margin-right: 8px;
+.tour-detail-wrapper .no-reviews i {
+    font-size: 2.5rem;
+    color: var(--detail-warning);
+    margin: 0;
+    opacity: 0.7;
 }
 
-/* ==================== BACK LINK ==================== */
+/* ==================== BACK LINK - MODERN BUTTON ==================== */
 
-.back-link {
+.tour-detail-wrapper .back-link {
     text-align: center;
-    margin: 80px 0;
+    margin: 100px auto 60px;
+    max-width: 1200px;
+    padding: 0 24px;
 }
 
-.back-link a {
+.tour-detail-wrapper .back-link a {
     display: inline-block;
-    padding: 14px 32px;
-    background: var(--info);
+    padding: 16px 40px;
+    background: var(--detail-info);
     color: white;
     text-decoration: none;
-    border-radius: var(--radius);
+    border-radius: 50px;
     font-weight: 600;
-    transition: var(--transition);
+    transition: var(--detail-transition);
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    font-family: inherit;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
-.back-link a:hover {
+.tour-detail-wrapper .back-link a:hover {
     background: #2563eb;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
 }
 
-.back-link a i {
-    margin-right: 4px;
+.tour-detail-wrapper .back-link a i {
+    margin-right: 0;
+    font-size: 1.1em;
+    transition: transform 0.3s ease;
 }
 
-/* ==================== RESPONSIVE ==================== */
+.tour-detail-wrapper .back-link a:hover i {
+    transform: translateX(-4px);
+}
+
+/* ==================== LOADING SKELETON ==================== */
+
+.skeleton {
+    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 12px;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==================== NOTIFICATION - MODERN TOAST ==================== */
+
+.tour-detail-wrapper .notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    max-width: 420px;
+    padding: 18px 24px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--detail-border);
+}
+
+.tour-detail-wrapper .notification-success {
+    background: rgba(209, 250, 229, 0.9);
+    color: #047857;
+    border-color: rgba(110, 231, 183, 0.5);
+}
+
+.tour-detail-wrapper .notification-error {
+    background: rgba(254, 226, 226, 0.9);
+    color: #dc2626;
+    border-color: rgba(252, 165, 165, 0.5);
+}
+
+.tour-detail-wrapper .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 500;
+}
+
+.tour-detail-wrapper .notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    color: currentColor;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 1.2rem;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.tour-detail-wrapper .notification-close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(420px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(420px);
+        opacity: 0;
+    }
+}
+
+/* ==================== RESPONSIVE - MODERN MOBILE ==================== */
+
+@media (max-width: 1200px) {
+    .tour-detail-wrapper .header,
+    .tour-detail-wrapper .main-image-wrapper,
+    .tour-detail-wrapper .info-grid,
+    .tour-detail-wrapper .guide-section,
+    .tour-detail-wrapper .description,
+    .tour-detail-wrapper .gallery-section,
+    .tour-detail-wrapper .reserve-section,
+    .tour-detail-wrapper .reviews-section,
+    .tour-detail-wrapper .back-link {
+        max-width: 1000px;
+    }
+}
 
 @media (max-width: 992px) {
-    .guide-section {
+    .tour-detail-wrapper .header,
+    .tour-detail-wrapper .main-image-wrapper,
+    .tour-detail-wrapper .info-grid,
+    .tour-detail-wrapper .guide-section,
+    .tour-detail-wrapper .description,
+    .tour-detail-wrapper .gallery-section,
+    .tour-detail-wrapper .reserve-section,
+    .tour-detail-wrapper .reviews-section,
+    .tour-detail-wrapper .back-link {
+        max-width: 800px;
+    }
+    
+    .tour-detail-wrapper .guide-section {
         flex-direction: column;
         text-align: center;
-        padding: 32px;
+        padding: 36px;
     }
 
-    .guide-info {
+    .tour-detail-wrapper .guide-info {
         text-align: left;
     }
 
-    .tour-detail .header h1 {
-        font-size: 2.2rem;
-    }
-
-    .info-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .reviews-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .rating-badge {
-        width: 100%;
-        justify-content: center;
+    .tour-detail-wrapper .tour-meta {
+        flex-direction: row;
+        padding: 14px 24px;
     }
 }
 
 @media (max-width: 768px) {
-    .container {
-        padding: 0 16px;
+    .tour-detail-wrapper .header {
+        margin: 60px 0 40px;
+        padding: 0 20px;
     }
 
-    .tour-detail .header {
-        margin: 40px 0 24px;
-    }
-
-    .tour-detail .header h1 {
-        font-size: 1.8rem;
-    }
-
-    .tour-meta {
+    .tour-detail-wrapper .tour-meta {
         flex-direction: column;
         gap: 12px;
+        padding: 12px 20px;
     }
 
-    .main-image-wrapper {
-        margin-bottom: 40px;
+    .tour-detail-wrapper .main-image-wrapper {
+        padding: 0 20px;
+        margin-bottom: 60px;
     }
 
-    .main-image {
-        height: 350px;
-    }
-
-    .info-grid {
+    .tour-detail-wrapper .info-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 20px;
+        padding: 0 20px;
+        margin: 60px auto;
     }
 
-    .guide-section {
-        padding: 24px;
+    .tour-detail-wrapper .guide-section {
+        padding: 28px;
+        gap: 24px;
+        margin: 60px 20px;
+    }
+
+    .tour-detail-wrapper .guide-photo,
+    .tour-detail-wrapper .guide-initial {
+        width: 140px;
+        height: 140px;
+        font-size: 3.5rem;
+    }
+
+    .tour-detail-wrapper .description,
+    .tour-detail-wrapper .reviews-section {
+        padding: 32px;
+        margin: 60px 20px;
+    }
+
+    .tour-detail-wrapper .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 20px;
     }
 
-    .guide-photo,
-    .guide-initial {
-        width: 120px;
-        height: 120px;
-        font-size: 3rem;
+    .tour-detail-wrapper .gallery-img {
+        height: 240px;
     }
 
-    .description,
-    .reviews-section {
-        padding: 24px;
+    .tour-detail-wrapper .reserve-section {
+        padding: 32px 24px;
+        margin: 80px 20px 60px;
     }
 
-    .description h2,
-    .reviews-header h2 {
-        font-size: 1.6rem;
-    }
-
-    .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-    }
-
-    .gallery-img {
-        height: 200px;
-    }
-
-    .reserve-section {
-        padding: 24px;
-        margin: 60px 0 40px;
-    }
-
-    .reserve-btn {
+    .tour-detail-wrapper .reserve-btn {
         width: 100%;
-        padding: 16px 24px;
-        font-size: 1rem;
+        padding: 18px 24px;
+        font-size: 1.1rem;
         justify-content: center;
     }
 
-    .review-form {
-        padding: 24px;
+    .tour-detail-wrapper .review-form,
+    .tour-detail-wrapper .review-prompt {
+        padding: 28px;
     }
 
-    .star-rating {
-        font-size: 2.4rem;
-        gap: 6px;
+    .tour-detail-wrapper .star-rating {
+        font-size: 2.8rem;
     }
 
-    .review-item {
-        padding: 16px;
-    }
-
-    .review-header {
+    .tour-detail-wrapper .review-header {
         flex-direction: column;
+    }
+    
+    .tour-detail-wrapper .notification {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .tour-detail-wrapper .header h1 {
+        font-size: 2rem;
+    }
+    
+    .tour-detail-wrapper .info-card {
+        padding: 28px 20px;
+    }
+    
+    .tour-detail-wrapper .info-card strong {
+        font-size: 1.8rem;
+    }
+    
+    .tour-detail-wrapper .description p {
+        font-size: 1rem;
+    }
+    
+    .tour-detail-wrapper .guide-info h3 {
+        font-size: 1.4rem;
+    }
+    
+    .tour-detail-wrapper .reserve-btn {
+        font-size: 1rem;
+        padding: 16px 20px;
+    }
+    
+    .tour-detail-wrapper .gallery {
+        grid-template-columns: 1fr;
     }
 }
