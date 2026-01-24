@@ -37,34 +37,34 @@
         <!-- Header Section -->
         <div class="header-section">
             <div class="header-content">
-            <div class="icon-badge">
-                <i class="fas fa-user-shield"></i>
-            </div>
-            <div class="header-text">
-                <h1>Plotëso Profilin tënd si Guide Lokal</h1>
-                <p class="subtitle">
-                    Përshëndetje, <strong>{{ request.user.first_name|default:request.user.username }}</strong>! 
-                    Plotësimi i profilit është hapi i parë për të filluar të ofrosh ture të paharrueshme.
-                </p>
-            </div>
+                <div class="icon-badge">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Plotëso Profilin tënd si Guide Lokal</h1>
+                    <p class="subtitle">
+                        Përshëndetje, <strong>{{ request.user.first_name|default:request.user.username }}</strong>! 
+                        Plotësimi i profilit është hapi i parë për të filluar të ofrosh ture të paharrueshme.
+                    </p>
+                </div>
             </div>
         </div>
 
         <!-- Messages -->
         {% if messages %}
-        <div class="messages-container">
+        <div class="messages-container" id="messages-container">
             {% for message in messages %}
-            <div class="message {{ message.tags }}">
+            <div class="message {{ message.tags }}" role="alert">
                 <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
                 <span>{{ message }}</span>
-                <button type="button" class="close-message">&times;</button>
+                <button type="button" class="close-message" aria-label="Mbyll mesazhin">&times;</button>
             </div>
             {% endfor %}
         </div>
         {% endif %}
 
         <!-- Form Content -->
-        <form method="post" enctype="multipart/form-data" class="profile-form">
+        <form method="post" enctype="multipart/form-data" class="profile-form" id="profile-form">
             {% csrf_token %}
 
             <div class="form-grid">
@@ -134,7 +134,7 @@
                             <i class="fas fa-phone"></i>
                             {{ form.phone.label }}
                         </label>
-                        <div >
+                        <div class="input-with-icon">
                             {{ form.phone }}
                         </div>
                         <p class="help-text">
@@ -149,7 +149,7 @@
                             <i class="fas fa-map-marker-alt"></i>
                             {{ form.location.label }}
                         </label>
-                        <div >
+                        <div>
                             {{ form.location }}
                         </div>
                         <p class="help-text">
@@ -202,7 +202,7 @@
 
             <!-- Action Buttons -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" id="submit-btn">
                     <i class="fas fa-save"></i>
                     <span>Ruaj Profilin</span>
                 </button>
@@ -247,48 +247,5 @@
     </div>
 </div>
 
-<script>
-// Preview image before upload
-document.addEventListener('DOMContentLoaded', function() {
-    const photoInput = document.getElementById('{{ form.photo.id_for_label }}');
-    const previewImage = document.getElementById('preview-image');
-    const placeholder = document.getElementById('photo-placeholder');
-    
-    if (photoInput) {
-        photoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (previewImage) {
-                        previewImage.src = e.target.result;
-                    } else if (placeholder) {
-                        placeholder.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    
-    // Character counter for bio
-    const bioTextarea = document.querySelector('textarea[name="bio"]');
-    const charCounter = document.getElementById('bio-count');
-    
-    if (bioTextarea && charCounter) {
-        bioTextarea.addEventListener('input', function() {
-            charCounter.textContent = this.value.length;
-        });
-        // Initialize counter
-        charCounter.textContent = bioTextarea.value.length;
-    }
-    
-    // Close message buttons
-    document.querySelectorAll('.close-message').forEach(button => {
-        button.addEventListener('click', function() {
-            this.parentElement.style.display = 'none';
-        });
-    });
-});
-</script>
+<script src="{% static 'js/guide_profile_edit.js' %}"></script>
 {% endblock %}

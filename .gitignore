@@ -121,4 +121,4 @@ Thumbs.db
 
 # Django specific
 media/
-static/
+staticfiles/

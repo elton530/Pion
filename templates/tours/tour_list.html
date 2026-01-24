@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Ture Turistike në Shqipëri - Pion{% endblock %}
+{% block title %}Ture Turistike në Shqipëri - Open Map{% endblock %}
+
+{% block meta_description %}
+Shfleto dhjetëra ture emocionuese në natyrën shqiptare. Ture alpinizmi, çiklizmi, 
+shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
@@ -9,56 +14,137 @@
 
 {% block content %}
 <div class="tour-list-container">
-    <h1 class="tour-list-title">Ture Turistike në Shqipëri</h1>
+    <!-- Header Section -->
+    <section class="list-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-compass"></i>
+                Ture Turistike në Shqipëri
+            </h1>
+            <p class="page-subtitle">
+                Zgjidh ndërmjet dhjetëra aventurave të emocionuese me guida profesioniste
+            </p>
+        </div>
+    </section>
 
+    <!-- Tours Grid -->
     {% if tours %}
-        <div class="tour-grid">
-            {% for tour in tours %}
-                <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card">
+    <div class="tour-grid" id="tour-grid">
+        {% for tour in tours %}
+        <div class="tour-card" 
+            data-tour-id="{{ tour.id }}"
+            data-tour-type="{{ tour.get_tour_type_display|lower }}"
+            data-tour-date="{{ tour.date|date:'Y-m-d' }}"
+            data-tour-rating="{{ tour.average_rating|default:'0' }}"
+            data-tour-price="{{ tour.price_per_person }}">
+            <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
+                <!-- Image Section -->
+                <div class="tour-image-wrapper">
                     {% if tour.main_image %}
-                        <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="tour-image">
+                        <img src="{{ tour.main_image.url }}" 
+                             alt="{{ tour.title }}" 
+                             class="tour-image" 
+                             loading="lazy"
+                             onerror="this.style.display='none'">
                     {% else %}
-                        <div style="height:240px;background:#e2e8f0;display:grid;place-items:center;color:#64748b;">
-                            Pa foto
+                        <div class="no-image-placeholder">
+                            <i class="fas fa-mountain"></i>
+                            <span>Pa foto</span>
                         </div>
                     {% endif %}
 
-                    <div class="tour-info">
-                        <h3 class="tour-title">{{ tour.title }}</h3>
-                        
-                        <div class="tour-meta">
-                            <span class="tour-meta-item">
-                                <i class="far fa-calendar-alt"></i> {{ tour.date|date:"d M Y" }}
-                            </span>
-                            <span class="tour-meta-item">
-                                <i class="fas fa-hiking"></i> {{ tour.get_tour_type_display }}
-                            </span>
-                            <span class="tour-meta-item">
-                                <i class="fas fa-mountain"></i> {{ tour.get_difficulty_display }}
-                            </span>
-                        </div>
-
-                        <div class="tour-guide">
-                            Guidë: {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
-                        </div>
-
-                        <div class="tour-price">
-                            {{ tour.price_per_person }} Lekë / person
-                        </div>
-
-                        <div class="tour-spots">
-                            {{ tour.available_spots }} vende të lira nga {{ tour.max_participants }}
-                        </div>
+                    <!-- Availability Badge -->
+                    {% if tour.available_spots > 0 %}
+                    <div class="tour-badge available">
+                        <i class="fas fa-check-circle"></i>
+                        {{ tour.available_spots }} vende
                     </div>
-                </a>
-            {% endfor %}
+                    {% else %}
+                    <div class="tour-badge sold-out">
+                        <i class="fas fa-times-circle"></i>
+                        Mbushur
+                    </div>
+                    {% endif %}
+
+                    <!-- Difficulty Badge -->
+                    <div class="difficulty-badge difficulty-{{ tour.difficulty }}">
+                        {{ tour.get_difficulty_display }}
+                    </div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="tour-info">
+                    <!-- Title -->
+                    <h3 class="tour-title">{{ tour.title }}</h3>
+
+                    <!-- Meta Information -->
+                    <div class="tour-meta">
+                        <span class="meta-item" title="Data e turit">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ tour.date|date:"d M Y" }}
+                        </span>
+                        <span class="meta-item" title="Lloji i turit">
+                            <i class="fas fa-hiking"></i>
+                            {{ tour.get_tour_type_display }}
+                        </span>
+                        <span class="meta-item" title="Kohëzgjatja">
+                            <i class="fas fa-hourglass-end"></i>
+                            {{ tour.duration_hours }}h
+                        </span>
+                    </div>
+
+                    <!-- Guide Information -->
+                    <div class="tour-guide">
+                        <i class="fas fa-user-shield"></i>
+                        <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
+                    </div>
+
+                    <!-- Rating -->
+                    {% if tour.average_rating %}
+                    <div class="tour-rating">
+                        <div class="stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= tour.average_rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="rating-count">({{ tour.reviews_count }})</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Footer Section -->
+                    <div class="tour-footer">
+                        <div class="tour-price">
+                            <span class="price-amount">{{ tour.price_per_person }}</span>
+                            <span class="price-label">Lekë/person</span>
+                        </div>
+                        <button class="tour-action" aria-label="Shiko detajet e turit">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </a>
         </div>
+        {% endfor %}
+    </div>
+
     {% else %}
-        <div class="no-tours">
+    <!-- Empty State -->
+    <div class="no-tours">
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
             <h2>Ende nuk ka ture të disponueshme</h2>
-            <p>Guidat tona po përgatisin aventura të reja emocionuese!</p>
-            <a href="{% url 'tours:tour_list' %}">Shiko të gjitha turët</a>
+            <p>Guidat tona po përgatisin aventura të reja emocionuese për ty!</p>
+            <p class="empty-state-hint">Kontrolloni më vonë për ture të reja</p>
         </div>
+    </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/tour_list.js' %}"></script>
 {% endblock %}
