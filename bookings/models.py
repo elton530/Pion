@@ -1,79 +1,432 @@
 from django.db import models
 from django.contrib.auth.models import User
-from tours.models import Tour
-from users.models import TouristProfile
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from decimal import Decimal
+from datetime import timedelta
+import uuid
 
+from tours.models import Tour
+from users.models import TouristProfile, GuideProfile
+
+
+# ==================== CHOICES ====================
+
+BOOKING_STATUS = [
+    ("pending", "Në pritje"),
+    ("confirmed", "Konfirmuar"),
+    ("completed", "Përfunduar"),
+    ("cancelled", "Anulluar"),
+    ("no_show", "Nuk u paraqit"),
+]
+
+PAYMENT_STATUS = [
+    ("pending", "Në pritje"),
+    ("paid", "Paguar"),
+    ("failed", "Dështoi"),
+    ("refunded", "Kthyer"),
+]
+
+PAYMENT_METHOD = [
+    ("card", "Kartë krediti"),
+    ("paypal", "PayPal"),
+    ("bank_transfer", "Transferim bankare"),
+    ("cash", "Në vend"),
+]
+
+CANCELLATION_REASON = [
+    ("personal", "Arsyje personale"),
+    ("health", "Probleme shëndetësore"),
+    ("weather", "Kushte të këqija motit"),
+    ("guide_cancelled", "Guide-i anulloi"),
+    ("other", "Tjetër"),
+]
+
+
+# ==================== BOOKING MODEL ====================
 
 class Booking(models.Model):
-    STATUS_CHOICES = [
-        ("pending", "Në pritje"),
-        ("confirmed", "Konfirmuar"),
-        ("cancelled", "Anulluar"),
-    ]
-
+    """Model për rezervimet e tureve"""
+    
+    # ===== BASIC INFORMATION =====
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
     tourist = models.ForeignKey(
-        TouristProfile, on_delete=models.CASCADE, related_name="bookings"
+        TouristProfile,
+        on_delete=models.CASCADE,
+        related_name="bookings"
     )
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name="bookings")
+    
+    tour = models.ForeignKey(
+        Tour,
+        on_delete=models.CASCADE,
+        related_name="bookings"
+    )
+    
+    # ===== PARTICIPANTS =====
     num_people = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(50)],
         help_text="Numri i personave (përfshirë veten)"
     )
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-    notes = models.TextField(blank=True, help_text="Kërkesa speciale, pyetje, etj.")
-    created_at = models.DateTimeField(auto_now_add=True)
+    
+    participants_info = models.TextField(
+        blank=True,
+        help_text="Emrat dhe informacioni i pjesëmarrësve (JSON ose tekst)"
+    )
+    
+    # ===== PRICING =====
+    price_per_person = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        editable=False,
+        help_text="Çmimi për person në kohën e prenimit"
+    )
+    
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        editable=False,
+        help_text="Total çmim = price_per_person * num_people"
+    )
+    
+    discount_applied = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        editable=False,
+        help_text="Zbritja e aplikuar (nëse ka)"
+    )
+    
+    final_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        editable=False,
+        help_text="Çmimi final = total_price - discount_applied"
+    )
+    
+    # ===== STATUS & WORKFLOW =====
+    status = models.CharField(
+        max_length=20,
+        choices=BOOKING_STATUS,
+        default="pending",
+        help_text="Statusi i prenimit"
+    )
+    
     is_confirmed_24h = models.BooleanField(
-        default=False, help_text="Tourist confirmed participation 24h before tour"
+        default=False,
+        help_text="Turist konfirmoi pjesëmarrjen 24h përpara"
     )
+    
     confirmed_24h_at = models.DateTimeField(
-        blank=True, null=True, help_text="When tourist confirmed their participation"
+        blank=True,
+        null=True,
+        help_text="Kur konfirmoi pjesëmarrjen"
     )
-
+    
+    # ===== COMMUNICATION =====
+    notes = models.TextField(
+        blank=True,
+        help_text="Kërkesa speciale, pyetje, notat e turistit"
+    )
+    
+    special_requirements = models.TextField(
+        blank=True,
+        help_text="Kërkesa speciale (ushqim, mobilitet, etj.)"
+    )
+    
+    guide_notes = models.TextField(
+        blank=True,
+        help_text="Shënime nga guide-i"
+    )
+    
+    # ===== CANCELLATION =====
+    cancellation_reason = models.CharField(
+        max_length=20,
+        choices=CANCELLATION_REASON,
+        blank=True,
+        help_text="Arsyeja e anulimit"
+    )
+    
+    cancellation_notes = models.TextField(
+        blank=True,
+        help_text="Detaje shtese për anulim"
+    )
+    
+    cancelled_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Kur u anullua"
+    )
+    
+    cancelled_by = models.CharField(
+        max_length=20,
+        choices=[("tourist", "Turist"), ("guide", "Guide"), ("admin", "Admin")],
+        blank=True,
+        help_text="Kush anulloi"
+    )
+    
+    # ===== SYSTEM FIELDS =====
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    confirmed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Kur guide-i konfirmoi"
+    )
+    
     class Meta:
-        unique_together = ("tourist", "tour")  # një person një rezervim për tur
         ordering = ["-created_at"]
-
+        indexes = [
+            models.Index(fields=['tourist', 'status']),
+            models.Index(fields=['tour', 'status']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['tourist', 'tour']),
+        ]
+        verbose_name = "Prernim"
+        verbose_name_plural = "Prenimet"
+    
     def __str__(self):
-        return f"{self.tourist.user.get_full_name()} - {self.tour.title} ({self.num_people} persona)"
-
+        tourist_name = self.tourist.user.get_full_name() or self.tourist.user.username
+        return f"{tourist_name} - {self.tour.title} ({self.num_people} persona)"
+    
     def save(self, *args, **kwargs):
-        # Llogarit çmimin total
-        self.total_price = self.tour.price_per_person * self.num_people
-
-        # Kontrollo vende të lira vetëm kur krijohet (jo kur ndryshon status)
+        """Llogarit çmimet dhe menaxhon vendet"""
+        
+        # Nëse krijohet për herë të parë
         if not self.pk:
+            # Kontrollo vende të lira
             if self.tour.available_spots < self.num_people:
                 raise ValueError(
-                    "Nuk ka vende të mjaftueshme të lira për këtë rezervim."
+                    f"Nuk ka vende të mjaftueshme. Vende të lira: {self.tour.available_spots}"
                 )
+            
+            # Zgjidh çmimin aktual (me ose pa zbritje)
+            self.price_per_person = self.tour.current_price
+            
+            # Llogarit çmimet
+            self.total_price = Decimal(str(self.price_per_person)) * Decimal(str(self.num_people))
+            self.discount_applied = Decimal('0.00')
+            self.final_price = self.total_price
+            
+            # Zbrit vendet
             self.tour.available_spots -= self.num_people
-            self.tour.save(update_fields=["available_spots"])
-
+            self.tour.save(update_fields=['available_spots', 'updated_at'])
+        
+        else:
+            # Kur ndryshon, përditëso final_price nëse ndryshon num_people
+            self.total_price = Decimal(str(self.price_per_person)) * Decimal(str(self.num_people))
+            self.final_price = self.total_price - self.discount_applied
+        
         super().save(*args, **kwargs)
-
-    def cancel(self):
-        if self.status == "pending" or self.status == "confirmed":
-            self.status = "cancelled"
-            self.tour.available_spots += self.num_people
-            self.tour.save(update_fields=["available_spots"])
-            self.save(update_fields=["status"])
-
-    def is_24h_before_tour(self):
-        """Check if tour starts within 24 hours."""
-        from django.utils import timezone
-        from datetime import timedelta
-
-        tour_start = (
-            timezone.make_aware(
-                timezone.datetime.combine(self.tour.date, self.tour.time_start)
+    
+    def cancel(self, reason=None, cancelled_by="tourist", notes=""):
+        """Anulo prenimin dhe kthej vendet"""
+        
+        if self.status == "cancelled":
+            raise ValueError("Ky prenim është tashmë anulluar.")
+        
+        if self.status == "completed":
+            raise ValueError("Nuk mund të anulohet një tur i përfunduar.")
+        
+        # Kthej vendet
+        self.tour.available_spots += self.num_people
+        self.tour.save(update_fields=['available_spots', 'updated_at'])
+        
+        # Përditëso prenimin
+        self.status = "cancelled"
+        self.cancelled_at = timezone.now()
+        self.cancelled_by = cancelled_by
+        
+        if reason:
+            self.cancellation_reason = reason
+        
+        if notes:
+            self.cancellation_notes = notes
+        
+        self.save(update_fields=[
+            'status', 'cancelled_at', 'cancelled_by',
+            'cancellation_reason', 'cancellation_notes'
+        ])
+    
+    def confirm(self):
+        """Konfirmim i prenimit nga guide-i"""
+        if self.status != "pending":
+            raise ValueError(f"Nuk mund të konfirmosh prenimin me status {self.status}")
+        
+        self.status = "confirmed"
+        self.confirmed_at = timezone.now()
+        self.save(update_fields=['status', 'confirmed_at'])
+    
+    def complete(self):
+        """Marko turin si të përfunduar"""
+        self.status = "completed"
+        self.save(update_fields=['status', 'updated_at'])
+    
+    def mark_no_show(self):
+        """Marko si nuk u paraqit"""
+        self.status = "no_show"
+        self.save(update_fields=['status', 'updated_at'])
+    
+    def confirm_participation_24h(self):
+        """Konfirmim i pjesëmarrjes 24h përpara"""
+        if not self.is_24h_before_tour():
+            raise ValueError(
+                "Mund të konfirmosh vetëm 24 orë përpara fillimit të turit."
             )
-            if self.tour.date
-            else None
+        
+        self.is_confirmed_24h = True
+        self.confirmed_24h_at = timezone.now()
+        self.save(update_fields=['is_confirmed_24h', 'confirmed_24h_at'])
+    
+    def is_24h_before_tour(self):
+        """Kontrollo nëse turi fillon brenda 24 orësh"""
+        tour_datetime = timezone.make_aware(
+            timezone.datetime.combine(self.tour.date, self.tour.time_start)
         )
-
-        if not tour_start:
-            return False
+        
         now = timezone.now()
-        return (tour_start - now).total_seconds() <= 86400 and (
-            tour_start - now
-        ).total_seconds() >= 0
+        hours_until = (tour_datetime - now).total_seconds() / 3600
+        
+        return 0 <= hours_until <= 24
+    
+    @property
+    def can_be_cancelled(self):
+        """Kontrollo nëse mund të anulohet"""
+        if self.status in ["cancelled", "completed"]:
+            return False
+        
+        tour_datetime = timezone.make_aware(
+            timezone.datetime.combine(self.tour.date, self.tour.time_start)
+        )
+        
+        # Duhet të jetë ndonjë orë përpara turit
+        hours_until = (tour_datetime - timezone.now()).total_seconds() / 3600
+        return hours_until > self.tour.cancellation_deadline_hours
+    
+    @property
+    def refund_amount(self):
+        """Llogarit shumën e rimburses"""
+        if not self.can_be_cancelled:
+            return Decimal('0.00')
+        
+        refund_percentage = Decimal(str(self.tour.refund_percentage)) / Decimal('100')
+        return self.final_price * refund_percentage
+    
+    @property
+    def days_until_tour(self):
+        """Ditët deri në tur"""
+        tour_datetime = timezone.make_aware(
+            timezone.datetime.combine(self.tour.date, self.tour.time_start)
+        )
+        return (tour_datetime - timezone.now()).days
+
+
+# ==================== PAYMENT MODEL ====================
+
+class Payment(models.Model):
+    """Model për pagesa"""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="payment"
+    )
+    
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Shuma e paguar"
+    )
+    
+    currency = models.CharField(
+        max_length=3,
+        default="ALL",
+        help_text="Valuta"
+    )
+    
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD,
+        default="card"
+    )
+    
+    status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS,
+        default="pending"
+    )
+    
+    transaction_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="ID i transaksionit nga provider"
+    )
+    
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    paid_at = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Pagesa"
+        verbose_name_plural = "Pagesat"
+    
+    def __str__(self):
+        return f"Payment {self.id} - {self.booking} - {self.status}"
+    
+    def mark_as_paid(self, transaction_id=None):
+        """Marko si paguar"""
+        self.status = "paid"
+        self.paid_at = timezone.now()
+        
+        if transaction_id:
+            self.transaction_id = transaction_id
+        
+        self.save(update_fields=['status', 'paid_at', 'transaction_id'])
+        
+        # Konfirmo prenimin automatikisht
+        if self.booking.status == "pending":
+            self.booking.confirm()
+    
+    def mark_as_failed(self):
+        """Marko si dështoi"""
+        self.status = "failed"
+        self.save(update_fields=['status'])
+    
+    def refund(self):
+        """Kthe paratë"""
+        self.status = "refunded"
+        self.save(update_fields=['status'])
+
+
+# ==================== REVIEW MODEL ====================
+
+class BookingReview(models.Model):
+    """Vlerësim i prenimit/tur-it"""
+    
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="booking_review"
+    )
+    
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    comment = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Vlerësim Prenimi"
+        verbose_name_plural = "Vlerësimet e Prenimeve"
+    
+    def __str__(self):
+        return f"Review për {self.booking}"
