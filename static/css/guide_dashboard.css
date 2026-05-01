@@ -310,6 +310,89 @@
     text-decoration: none;
 }
 
+/* Modern small action buttons shown per tour */
+.guide-dashboard .btn-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(44, 62, 80, 0.05);
+    color: #2c3e50;
+    border: 1px solid rgba(44,62,80,0.06);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    margin-right: 6px;
+}
+
+.guide-dashboard .btn-small:hover {
+    background: linear-gradient(90deg, rgba(39,174,96,0.12), rgba(39,174,96,0.06));
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(39,174,96,0.08);
+}
+
+.guide-dashboard .btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: white;
+    color: #2c3e50;
+    border: 1px solid rgba(44,62,80,0.06);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.18s ease;
+}
+
+.guide-dashboard .btn-edit-profile:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(39,174,96,0.12);
+}
+
+/* Tooltip */
+.guide-dashboard [data-tooltip] {
+    position: relative;
+}
+
+.guide-dashboard [data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 0.8em;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 40;
+    box-shadow: 0 8px 20px rgba(2,6,23,0.3);
+}
+
+/* Ripple effect container */
+.guide-dashboard .ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.guide-dashboard .ripple__wave {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    background: rgba(255,255,255,0.4);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+}
+
 .guide-dashboard .no-data {
     text-align: center;
     color: #95a5a6;

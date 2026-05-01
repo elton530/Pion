@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ==================== FORM VALIDATION ====================
     initFormValidation();
+    
+    // ==================== GALLERY LIGHTBOX ====================
+    initGalleryLightbox();
 });
 
 /**
@@ -57,6 +60,71 @@ function initStarRating() {
                 s.classList.remove('active');
             }
         });
+    }
+}
+
+/**
+ * Initialize gallery lightbox (simple, no-dependency)
+ */
+function initGalleryLightbox() {
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    if (!galleryItems || galleryItems.length === 0) return;
+
+    // Create modal element
+    const modal = document.createElement('div');
+    modal.className = 'tl-lightbox';
+    modal.innerHTML = `
+        <div class="tl-lightbox-inner">
+            <button class="tl-close" aria-label="Close">×</button>
+            <img class="tl-img" src="" alt="" />
+            <div class="tl-caption"></div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const tlImg = modal.querySelector('.tl-img');
+    const tlCaption = modal.querySelector('.tl-caption');
+    const tlClose = modal.querySelector('.tl-close');
+
+    galleryItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const img = item.querySelector('img');
+            const src = img.getAttribute('src') || img.dataset.src || '';
+            const caption = item.querySelector('.gallery-caption')?.innerText || '';
+            tlImg.src = src;
+            tlImg.alt = img.alt || '';
+            tlCaption.textContent = caption;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    tlClose.addEventListener('click', closeLightbox);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeLightbox();
+    });
+
+    function closeLightbox() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+        tlImg.src = '';
+        tlCaption.textContent = '';
+    }
+
+    // Inject minimal styles
+    if (!document.getElementById('tl-lightbox-styles')) {
+        const s = document.createElement('style');
+        s.id = 'tl-lightbox-styles';
+        s.textContent = `
+            .tl-lightbox{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:9999}
+            .tl-lightbox.open{opacity:1;pointer-events:auto}
+            .tl-lightbox-inner{max-width:90%;max-height:90%;position:relative;background:transparent;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+            .tl-lightbox .tl-img{max-width:100%;max-height:80vh;display:block;border-radius:8px;box-shadow:0 20px 50px rgba(2,6,23,0.6)}
+            .tl-lightbox .tl-caption{margin-top:12px;color:#e6eef8;opacity:0.95;text-align:center}
+            .tl-lightbox .tl-close{position:absolute;top:-10px;right:-10px;background:#fff;border-radius:50%;width:40px;height:40px;border:none;font-size:22px;cursor:pointer;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+            @media (max-width:600px){.tl-lightbox .tl-close{width:36px;height:36px;font-size:20px}}
+        `;
+        document.head.appendChild(s);
     }
 }
 

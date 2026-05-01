@@ -32,9 +32,6 @@ urlpatterns = [
     
     
     # ==================== TOUR DETAIL & INTERACTIONS ====================
-    # GET /tours/<slug>/ - Detajet e turit
-    path("<slug:slug>/", TourDetailView.as_view(), name="tour_detail"),
-    
     # POST /tours/<slug>/review/ - Kërkimi për vlerësim
     path("<slug:slug>/review/", views.create_review, name="create_review"),
     
@@ -89,4 +86,8 @@ urlpatterns = [
     
     # POST /tours/review/<review_id>/delete/ - Fshirja e vlerësimit
     path("review/<int:review_id>/delete/", views.delete_review, name="delete_review"),
+    
+    # ==================== TOUR DETAIL (must come last) ====================
+    # GET /tours/<slug>/ - Detajet e turit
+    path("<slug:slug>/", TourDetailView.as_view(), name="tour_detail"),
 ]

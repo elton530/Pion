@@ -211,6 +211,33 @@
     display: block;
 }
 
+/* Booking Progress */
+.booking-progress {
+    margin-top: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(14, 165, 233, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--detail-success), var(--detail-primary));
+    border-radius: 4px;
+    transition: width 0.8s ease;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: var(--detail-text-light);
+    font-weight: 600;
+}
+
 /* ==================== GUIDE SECTION - GLASS CARD ==================== */
 
 .tour-detail-wrapper .guide-section {
@@ -461,6 +488,104 @@
     z-index: 2;
 }
 
+/* ==================== BOOKING OVERVIEW ==================== */
+
+.booking-overview {
+    margin-bottom: 40px;
+}
+
+.booking-status-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.1);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.status-header h3 {
+    font-size: 1.2rem;
+    color: var(--detail-text);
+    margin: 0;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-badge.status-empty {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.status-badge.status-available {
+    background: rgba(245, 158, 11, 0.9);
+    color: white;
+}
+
+.status-badge.status-limited {
+    background: rgba(239, 68, 68, 0.85);
+    color: white;
+}
+
+.status-badge.status-full {
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+}
+
+.status-badge .percentage {
+    font-weight: 800;
+    opacity: 0.9;
+}
+
+.booking-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: var(--detail-text-light);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: var(--detail-text);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
 /* ==================== RESERVE SECTION - MODERN CTA ==================== */
 
 .tour-detail-wrapper .reserve-section {
@@ -644,6 +769,87 @@
     border: 1px solid var(--detail-border);
     margin-bottom: 48px;
     box-shadow: var(--detail-shadow);
+}
+
+/* ==================== FEATURES LISTS ==================== */
+.tour-detail-wrapper .features-lists {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 0 24px 40px;
+}
+
+.tour-detail-wrapper .features-col {
+    background: var(--detail-card);
+    border: 1px solid var(--detail-border);
+    padding: 20px 18px;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(2, 132, 199, 0.06);
+}
+
+.tour-detail-wrapper .features-col h3 {
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--detail-text);
+}
+
+.tour-detail-wrapper .features-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.tour-detail-wrapper .features-col li {
+    padding-left: 12px;
+    position: relative;
+    color: var(--detail-text-light);
+}
+
+.tour-detail-wrapper .features-col li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--detail-primary);
+    font-weight: 800;
+}
+
+/* ==================== BACK LINK ==================== */
+.tour-detail-wrapper .back-link {
+    text-align: center;
+    margin: 40px 0 100px;
+}
+
+.tour-detail-wrapper .back-link a {
+    color: var(--detail-primary-dark);
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ==================== RESPONSIVE TWEAKS ==================== */
+@media (max-width: 880px) {
+    .tour-detail-wrapper .guide-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .tour-detail-wrapper .guide-photo, .tour-detail-wrapper .guide-initial {
+        margin: 0 auto;
+    }
+
+    .tour-detail-wrapper .reserve-section {
+        padding: 32px 20px;
+        margin: 40px 16px;
+    }
 }
 
 .tour-detail-wrapper .review-form h3 {

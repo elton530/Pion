@@ -57,6 +57,13 @@ def create_booking(request, slug):
         form = BookingForm(request.POST, tour=tour, tourist=tourist_profile)
         
         if form.is_valid():
+            # Guard: ensure tour.current_price is numeric before creating Booking
+            try:
+                Decimal(str(tour.current_price))
+            except Exception:
+                messages.error(request, "❌ Nuk mund të vazhdosh - çmimi i turit nuk është i vlefshëm. Kontakto administratën.")
+                return redirect("tours:tour_detail", slug=tour.slug)
+
             try:
                 booking = form.save(commit=False)
                 booking.tour = tour

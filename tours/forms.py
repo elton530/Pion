@@ -3,9 +3,39 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from .models import (
     Tour, TourImage, TourReview, TourSchedule, 
-    TourFAQ, TourHighlight, TourTag, TOUR_TYPES,
-    DIFFICULTY_LEVELS, CURRENCY_CHOICES, AGE_GROUP_CHOICES
+    TourFAQ, TOUR_TYPES,
+    DIFFICULTY_LEVELS, AGE_GROUP_CHOICES
 )
+
+
+# ==================== HELPER WIDGETS ====================
+
+class ControlInput(forms.TextInput):
+    """Base widget për input me class form-control"""
+    def __init__(self, attrs=None, **kwargs):
+        default_attrs = {'class': 'form-control'}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs, **kwargs)
+
+
+class ControlSelect(forms.Select):
+    """Base widget për select me class form-select"""
+    def __init__(self, attrs=None, **kwargs):
+        default_attrs = {'class': 'form-select'}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs, **kwargs)
+
+
+class ControlTextarea(forms.Textarea):
+    """Base widget për textarea me class form-control"""
+    def __init__(self, attrs=None, **kwargs):
+        default_attrs = {'class': 'form-control'}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs, **kwargs)
+
 
 
 # ==================== TOUR REVIEW FORMS ====================
@@ -21,16 +51,14 @@ class TourReviewForm(forms.ModelForm):
                 choices=[(i, f"{i} ⭐") for i in range(1, 6)],
                 attrs={'class': 'rating-radio'}
             ),
-            'title': forms.TextInput(
+            'title': ControlInput(
                 attrs={
-                    'class': 'form-control',
                     'placeholder': 'Titulli i review-it (opsionale)',
                     'maxlength': '200'
                 }
             ),
-            'comment': forms.Textarea(
+            'comment': ControlTextarea(
                 attrs={
-                    'class': 'form-control',
                     'rows': 5,
                     'placeholder': 'Ndja përvojën tuaj me turist të tjerë...',
                     'maxlength': '2000'
@@ -82,9 +110,8 @@ class TourImageForm(forms.ModelForm):
                     'accept': 'image/*'
                 }
             ),
-            'caption': forms.TextInput(
+            'caption': ControlInput(
                 attrs={
-                    'class': 'form-control',
                     'placeholder': 'Përshkrimi i imazhit (opsionale)',
                     'maxlength': '200'
                 }
@@ -148,139 +175,68 @@ class TourCreateForm(forms.ModelForm):
             'main_image', 'elevation_gain', 'max_altitude'
         ]
         widgets = {
-            'title': forms.TextInput(
+            'title': ControlInput(
                 attrs={
-                    'class': 'form-control form-control-lg',
-                    'placeholder': 'P.sh. Ecje në Theth - Liqeni i Komanit',
+                    'class': 'form-control-lg',
+                    'placeholder': 'P.sh. Ecje në Theth - Liqeni i Komanin',
                     'maxlength': '200'
                 }
             ),
-            'short_description': forms.Textarea(
+            'short_description': ControlTextarea(
                 attrs={
-                    'class': 'form-control',
                     'rows': 2,
                     'placeholder': 'Përshkrim i shkurtër (deri 300 karaktere)',
                     'maxlength': '300'
                 }
             ),
-            'full_description': forms.Textarea(
+            'full_description': ControlTextarea(
                 attrs={
-                    'class': 'form-control',
                     'rows': 8,
                     'placeholder': 'Përshkrim i detajuar: itinerari, aktivitetet, pemandja, etj.',
                 }
             ),
-            'tour_type': forms.Select(
-                attrs={'class': 'form-select'}
+            'tour_type': ControlSelect(),
+            'difficulty': ControlSelect(),
+            'age_group': ControlSelect(),
+            'meeting_point': ControlInput(
+                attrs={'placeholder': 'P.sh. Para Hyqes së Universitetit të Tiranës'}
             ),
-            'difficulty': forms.Select(
-                attrs={'class': 'form-select'}
+            'location_city': ControlInput(
+                attrs={'placeholder': 'Qyteti (Tiranë, Shkodër, etj.)'}
             ),
-            'age_group': forms.Select(
-                attrs={'class': 'form-select'}
-            ),
-            'meeting_point': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'P.sh. Para Hyqes së Universitetit të Tiranës',
-                }
-            ),
-            'location_city': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Qyteti (Tiranë, Shkodër, etj.)',
-                }
-            ),
-            'location_region': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Rajoni (Dajti, Theth, Mali i Korab, etj.)',
-                }
+            'location_region': ControlInput(
+                attrs={'placeholder': 'Rajoni (Dajti, Theth, Mali i Korab, etj.)'}
             ),
             'duration_hours': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'min': '1',
-                    'placeholder': 'Orë',
-                }
+                attrs={'class': 'form-control', 'min': '1', 'placeholder': 'Orë'}
             ),
             'duration_days': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'min': '0',
-                    'placeholder': 'Ditë (për turet shumë-ditore)',
-                }
+                attrs={'class': 'form-control', 'min': '0', 'placeholder': 'Ditë (për turet shumë-ditore)'}
             ),
             'distance_km': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'step': '0.01',
-                    'placeholder': 'Km',
-                    'type': 'number',
-                }
+                attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Km', 'type': 'number'}
             ),
             'elevation_gain': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Metra (opsionale)',
-                }
+                attrs={'class': 'form-control', 'placeholder': 'Metra (opsionale)'}
             ),
             'max_altitude': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Metra (opsionale)',
-                }
+                attrs={'class': 'form-control', 'placeholder': 'Metra (opsionale)'}
             ),
             'price_per_person': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'step': '0.01',
-                    'min': '0',
-                    'placeholder': '0.00',
-                    'type': 'number',
-                }
+                attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'placeholder': '0.00', 'type': 'number'}
             ),
-            'currency': forms.Select(
-                attrs={'class': 'form-select'}
-            ),
+            'currency': ControlSelect(),
             'max_participants': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'min': '1',
-                    'max': '100',
-                }
+                attrs={'class': 'form-control', 'min': '1', 'max': '100'}
             ),
             'min_participants': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'min': '1',
-                    'max': '50',
-                }
+                attrs={'class': 'form-control', 'min': '1', 'max': '50'}
             ),
-            'date': forms.DateInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'date',
-                }
-            ),
-            'time_start': forms.TimeInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'time',
-                }
-            ),
-            'time_end': forms.TimeInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'time',
-                }
-            ),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'time_start': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'time_end': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'main_image': forms.FileInput(
-                attrs={
-                    'class': 'form-control',
-                    'accept': 'image/*',
-                    'required': 'true',
-                }
+                attrs={'class': 'form-control', 'accept': 'image/*', 'required': 'true'}
             ),
         }
         labels = {
@@ -365,27 +321,27 @@ class TourEditForm(forms.ModelForm):
             'status'
         ]
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control form-control-lg'}),
-            'slug': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
-            'short_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'full_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 8}),
-            'tour_type': forms.Select(attrs={'class': 'form-select'}),
-            'difficulty': forms.Select(attrs={'class': 'form-select'}),
-            'age_group': forms.Select(attrs={'class': 'form-select'}),
-            'languages': forms.Select(attrs={'class': 'form-select'}),
-            'meeting_point': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': ControlInput(attrs={'class': 'form-control-lg'}),
+            'slug': ControlInput(attrs={'readonly': 'readonly'}),
+            'short_description': ControlTextarea(attrs={'rows': 2}),
+            'full_description': ControlTextarea(attrs={'rows': 8}),
+            'tour_type': ControlSelect(),
+            'difficulty': ControlSelect(),
+            'age_group': ControlSelect(),
+            'languages': ControlSelect(),
+            'meeting_point': ControlInput(),
             'meeting_point_lat': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.000001'}),
             'meeting_point_lng': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.000001'}),
-            'location_city': forms.TextInput(attrs={'class': 'form-control'}),
-            'location_region': forms.TextInput(attrs={'class': 'form-control'}),
-            'end_point': forms.TextInput(attrs={'class': 'form-control'}),
+            'location_city': ControlInput(),
+            'location_region': ControlInput(),
+            'end_point': ControlInput(),
             'duration_hours': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
             'distance_km': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'type': 'number'}),
             'elevation_gain': forms.NumberInput(attrs={'class': 'form-control', 'type': 'number'}),
             'max_altitude': forms.NumberInput(attrs={'class': 'form-control', 'type': 'number'}),
             'price_per_person': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'type': 'number'}),
-            'currency': forms.Select(attrs={'class': 'form-select'}),
+            'currency': ControlSelect(),
             'max_participants': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '100'}),
             'min_participants': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -393,22 +349,22 @@ class TourEditForm(forms.ModelForm):
             'time_end': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'main_image': forms.FileInput(attrs={'class': 'form-control'}),
             'thumbnail': forms.FileInput(attrs={'class': 'form-control'}),
-            'highlights': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Një për rresht'}),
-            'included': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Një për rresht'}),
-            'not_included': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Një për rresht'}),
-            'what_to_bring': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Një për rresht'}),
-            'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'health_warnings': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'equipment_provided': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'highlights': ControlTextarea(attrs={'rows': 4, 'placeholder': 'Një për rresht'}),
+            'included': ControlTextarea(attrs={'rows': 4, 'placeholder': 'Një për rresht'}),
+            'not_included': ControlTextarea(attrs={'rows': 4, 'placeholder': 'Një për rresht'}),
+            'what_to_bring': ControlTextarea(attrs={'rows': 4, 'placeholder': 'Një për rresht'}),
+            'requirements': ControlTextarea(attrs={'rows': 3}),
+            'health_warnings': ControlTextarea(attrs={'rows': 3}),
+            'equipment_provided': ControlTextarea(attrs={'rows': 3}),
             'transportation_included': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'transportation_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'transportation_details': ControlTextarea(attrs={'rows': 3}),
             'meal_included': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'meal_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'meal_details': ControlTextarea(attrs={'rows': 3}),
             'accommodation_included': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'accommodation_details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'accommodation_details': ControlTextarea(attrs={'rows': 3}),
             'cancellation_deadline_hours': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
             'refund_percentage': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '100'}),
-            'status': forms.Select(attrs={'class': 'form-select'}),
+            'status': ControlSelect(),
         }
 
 
@@ -428,7 +384,7 @@ class TourPricingForm(forms.ModelForm):
             'price_per_person': forms.NumberInput(
                 attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'type': 'number'}
             ),
-            'currency': forms.Select(attrs={'class': 'form-select'}),
+            'currency': ControlSelect(),
             'max_participants': forms.NumberInput(
                 attrs={'class': 'form-control', 'min': '1', 'max': '100', 'type': 'number'}
             ),
@@ -506,24 +462,14 @@ class TourSearchForm(forms.Form):
     search = forms.CharField(
         max_length=200,
         required=False,
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'Kërko tur, lokacion, ...',
-            }
-        ),
+        widget=ControlInput(attrs={'placeholder': 'Kërko tur, lokacion, ...'}),
         label='Kërkim'
     )
     
     location = forms.CharField(
         max_length=100,
         required=False,
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'Qyteti ose rajoni',
-            }
-        ),
+        widget=ControlInput(attrs={'placeholder': 'Qyteti ose rajoni'}),
         label='Lokacioni'
     )
     
@@ -545,12 +491,7 @@ class TourSearchForm(forms.Form):
         required=False,
         min_value=0,
         widget=forms.NumberInput(
-            attrs={
-                'class': 'form-control',
-                'type': 'number',
-                'step': '0.01',
-                'placeholder': 'Min',
-            }
+            attrs={'class': 'form-control', 'type': 'number', 'step': '0.01', 'placeholder': 'Min'}
         ),
         label='Çmim Min'
     )
@@ -559,42 +500,27 @@ class TourSearchForm(forms.Form):
         required=False,
         min_value=0,
         widget=forms.NumberInput(
-            attrs={
-                'class': 'form-control',
-                'type': 'number',
-                'step': '0.01',
-                'placeholder': 'Max',
-            }
+            attrs={'class': 'form-control', 'type': 'number', 'step': '0.01', 'placeholder': 'Max'}
         ),
         label='Çmim Max'
     )
     
     date_from = forms.DateField(
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                'class': 'form-control',
-                'type': 'date',
-            }
-        ),
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         label='Nga Data'
     )
     
     date_to = forms.DateField(
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                'class': 'form-control',
-                'type': 'date',
-            }
-        ),
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         label='Deri Data'
     )
     
     age_group = forms.ChoiceField(
         choices=[('', '-- Zgjedh Grupin Moshor --')] + list(AGE_GROUP_CHOICES),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=ControlSelect(),
         label='Grupi Moshor'
     )
     
@@ -607,7 +533,7 @@ class TourSearchForm(forms.Form):
             ('-created_at', 'Më të Rinj'),
         ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=ControlSelect(),
         label='Renditi'
     )
     

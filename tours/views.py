@@ -1,16 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
-from django.views.generic.edit import FormMixin
+from django.views.generic import DetailView, ListView
 from django.urls import reverse_lazy
-from django.db.models import Q, Count, Avg
-from django.http import HttpResponseForbidden, JsonResponse
-from django.core.paginator import Paginator
+from django.db.models import Q, Count, Sum, Avg
+from django.http import JsonResponse
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage
 
-from users.models import GuideProfile, TouristProfile
+from users.models import GuideProfile
 from .models import Tour, TourReview, TourImage, TourSchedule, TourFAQ, TourStatistic
 from .forms import (
     TourCreateForm, TourEditForm, TourReviewForm, TourImageForm,
@@ -34,6 +33,12 @@ class TourListView(ListView):
             status="published",
             date__gte=timezone.now().date()
         ).select_related("guide__user").prefetch_related("images", "reviews")
+        # Precompute approved reviews average to avoid per-item queries
+        # Note: do NOT annotate `reviews_count` because it's a real model field
+        # on `Tour` (conflicts with annotations). Use the stored field instead.
+        queryset = queryset.annotate(
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True)),
+        )
         
         # Kërkimi sipas titullit ose përshkrimit
         search = self.request.GET.get('search', '').strip()
@@ -102,10 +107,8 @@ class TourListView(ListView):
         context['current_search'] = self.request.GET.urlencode()
         
         # Statistika
-        context['total_tours'] = Tour.objects.filter(
-            is_active=True,
-            status="published"
-        ).count()
+        # Use the same queryset as the list to keep filters consistent
+        context['total_tours'] = self.get_queryset().count()
         
         return context
 
@@ -197,16 +200,52 @@ class TourDetailView(DetailView):
     slug_url_kwarg = "slug"
     
     def get_queryset(self):
-        return Tour.objects.filter(is_active=True, status="published").select_related(
+        # Allow published tours for everyone, but let the guide owner view their
+        # own tours (including drafts) while editing. This keeps unpublished
+        # drafts hidden from public users.
+        base_qs = Tour.objects.filter(is_active=True).select_related(
             "guide__user"
         ).prefetch_related("images", "reviews", "schedules", "faqs")
+
+        # Public users only see published tours
+        if not self.request.user.is_authenticated:
+            return base_qs.filter(status="published")
+
+        # If the current user is the guide owner, allow them to access their
+        # own tours regardless of status; otherwise only published tours.
+        try:
+            if hasattr(self.request.user, "guide_profile"):
+                guide_profile = self.request.user.guide_profile
+                return base_qs.filter(Q(status="published") | Q(guide=guide_profile))
+        except Exception:
+            # Fall back to published only if anything goes wrong
+            pass
+
+        return base_qs.filter(status="published")
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tour = self.object
         
-        # Imazhet
-        context["additional_images"] = tour.images.all()
+        # Imazhet - filter out media files that are missing from storage
+        valid_images = []
+        for img in tour.images.all():
+            try:
+                if img.image and default_storage.exists(img.image.name):
+                    valid_images.append(img)
+            except Exception:
+                # skip images that cause storage errors
+                continue
+        context["additional_images"] = valid_images
+
+        # Check main image exists before rendering to avoid 404s
+        main_image_exists = False
+        try:
+            if tour.main_image and default_storage.exists(tour.main_image.name):
+                main_image_exists = True
+        except Exception:
+            main_image_exists = False
+        context["main_image_exists"] = main_image_exists
         
         # Vlerësimet
         context["reviews"] = tour.reviews.filter(
@@ -246,6 +285,8 @@ class TourDetailView(DetailView):
         
         # FAQ
         context["faqs"] = tour.faqs.filter(is_active=True)
+        # Current timestamp for template comparisons (discounts, early bird)
+        context["now"] = timezone.now()
         
         # Statistika
         try:
@@ -279,14 +320,17 @@ def create_tour(request):
         if form.is_valid():
             tour = form.save(commit=False)
             tour.guide = guide_profile
-            tour.status = "draft"
+            # Publish new tours by default so they appear in listings immediately.
+            # If you prefer a draft workflow, change this back to 'draft' or
+            # add a publish checkbox to the form.
+            tour.status = "published"
             tour.save()
             
             messages.success(
                 request,
                 f'Turi "{tour.title}" u krijua me sukses! Tani plotëso detajet shtesë.'
             )
-            return redirect("tours:tour_edit", slug=tour.slug)
+            return redirect("tours:edit_tour", slug=tour.slug)
         else:
             messages.error(request, "Ka gabime në formë. Provo përsëri.")
     else:
@@ -355,19 +399,23 @@ def my_tours(request):
     
     status_filter = request.GET.get('status', 'all')
     
-    tours = guide_profile.tours.all().order_by('-created_at')
-    
+    base_qs = guide_profile.tours.all()
+    tours = base_qs.order_by('-created_at')
+
     if status_filter != 'all':
         tours = tours.filter(status=status_filter)
-    
-    # Statistika
+
+    # Statistika using aggregate to avoid iterating in Python
+    aggregates = base_qs.aggregate(total_bookings=Sum('booking_count'))
+    total_bookings = aggregates.get('total_bookings') or 0
+
     context = {
         'tours': tours,
         'status_filter': status_filter,
-        'total_tours': guide_profile.tours.count(),
-        'published_tours': guide_profile.tours.filter(status='published').count(),
-        'draft_tours': guide_profile.tours.filter(status='draft').count(),
-        'total_bookings': sum(tour.booking_count for tour in guide_profile.tours.all()),
+        'total_tours': base_qs.count(),
+        'published_tours': base_qs.filter(status='published').count(),
+        'draft_tours': base_qs.filter(status='draft').count(),
+        'total_bookings': total_bookings,
         'total_reviews': TourReview.objects.filter(
             tour__guide=guide_profile,
             is_approved=True
@@ -426,7 +474,7 @@ def add_tour_image(request, slug):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'message': 'Foto u shtua me sukses!'})
             
-            return redirect("tours:tour_edit", slug=slug)
+            return redirect("tours:edit_tour", slug=slug)
     else:
         form = TourImageForm()
     
@@ -452,7 +500,7 @@ def delete_tour_image(request, image_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': True})
     
-    return redirect("tours:tour_edit", slug=tour.slug)
+    return redirect("tours:edit_tour", slug=tour.slug)
 
 
 # ==================== TOUR SCHEDULE VIEWS ====================
@@ -473,7 +521,7 @@ def add_tour_schedule(request, slug):
             schedule.tour = tour
             schedule.save()
             messages.success(request, "Programi u shtua me sukses!")
-            return redirect("tours:tour_edit", slug=slug)
+            return redirect("tours:edit_tour", slug=slug)
     else:
         form = TourScheduleForm()
     
@@ -498,7 +546,7 @@ def edit_tour_schedule(request, schedule_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Programi u përditësua me sukses!")
-            return redirect("tours:tour_edit", slug=tour.slug)
+            return redirect("tours:edit_tour", slug=tour.slug)
     else:
         form = TourScheduleForm(instance=schedule)
     
@@ -520,7 +568,7 @@ def delete_tour_schedule(request, schedule_id):
     
     schedule.delete()
     messages.success(request, "Programi u fshi me sukses!")
-    return redirect("tours:tour_edit", slug=tour.slug)
+    return redirect("tours:edit_tour", slug=tour.slug)
 
 
 # ==================== TOUR FAQ VIEWS ====================
@@ -541,7 +589,7 @@ def add_tour_faq(request, slug):
             faq.tour = tour
             faq.save()
             messages.success(request, "Pyetja u shtua me sukses!")
-            return redirect("tours:tour_edit", slug=slug)
+            return redirect("tours:edit_tour", slug=slug)
     else:
         form = TourFAQForm()
     
@@ -566,7 +614,7 @@ def edit_tour_faq(request, faq_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Pyetja u përditësua me sukses!")
-            return redirect("tours:tour_edit", slug=tour.slug)
+            return redirect("tours:edit_tour", slug=tour.slug)
     else:
         form = TourFAQForm(instance=faq)
     
@@ -588,7 +636,7 @@ def delete_tour_faq(request, faq_id):
     
     faq.delete()
     messages.success(request, "Pyetja u fshi me sukses!")
-    return redirect("tours:tour_edit", slug=tour.slug)
+    return redirect("tours:edit_tour", slug=tour.slug)
 
 
 # ==================== TOUR REVIEW VIEWS ====================
@@ -681,15 +729,16 @@ def featured_tours(request):
 def tour_by_location(request, location):
     """Turet sipas lokacionit"""
     
-    tours = Tour.objects.filter(
+    qs = Tour.objects.filter(
         is_active=True,
         status="published",
         location_city__icontains=location
     ).select_related("guide__user")
-    
-    if not tours.exists():
+
+    tours = list(qs)
+    if not tours:
         messages.info(request, f"Nuk ka ture në {location}.")
-    
+
     return render(request, "tours/tour_by_location.html", {
         "tours": tours,
         "location": location

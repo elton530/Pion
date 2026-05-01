@@ -16,6 +16,8 @@ class GuideProfileEditor {
         this.setupBioCounter();
         this.setupMessageHandlers();
         this.setupFormValidation();
+        this.markServerErrors();
+        this.disableFormOnSubmit();
     }
 
     /**
@@ -261,6 +263,40 @@ class GuideProfileEditor {
             event.preventDefault();
             errors.forEach(error => this.showErrorMessage(error));
         }
+    }
+
+    /**
+     * Highlight inputs that have server-side validation errors and focus the first
+     */
+    markServerErrors() {
+        const form = document.getElementById('profile-form');
+        if (!form) return;
+
+        // Find all inline error lists and mark the related input
+        const errorLists = form.querySelectorAll('.messages.error');
+        let firstFocused = false;
+        errorLists.forEach((errList) => {
+            // The field is typically just before the error list in our template
+            let field = errList.previousElementSibling;
+
+            // If label is between field and errors, go back one more
+            if (field && field.tagName === 'LABEL') {
+                field = field.previousElementSibling;
+            }
+
+            if (!field) {
+                // try to find a field inside the same form-group
+                field = errList.closest('.form-group')?.querySelector('input,select,textarea');
+            }
+
+            if (field) {
+                field.classList.add('input-error');
+                if (!firstFocused) {
+                    try { field.focus(); } catch (e) {}
+                    firstFocused = true;
+                }
+            }
+        });
     }
 
     /**

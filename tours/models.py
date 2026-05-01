@@ -1,27 +1,27 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from users.models import GuideProfile, TouristProfile
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from decimal import Decimal
-import uuid
 
 # ==================== CHOICES ====================
 
 TOUR_TYPES = [
     ("nature_walk", "Ecje në Natyrë"),
-    ("alpine", "Guide Alpinistike"),
+    ("alpine_guide", "Guide Alpinistike"),
     ("bike_tour", "Tur me Biçikletë"),
-    ("rural", "Zona Rurale"),
+    ("rural_cultural_food", "Përvojë Rurale, Kulturore dhe Kulinarie"),
     ("cultural", "Tur Kulturor"),
-    ("adventure", "Aventurë"),
+    ("adventure", "Tur Aventure"),
     ("historical", "Tur Historik"),
     ("food", "Tur Kulinarik"),
     ("photography", "Tur Fotografik"),
-    ("wellness", "Tur Wellness"),
+    ("wellness", "Tur Wellness dhe Relaksimi"),
     ("family", "Tur Familjar"),
-    ("other", "Tjetër"),
+    ("custom", "Personalizuar/Tjetër")
 ]
 
 DIFFICULTY_LEVELS = [
@@ -69,7 +69,7 @@ class TourQuerySet(models.QuerySet):
     """Custom QuerySet për Tour model"""
     
     def active(self):
-        """Nur aktive dhe publikuar turet"""
+        """Turet aktive dhe të publikuara"""
         return self.filter(
             is_active=True,
             status="published",
@@ -115,7 +115,7 @@ class TourQuerySet(models.QuerySet):
         )
     
     def featured(self):
-        """Turet e shfaqur si featured"""
+        """Turet e veçuar"""
         return self.filter(
             is_active=True,
             status="published",
@@ -153,30 +153,39 @@ class TourManager(models.Manager):
     """Custom manager për Tour model"""
     
     def get_queryset(self):
+        """Kthe custom TourQuerySet"""
         return TourQuerySet(self.model, using=self._db)
     
     def active(self):
+        """Kthe turet aktive dhe të publikuara"""
         return self.get_queryset().active()
     
     def upcoming(self):
+        """Kthe turet e ardhshëm"""
         return self.get_queryset().upcoming()
     
     def past(self):
+        """Kthe turet e kaluar"""
         return self.get_queryset().past()
     
     def by_guide(self, guide):
+        """Kthe turet e një udhëzuesi specifik"""
         return self.get_queryset().by_guide(guide)
     
     def by_type(self, tour_type):
+        """Kthe turet sipas llojit"""
         return self.get_queryset().by_type(tour_type)
     
     def by_location(self, location):
+        """Kthe turet sipas lokacionit"""
         return self.get_queryset().by_location(location)
     
     def featured(self):
+        """Kthe turet e veçuar"""
         return self.get_queryset().featured()
     
     def available(self):
+        """Kthe turet me vende të lira"""
         return self.get_queryset().available()
 
 
@@ -240,10 +249,12 @@ class Tour(models.Model):
     )
     
     # ===== KATEGORIZIM =====
-    tour_type = models.CharField(
-        max_length=50,
-        choices=TOUR_TYPES,
-        default="nature_walk"
+    tour_type = models.ForeignKey(
+        TourType,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="tours",
+        help_text="Lloji i turit"
     )
     difficulty = models.CharField(
         max_length=20,
@@ -271,21 +282,21 @@ class Tour(models.Model):
     # ===== DETAJET E LOKACIONIT =====
     meeting_point = models.CharField(
         max_length=200,
-        help_text="Vendi i saktë i takimit, p.sh. 'Para Hyqes së Universitetit'"
+        help_text="Vendi ku takohen pjesëmarrësit për nisjen e turit"
     )
     meeting_point_lat = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
         blank=True,
-        help_text="Latitude për pikën e takimit"
+        help_text="Latitude për pikën e takimit 'gjeresia-gjeografike'"
     )
     meeting_point_lng = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
         blank=True,
-        help_text="Longitude për pikën e takimit"
+        help_text="Longitude për pikën e takimit 'gjatësia-gjeografike'"
     )
     location_city = models.CharField(
         max_length=100,
@@ -328,7 +339,7 @@ class Tour(models.Model):
     elevation_gain = models.PositiveIntegerField(
         null=True,
         blank=True,
-        help_text="Ngritja totale në metra"
+        help_text="Fitimi i lartësisë në metra"
     )
     max_altitude = models.PositiveIntegerField(
         null=True,
@@ -349,7 +360,8 @@ class Tour(models.Model):
     )
     max_participants = models.PositiveSmallIntegerField(
         default=10,
-        validators=[MinValueValidator(1), MaxValueValidator(100)]
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        help_text="Kapaciteti maksimal i pjesëmarrësve në tur"
     )
     min_participants = models.PositiveSmallIntegerField(
         default=2,
@@ -374,7 +386,7 @@ class Tour(models.Model):
     )
     early_bird_days = models.PositiveIntegerField(
         default=0,
-        help_text="Numri i ditëve para turit për early bird"
+        help_text="Numri i ditëve para turit për të përfituar zbritjen early bird"
     )
     early_bird_discount = models.DecimalField(
         max_digits=5,
@@ -392,7 +404,7 @@ class Tour(models.Model):
         upload_to="tours/thumbnails/%Y/%m/",
         null=True,
         blank=True,
-        help_text="Thumbnail për listime (rekomandohet 400x300px)"
+        help_text="Miniaturë e turit (p.sh. 400x300px)"
     )
     
     # ===== PËRMBAJTJA DHE DETAJET =====
@@ -501,7 +513,7 @@ class Tour(models.Model):
         indexes = [
             models.Index(fields=['is_active', 'status', 'date']),
             models.Index(fields=['guide', 'is_active']),
-            models.Index(fields=['tour_type', 'is_active']),
+            models.Index(fields=['tour_type_id', 'is_active']),
             models.Index(fields=['location_city', 'is_active']),
             models.Index(fields=['price_per_person']),
             models.Index(fields=['difficulty', 'is_active']),
@@ -567,23 +579,45 @@ class Tour(models.Model):
     
     @property
     def booking_percentage(self):
-        """Përqindja e vendeve të prenuar"""
+        """Llogarit përqindjen e prenotimeve"""
         if self.max_participants == 0:
             return 0
         booked = self.max_participants - self.available_spots
         return (booked / self.max_participants) * 100
     
     @property
+    def confirmed_booked_spots(self):
+        """Numri i vendeve të konfirmuara"""
+        return self.bookings.filter(
+            status__in=['confirmed', 'completed']
+        ).aggregate(total=Sum('num_people'))['total'] or 0
+    
+    @property
+    def confirmed_percentage(self):
+        """Përqindja e prenotimeve të konfirmuara"""
+        if self.max_participants == 0:
+            return 0
+        return (self.confirmed_booked_spots / self.max_participants) * 100
+    
+    @property
     def current_price(self):
         """Merr çmimin aktual (me zbritje nëse zbatohet)"""
+        from decimal import Decimal
+
+        # Prefer discount price when applicable
         if (self.has_discount and self.discount_until and
                 self.discount_until >= timezone.now().date()):
-            return self.discount_price or self.price_per_person
-        
-        if self.is_early_bird:
-            return self.early_bird_price
-        
-        return self.price_per_person
+            val = self.discount_price if self.discount_price is not None else self.price_per_person
+        elif self.is_early_bird:
+            val = self.early_bird_price
+        else:
+            val = self.price_per_person
+
+        # Coerce to Decimal and fallback to 0.00 if missing
+        try:
+            return Decimal(str(val)) if val is not None else Decimal('0.00')
+        except Exception:
+            return Decimal('0.00')
     
     @property
     def duration_formatted(self):
@@ -643,7 +677,7 @@ class Tour(models.Model):
     
     @property
     def what_to_bring_list(self):
-        """Merr listën e sendeve që duhen sjellë"""
+        """Merr çfarë duhet të marrë si listë"""
         if not self.what_to_bring:
             return []
         return [w.strip() for w in self.what_to_bring.split('\n') if w.strip()]
@@ -656,7 +690,7 @@ class Tour(models.Model):
         return [r.strip() for r in self.requirements.split('\n') if r.strip()]
     
     def update_available_spots(self):
-        """Përditëso vendet e lira bazuar në prenotazioneale të konfirmuara"""
+        """Përditëso numrin e vendeve të lira bazuar në prenotimet e konfirmuara"""
         from django.db.models import Sum
         try:
             confirmed_count = self.bookings.filter(
@@ -681,7 +715,7 @@ class Tour(models.Model):
         ).exclude(
             pk=self.pk
         ).filter(
-            models.Q(tour_type=self.tour_type) |
+            models.Q(tour_type_id=self.tour_type_id) |
             models.Q(location_city=self.location_city)
         ).order_by('?')[:limit]
 
@@ -708,7 +742,7 @@ class TourImage(models.Model):
     class Meta:
         ordering = ['order', 'created_at']
         verbose_name = "Foto Turi"
-        verbose_name_plural = "Fotos Turi"
+        verbose_name_plural = "Foto të Tureve"
     
     def __str__(self):
         return f"Foto për {self.tour.title}"
@@ -763,7 +797,7 @@ class TourSchedule(models.Model):
 # ==================== TOUR FAQ MODEL ====================
 
 class TourFAQ(models.Model):
-    """Pyetje të Shpesh Bëra për ein tur"""
+    """Pyetjet e shpeshta për një tur"""
     
     tour = models.ForeignKey(
         Tour,
@@ -825,13 +859,13 @@ class TourReview(models.Model):
         null=True,
         blank=True,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
-        help_text="Vlerësimi për vlerën për para"
+        help_text="Vlerësimi për vlerën për paratë"
     )
     experience_rating = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
-        help_text="Vlerësimi për përvojan"
+        help_text="Vlerësimi për përvojën e përgjithshme"
     )
     
     # Fushat e administrimit
@@ -881,15 +915,20 @@ class TourReview(models.Model):
         return sum(ratings) / len(ratings) if ratings else self.rating
     
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
         super().save(*args, **kwargs)
         
         # Përditëso vlerësimet e turit
-        self.update_tour_ratings()
+        try:
+            self.update_tour_ratings()
+        except Exception as e:
+            print(f"Error updating tour ratings: {e}")
         
-        # Përditëso vlerësimin e guida-it nëse ka metodën
-        if hasattr(self.tour.guide, 'update_rating'):
-            self.tour.guide.update_rating()
+        # Përditëso vlerësimin e guida-it
+        try:
+            if hasattr(self.tour.guide, 'update_rating'):
+                self.tour.guide.update_rating()
+        except Exception as e:
+            print(f"Error updating guide rating: {e}")
     
     def delete(self, *args, **kwargs):
         tour = self.tour
@@ -904,7 +943,7 @@ class TourReview(models.Model):
             guide.update_rating()
     
     def update_tour_ratings(self, tour=None):
-        """Përditëso agregatet e vlerësimit të turit"""
+        """Përditëso mesataren e vlerësimeve dhe numrin e review-eve për turin"""
         from django.db.models import Avg, Count
         
         tour = tour or self.tour
@@ -950,7 +989,7 @@ class TourReviewImage(models.Model):
 # ==================== TOUR HIGHLIGHT MODEL ====================
 
 class TourHighlight(models.Model):
-    """Pikat kryesore/karakteristikat e një turi"""
+    """Pikat kryesore të veçanta të turit me ikonë dhe përshkrim"""
     
     tour = models.ForeignKey(
         Tour,

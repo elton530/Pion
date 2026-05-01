@@ -56,6 +56,12 @@
             <span>Krijo Tur të Ri</span>
         </a>
 
+        <!-- Edit Profile Button -->
+        <a href="{% url 'users:guide_profile_edit' %}" class="btn-edit-profile" style="margin-left:12px;">
+            <span>⚙️</span>
+            <span>Edito Profilin</span>
+        </a>
+
         <!-- Rezervimet -->
         <div class="section">
             <h2>📋 Rezervimet e fundit</h2>
@@ -93,16 +99,20 @@
                         </td>
                         <td>
                             {% if booking.status == 'pending' %}
-                            <a href="{% url 'users:booking_action' booking.id 'confirm' %}"
-                                class="btn btn-confirm">
-                                <span>✓</span>
-                                <span>Konfirmo</span>
-                            </a>
-                            <a href="{% url 'users:booking_action' booking.id 'cancel' %}"
-                                class="btn btn-cancel">
-                                <span>✗</span>
-                                <span>Anullo</span>
-                            </a>
+                            <form action="{% url 'users:guide_booking_confirm' booking.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button class="btn btn-confirm" type="submit">
+                                    <span>✓</span>
+                                    <span>Konfirmo</span>
+                                </button>
+                            </form>
+                            <form action="{% url 'users:guide_booking_cancel' booking.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button class="btn btn-cancel" type="submit">
+                                    <span>✗</span>
+                                    <span>Anullo</span>
+                                </button>
+                            </form>
                             {% else %}
                             <span style="color: #95a5a6; font-size: 0.9em;">Pa veprim</span>
                             {% endif %}
@@ -131,6 +141,7 @@
                         <th>Vende të lira</th>
                         <th>Çmim</th>
                         <th>Status</th>
+                        <th>Veprime</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -154,6 +165,12 @@
                             <span class="status-cancelled">Joaktiv</span>
                             {% endif %}
                         </td>
+                        <td>
+                            <a class="btn-small" href="{% url 'tours:edit_tour' tour.slug %}">Edito</a>
+                            <a class="btn-small" href="{% url 'tours:edit_tour_pricing' tour.slug %}">Çmimet</a>
+                            <a class="btn-small" href="{% url 'tours:tour_statistics' tour.slug %}">Statistika</a>
+                            <a class="btn-small" href="{% url 'tours:tour_detail' tour.slug %}">Shiko</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -166,4 +183,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/guide_dashboard.js' %}"></script>
 {% endblock %}

@@ -97,13 +97,28 @@
         </ul>
         {% endif %}
 
+        {% if form.non_field_errors %}
+        <ul class="messages error">
+            {% for err in form.non_field_errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% for field in form %}
             <div class="form-group">
-                <label>{{ field.label }}</label>
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
                 {{ field }}
                 {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% if field.errors %}
+                <ul class="messages error">
+                    {% for ferr in field.errors %}
+                    <li>{{ ferr }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
             {% endfor %}
             <button type="submit">Publiko Turin</button>

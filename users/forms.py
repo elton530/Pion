@@ -101,7 +101,6 @@ class SignupForm(UserCreationForm):
             "email",
             "password1",
             "password2",
-            "role",
         )
     
     def clean_email(self):
@@ -171,7 +170,9 @@ class UserAuthenticationForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         label="Mbaj mua të lidhur"
     )
-
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
 
 # ==================== GUIDE PROFILE FORMS ====================
 

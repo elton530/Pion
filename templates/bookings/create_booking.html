@@ -1,110 +1,151 @@
-<!DOCTYPE html>
-<html lang="sq">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezervo: {{ tour.title }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
+{% block title %}Rezervo: {{ tour.title }} - Open Map{% endblock %}
 
-        .container {
-            max-width: 700px;
-            margin: 40px auto;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
-        }
+{% block meta_description %}Rezervo turin: {{ tour.title }}. Çmimi: {{ tour.price_per_person }} Lekë per person.{% endblock %}
 
-        h1 {
-            color: #27ae60;
-            text-align: center;
-        }
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
 
-        .tour-info {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-
-        button {
-            background: #e74c3c;
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        button:hover {
-            background: #c0392b;
-        }
-
-        .back {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .back a {
-            color: #3498db;
-            text-decoration: none;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>🚌 Rezervo Turin</h1>
-        <div class="tour-info">
-            <strong>{{ tour.title }}</strong><br>
-            Data: {{ tour.date|date:"d F Y" }} | Çmimi: {{ tour.price_per_person }} Lekë/person<br>
-            Vende të lira: {{ tour.available_spots }}
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-ticket-alt"></i> Rezervo Turin
+                </h1>
+                <p>Ploteso formularin më poshtë për të plotësuar prenotimin tënd</p>
+            </div>
         </div>
 
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="form-group">
-                <label>{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-            </div>
-            {% endfor %}
-            <p><strong>Çmimi total do të jetë: {{ tour.price_per_person }} × ? = ? Lekë</strong></p>
-            <button type="submit">Konfirmo Rezervimin</button>
-        </form>
+        <!-- Main Grid -->
+        <div class="booking-grid">
+            <!-- Left: Booking Form -->
+            <div class="booking-form-card">
+                <h2>Detajet e Prenotimit</h2>
+                
+                <form method="post" class="booking-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="booking-alert" role="alert">
+                        <strong>Gabim:</strong>
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
 
-        <div class="back">
-            <a href="{% url 'tours:tour_detail' tour.slug %}">← Kthehu te detajet e turit</a>
+                    {% for field in form %}
+                        <div class="form-group">
+                            {% if field.label %}
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span style="color: var(--danger);">*</span>{% endif %}
+                                </label>
+                            {% endif %}
+                            
+                            {{ field }}
+                            
+                            {% if field.help_text %}
+                                <span class="form-note">
+                                    {{ field.help_text|safe }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <span style="color: var(--danger); font-size: 0.9rem;">
+                                    {% for error in field.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="booking-footer">
+                        <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kthehu
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Konfirmo Prenotimin
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Tour Summary -->
+            <div class="tour-summary">
+                <div class="tour-card-mini">
+                    <h2>{{ tour.title }}</h2>
+                    
+                    <div style="display: grid; gap: 0.8rem;">
+                        <p>
+                            <strong><i class="fas fa-calendar-alt"></i> Data:</strong><br>
+                            {{ tour.date|date:"d F Y" }} në {{ tour.time_start|time:"H:i" }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-map-pin"></i> Vendi i Takimit:</strong><br>
+                            {{ tour.location_start }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-hourglass-end"></i> Kohëzgjatja:</strong><br>
+                            {{ tour.duration_formatted }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-user-shield"></i> Udhëzuesi:</strong><br>
+                            {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
+                        </p>
+
+                        <hr style="border: none; border-top: 1px solid rgba(14, 165, 233, 0.12); margin: 0.5rem 0;">
+
+                        <p>
+                            <strong><i class="fas fa-tag"></i> Çmimi:</strong><br>
+                            <span style="font-size: 1.4rem; color: var(--primary); font-weight: 700;">
+                                {{ tour.price_per_person }} Lekë
+                            </span>
+                            <span style="color: var(--text-light); font-size: 0.9rem;">per person</span>
+                        </p>
+
+                        <p>
+                            <strong><i class="fas fa-users"></i> Vende të Lira:</strong><br>
+                            <span style="font-size: 1.2rem; color: {% if tour.available_spots > 5 %}var(--success){% else %}var(--warning){% endif %};">
+                                {{ tour.available_spots }} / {{ tour.max_participants }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Price Breakdown -->
+                <div class="tour-card-mini">
+                    <h3>Përmbledhje Çmimi</h3>
+                    <table>
+                        <tr>
+                            <th>Artikulli</th>
+                            <td colspan="2" class="text-right" style="font-weight: 600;">Çmim</td>
+                        </tr>
+                        <tr>
+                            <th>Çmim per Person:</th>
+                            <td colspan="2" class="text-right" style="color: var(--text); font-weight: 600;">
+                                {{ tour.price_per_person }} Lekë
+                            </td>
+                        </tr>
+                        <tr>
+                            <th colspan="3" style="font-size: 0.9rem; color: var(--text-light); font-weight: 400;">
+                                Çmimi total llogaritet automatikisht në bazë të numrit të personave
+                            </th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

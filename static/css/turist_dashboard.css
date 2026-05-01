@@ -409,6 +409,25 @@ h2.section-title i {
     padding: 1rem 2.5rem;
 }
 
+/* Small edit profile button for tourist dashboard */
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.btn-edit-profile i {
+    color: var(--primary);
+}
+
 /* ===========================
    RESPONSIVE DESIGN
    =========================== */

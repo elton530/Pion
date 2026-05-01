@@ -66,6 +66,26 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                     </div>
                     {% endif %}
 
+                    <!-- Booking Status Badge -->
+                    {% with percentage=tour.confirmed_percentage %}
+                    <div class="booking-status-badge 
+                        {% if percentage == 0 %}status-empty
+                        {% elif percentage < 50 %}status-available
+                        {% elif percentage < 100 %}status-limited
+                        {% else %}status-full{% endif %}">
+                        {% if percentage == 0 %}
+                            <i class="fas fa-circle"></i> Bosh
+                        {% elif percentage < 50 %}
+                            <i class="fas fa-circle-half-stroke"></i> Të Lira
+                        {% elif percentage < 100 %}
+                            <i class="fas fa-circle-quarter"></i> Pak
+                        {% else %}
+                            <i class="fas fa-circle-fill"></i> Plotë
+                        {% endif %}
+                        <span class="percentage">({{ percentage|floatformat:0 }}%)</span>
+                    </div>
+                    {% endwith %}
+
                     <!-- Difficulty Badge -->
                     <div class="difficulty-badge difficulty-{{ tour.difficulty }}">
                         {{ tour.get_difficulty_display }}

@@ -469,10 +469,24 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=GuideProfile)
 def update_guide_on_status_change(sender, instance, created, **kwargs):
     """Përditëso guide kur statusi ndryshon"""
-    if instance.status == "verified" and not instance.is_verified:
-        instance.is_verified = True
-        instance.verified_at = timezone.now()
-        instance.save(update_fields=['is_verified', 'verified_at'])
-    elif instance.status != "verified":
-        instance.is_verified = False
-        instance.save(update_fields=['is_verified'])
+    # Avoid calling instance.save() inside a post_save handler because that
+    # would emit post_save again and can lead to recursive save loops.
+    # Use QuerySet.update() to perform a direct DB update without sending signals.
+    try:
+        if created:
+            # On creation, status may be the default; handle explicitly if needed
+            if instance.status == "verified" and not instance.is_verified:
+                GuideProfile.objects.filter(pk=instance.pk).update(
+                    is_verified=True, verified_at=timezone.now()
+                )
+            return
+
+        if instance.status == "verified" and not instance.is_verified:
+            GuideProfile.objects.filter(pk=instance.pk).update(
+                is_verified=True, verified_at=timezone.now()
+            )
+        elif instance.status != "verified" and instance.is_verified:
+            GuideProfile.objects.filter(pk=instance.pk).update(is_verified=False)
+    except Exception:
+        # Swallow exceptions to avoid breaking the save flow
+        pass

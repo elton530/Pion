@@ -57,10 +57,22 @@
 
                     <!-- User Dropdown -->
                     <div class="user-dropdown">
+                        {% if user.guide_profile %}
+                        <a href="{% url 'users:guide_dashboard' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profili im</span>
+                        </a>
+                        {% elif user.tourist_profile %}
                         <a href="{% url 'users:tourist_dashboard' %}" class="dropdown-item">
                             <i class="fas fa-user"></i>
                             <span>Profili im</span>
                         </a>
+                        {% else %}
+                        <a href="{% url 'core:home' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profili im</span>
+                        </a>
+                        {% endif %}
                         <a href="#" class="dropdown-item">
                             <i class="fas fa-bookmark"></i>
                             <span>Ture të ruajtura</span>
@@ -150,11 +162,7 @@
                     <div class="mobile-user-section">
                         <div class="mobile-user-info">
                             <div class="mobile-user-avatar">
-                                {% if user.profile.photo %}
-                                    <img src="{{ user.profile.photo.url }}" alt="{{ user.get_full_name }}">
-                                {% else %}
-                                    <i class="fas fa-user-circle"></i>
-                                {% endif %}
+                                <span>{{ user.first_name|slice:":1"|default:user.username|upper }}</span>
                             </div>
                             <div class="mobile-user-details">
                                 <span class="mobile-user-name">{{ user.first_name|default:user.username }}</span>
@@ -164,11 +172,25 @@
 
                         <ul class="mobile-user-links">
                             <li>
-                                <a href="{% url 'users:tourist_dashboard' %}" class="mobile-nav-link">
-                                    <i class="fas fa-user"></i>
-                                    <span>Profili im</span>
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
+                                    {% if user.guide_profile %}
+                                    <a href="{% url 'users:guide_dashboard' %}" class="mobile-nav-link">
+                                        <i class="fas fa-user"></i>
+                                        <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% elif user.tourist_profile %}
+                                    <a href="{% url 'users:tourist_dashboard' %}" class="mobile-nav-link">
+                                        <i class="fas fa-user"></i>
+                                        <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'core:home' %}" class="mobile-nav-link">
+                                        <i class="fas fa-user"></i>
+                                        <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% endif %}
                             </li>
                             <li>
                                 <a href="#" class="mobile-nav-link">

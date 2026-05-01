@@ -4,7 +4,7 @@
 {% block title %}{{ tour.title }} - {{ tour.date|date:"d F Y" }} - Open Map{% endblock %}
 
 {% block meta_description %}
-{{ tour.title }} - Tur në {{ tour.location_start }}. Çmimi: {{ tour.price_per_person }} Lekë. 
+{{ tour.title }} - Tur në {{ tour.meeting_point }}. Çmimi: {{ tour.price_per_person }} Lekë. 
 Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 {% endblock %}
 
@@ -24,7 +24,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
     </div>
 
     <!-- Main Image -->
-    {% if tour.main_image %}
+    {% if tour.main_image and main_image_exists %}
     <div class="main-image-wrapper">
         <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="main-image" loading="lazy">
     </div>
@@ -43,21 +43,31 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
             <div class="info-icon">
                 <i class="fas fa-users"></i>
             </div>
-            <strong>{{ tour.available_spots }} / {{ tour.max_participants }}</strong>
-            <span>Vende të lira</span>
+            <strong>{{ tour.confirmed_booked_spots }} / {{ tour.max_participants }}</strong>
+            <span>Prenotime konfirmuar</span>
+            <div class="booking-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ tour.confirmed_percentage }}%"></div>
+                </div>
+                <span class="progress-text">{{ tour.confirmed_percentage|floatformat:1 }}% e plotë</span>
+            </div>
         </div>
         <div class="info-card" data-aos="fade-up" data-aos-delay="200">
             <div class="info-icon">
                 <i class="fas fa-map-pin"></i>
             </div>
-            <strong>{{ tour.get_tour_type_display }}</strong>
+            {% if tour.tour_type %}
+                <strong>{{ tour.tour_type.name }}</strong>
+            {% else %}
+                <strong>Aventurë në natyrë</strong>
+            {% endif %}
             <span>Lloji i turit</span>
         </div>
         <div class="info-card" data-aos="fade-up" data-aos-delay="300">
             <div class="info-icon">
                 <i class="fas fa-chart-line"></i>
             </div>
-            <strong>{{ tour.get_difficulty_display }}</strong>
+                <strong>{{ tour.get_difficulty_display }}</strong>
             <span>Vështirësia</span>
         </div>
         <div class="info-card" data-aos="fade-up" data-aos-delay="400">
@@ -122,11 +132,87 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
     <!-- Description Section -->
     <div class="description" data-aos="fade-up">
         <h2><i class="fas fa-align-left"></i> Përshkrimi i turit</h2>
-        <p>{{ tour.description|linebreaks }}</p>
+            <p>{{ tour.full_description|linebreaks }}</p>
         <div class="location-info">
             <i class="fas fa-location-dot"></i>
-            <strong>Vendi i takimit:</strong> {{ tour.location_start }}
+            <strong>Vendi i takimit:</strong> {{ tour.meeting_point }}
+            {% if tour.location_city %}, {{ tour.location_city }}{% endif %}
         </div>
+    </div>
+
+    <!-- Highlights / Included / What to bring -->
+    <div class="features-lists" data-aos="fade-up">
+        {# Price includes block - show prominently if any included items or flags are set #}
+        {% if tour.included_list or tour.transportation_included or tour.meal_included or tour.accommodation_included or tour.equipment_provided %}
+        <div class="features-col">
+            <h3><i class="fas fa-wallet"></i> Çmimi përfshin</h3>
+            {% if tour.included_list %}
+            <ul>
+                {% for inc in tour.included_list %}
+                <li>{{ inc }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="included-flags">
+                {% if tour.transportation_included %}
+                    <p><i class="fas fa-bus"></i> Transporti i përfshirë{% if tour.transportation_details %}: {{ tour.transportation_details }}{% endif %}</p>
+                {% endif %}
+                {% if tour.meal_included %}
+                    <p><i class="fas fa-utensils"></i> Vakt(i) i përfshirë{% if tour.meal_details %}: {{ tour.meal_details }}{% endif %}</p>
+                {% endif %}
+                {% if tour.accommodation_included %}
+                    <p><i class="fas fa-bed"></i> Akomodimi i përfshirë{% if tour.accommodation_details %}: {{ tour.accommodation_details }}{% endif %}</p>
+                {% endif %}
+                {% if tour.equipment_provided %}
+                    <p><i class="fas fa-toolbox"></i> Pajisjet e ofruara: {{ tour.equipment_provided }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if tour.highlights_list %}
+        <div class="features-col">
+            <h3><i class="fas fa-bolt"></i> Pikat kryesore</h3>
+            <ul>
+                {% for h in tour.highlights_list %}
+                <li>{{ h }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if tour.included_list %}
+        <div class="features-col">
+            <h3><i class="fas fa-box-open"></i> Përfshihet</h3>
+            <ul>
+                {% for inc in tour.included_list %}
+                <li>{{ inc }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if tour.not_included_list %}
+        <div class="features-col">
+            <h3><i class="fas fa-times-circle"></i> Nuk përfshihet</h3>
+            <ul>
+                {% for ni in tour.not_included_list %}
+                <li>{{ ni }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if tour.what_to_bring_list %}
+        <div class="features-col">
+            <h3><i class="fas fa-hiking"></i> Çfarë të marrësh me vete</h3>
+            <ul>
+                {% for w in tour.what_to_bring_list %}
+                <li>{{ w }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Gallery -->
@@ -149,28 +235,90 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 
     <!-- Reserve Section -->
     <div class="reserve-section" data-aos="zoom-in">
-        {% if tour.available_spots > 0 %}
-            {% if user.is_authenticated %}
-                {% if user.tourist_profile %}
-                <a href="{% url 'bookings:create_booking' tour.slug %}" class="reserve-btn">
-                    <i class="fas fa-bus"></i> REZERVO TANI
-                    <span class="spots-count">({{ tour.available_spots }} vende)</span>
-                </a>
+        <!-- Booking Status Overview -->
+        <div class="booking-overview">
+            <div class="booking-status-card">
+                <div class="status-header">
+                    <h3>Statusi i Prenotimeve</h3>
+                    {% with percentage=tour.confirmed_percentage %}
+                    <div class="status-badge 
+                        {% if percentage == 0 %}status-empty
+                        {% elif percentage < 50 %}status-available
+                        {% elif percentage < 100 %}status-limited
+                        {% else %}status-full{% endif %}">
+                        {% if percentage == 0 %}
+                            <i class="fas fa-circle"></i> Bosh
+                        {% elif percentage < 50 %}
+                            <i class="fas fa-circle-half-stroke"></i> Të Lira
+                        {% elif percentage < 100 %}
+                            <i class="fas fa-circle-quarter"></i> Pak
+                        {% else %}
+                            <i class="fas fa-circle-fill"></i> Plotë
+                        {% endif %}
+                        <span class="percentage">({{ percentage|floatformat:0 }}%)</span>
+                    </div>
+                    {% endwith %}
+                </div>
+                <div class="booking-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Konfirmuar:</span>
+                        <span class="stat-value">{{ tour.confirmed_booked_spots }} persona</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Vende totale:</span>
+                        <span class="stat-value">{{ tour.max_participants }} persona</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Vende të lira:</span>
+                        <span class="stat-value">{{ tour.available_spots }} vende</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            {# Price and booking CTA with discounts/early bird #}
+            <div class="price-box">
+                {% with price=tour.current_price %}
+                    {% if tour.has_discount and tour.discount_price and tour.discount_until and tour.discount_until >= now.date %}
+                        <div class="price-now">
+                            <span class="price-old">{{ tour.price_per_person }} Lekë</span>
+                            <span class="price-new">{{ tour.discount_price }} Lekë</span>
+                            <span class="price-label">Çmim me zbritje</span>
+                        </div>
+                    {% elif tour.is_early_bird %}
+                        <div class="price-now">
+                            <span class="price-old">{{ tour.price_per_person }} Lekë</span>
+                            <span class="price-new">{{ tour.early_bird_price }} Lekë</span>
+                            <span class="price-label">Early bird</span>
+                        </div>
+                    {% else %}
+                        <div class="price-now">
+                            <span class="price-new">{{ price }} Lekë</span>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% if tour.available_spots > 0 and tour.can_be_booked %}
+                    {% if user.is_authenticated and user.tourist_profile %}
+                        <a href="{% url 'bookings:create_booking' tour.slug %}" class="reserve-btn">
+                            <i class="fas fa-bus"></i> REZERVO TANI
+                            <span class="spots-count">({{ tour.available_spots }} vende)</span>
+                        </a>
+                    {% elif user.is_authenticated and not user.tourist_profile %}
+                        <a href="{% url 'users:guide_profile_edit' %}" class="reserve-btn signup-prompt">
+                            <i class="fas fa-user-check"></i> Bëhu Tourist (plotëso profilin)
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:signup' %}" class="reserve-btn signup-prompt">
+                            <i class="fas fa-sign-in-alt"></i> Kyçu ose Regjistrohu
+                        </a>
+                    {% endif %}
                 {% else %}
-                <a href="{% url 'users:signup' %}" class="reserve-btn signup-prompt">
-                    <i class="fas fa-user-check"></i> Regjistrohu si Tourist
-                </a>
+                    <p class="no-spots">
+                        <i class="fas fa-times-circle"></i> Nuk ka më vende të lira
+                    </p>
                 {% endif %}
-            {% else %}
-            <a href="{% url 'users:signup' %}" class="reserve-btn signup-prompt">
-                <i class="fas fa-sign-in-alt"></i> Kyçu ose Regjistrohu
-            </a>
-            {% endif %}
-        {% else %}
-        <p class="no-spots">
-            <i class="fas fa-times-circle"></i> Nuk ka më vende të lira
-        </p>
-        {% endif %}
+            </div>
     </div>
 
     <!-- Reviews Section -->

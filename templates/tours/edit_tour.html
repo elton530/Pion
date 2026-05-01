@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redakto Tur - {{ tour.title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #27ae60; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display:block; margin-bottom:8px; font-weight:bold; color:#2c3e50; }
+        input, textarea, select { width:100%; padding:12px; border:1px solid #ddd; border-radius:6px; font-size:16px; }
+        button { background:#27ae60; color:#fff; padding:12px 20px; border:none; border-radius:6px; font-size:16px; cursor:pointer; }
+        button:hover { background:#219a52; }
+        .messages { list-style:none; padding:15px; margin-bottom:20px; border-radius:6px; }
+        .success { background:#d4edda; color:#155724; }
+        .error { background:#f8d7da; color:#721c24; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Redakto Turin: {{ tour.title }}</h1>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+        <ul class="messages error">
+            {% for err in form.non_field_errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% if field.errors %}
+                <ul class="messages error">
+                    {% for ferr in field.errors %}
+                    <li>{{ ferr }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit">Ruaj Ndryshimet</button>
+        </form>
+    </div>
+</body>
+
+</html>

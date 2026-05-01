@@ -188,9 +188,10 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 # ==================== AUTHENTICATION ====================
 
 AUTH_USER_MODEL = "auth.User"  # Default user model
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = "home"
+# Use namespaced URL names that exist in the project
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "core:home"
+LOGOUT_REDIRECT_URL = "core:home"
 
 # Password reset timeout (në ditë)
 PASSWORD_RESET_TIMEOUT = 3

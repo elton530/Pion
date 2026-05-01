@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detajet e Prenotimit - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-ticket-alt"></i> Detajet e Prenotimit
+                </h1>
+                <p>Shfletim dhe menaxhim i prenotimit tënd</p>
+            </div>
+            <div class="booking-badge {{ booking.status }}">
+                <i class="fas fa-circle"></i> {{ booking.get_status_display }}
+            </div>
+        </div>
+
+        <div class="booking-grid">
+            <!-- Main Booking Details -->
+            <div class="booking-card">
+                <div class="card-top">
+                    <div>
+                        <h2 class="booking-title">{{ tour.title }}</h2>
+                        <p style="margin: 0.5rem 0 0; color: var(--text-light);">
+                            <i class="fas fa-user-shield"></i> Udhëzuesi: {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Booking Info -->
+                <div class="booking-meta">
+                    <div class="booking-meta-item">
+                        <strong>Numri i Prenotimit</strong>
+                        <span style="font-family: monospace; font-weight: 700;">{{ booking.id }}</span>
+                    </div>
+                    <div class="booking-meta-item">
+                        <strong>Data e Prenotimit</strong>
+                        <span>{{ booking.created_at|date:"d M Y" }}</span>
+                    </div>
+                    <div class="booking-meta-item">
+                        <strong>Numri i Personave</strong>
+                        <span>{{ booking.num_people }} {% if booking.num_people == 1 %}person{% else %}persona{% endif %}</span>
+                    </div>
+                    <div class="booking-meta-item">
+                        <strong>Çmimi Total</strong>
+                        <span style="font-size: 1.2rem; color: var(--primary); font-weight: 700;">
+                            {{ booking.total_price }} {{ tour.currency }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Tour Info -->
+                <div style="border-top: 1px solid rgba(15, 23, 42, 0.08); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <h3>Detajet e Turit</h3>
+                    <table style="width: 100%;">
+                        <tr>
+                            <th>Data dhe Ora</th>
+                            <td>{{ tour.date|date:"d F Y" }} në {{ tour.time_start|time:"H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Vendi i Takimit</th>
+                            <td>{{ tour.meeting_point }}</td>
+                        </tr>
+                        <tr>
+                            <th>Lokacioni</th>
+                            <td>{{ tour.location_city }}, {{ tour.location_region }}</td>
+                        </tr>
+                        <tr>
+                            <th>Kohëzgjatja</th>
+                            <td>{{ tour.duration_formatted }}</td>
+                        </tr>
+                        <tr>
+                            <th>Lloji i Turit</th>
+                            <td>{{ tour.get_tour_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Vështirësia</th>
+                            <td>{{ tour.get_difficulty_display }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                {% if booking.notes %}
+                <div style="background: rgba(14, 165, 233, 0.07); border-radius: 14px; padding: 1rem; margin-top: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.12);">
+                    <strong><i class="fas fa-sticky-note"></i> Shënimet e ita:</strong>
+                    <p style="margin: 0.5rem 0 0; color: var(--text-light);">
+                        {{ booking.notes }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Actions -->
+                {% if is_tourist %}
+                <div class="booking-actions" style="margin-top: 1.5rem;">
+                    <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-secondary">
+                        <i class="fas fa-eye"></i> Shiko Turin
+                    </a>
+                    
+                    {% if booking.status == 'pending' %}
+                    <a href="{% url 'bookings:booking_edit' booking_id=booking.id %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Redakto
+                    </a>
+                    {% endif %}
+                    
+                    {% if can_cancel %}
+                    <a href="{% url 'bookings:booking_cancel' booking_id=booking.id %}" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Anulo
+                    </a>
+                    {% endif %}
+
+                    {% if booking.status == 'confirmed' %}
+                    <a href="{% url 'bookings:booking_confirm_participation' booking_id=booking.id %}" class="btn btn-success">
+                        <i class="fas fa-check"></i> Konfirmo Pjesëmarrjen (24h përpara)
+                    </a>
+                    {% endif %}
+
+                    {% if booking.status == 'completed' and not booking.review %}
+                    <a href="{% url 'bookings:create_booking_review' booking_id=booking.id %}" class="btn btn-primary">
+                        <i class="fas fa-star"></i> Lër Vlerësim
+                    </a>
+                    {% endif %}
+                </div>
+                {% elif is_guide %}
+                <div style="background: rgba(14, 165, 233, 0.07); border-radius: 14px; padding: 1rem; margin-top: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.12);">
+                    <strong><i class="fas fa-info-circle"></i> Informacion për Guidën:</strong>
+                    <p style="margin: 0.5rem 0 0; color: var(--text-light);">
+                        Kontaktet e turistit dhe detajet e plotë janë në dispozicionin tuaj nëpërmjet dashboardit të guida-ve.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar: Tour Highlight -->
+            <div class="tour-summary">
+                <div class="tour-card-mini">
+                    {% if tour.main_image %}
+                    <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; display: block;">
+                    {% endif %}
+                    
+                    <h3>Informacioni i Turit</h3>
+                    <p>
+                        <strong>Çmimi per Person:</strong><br>
+                        {{ tour.price_per_person }} Lekë
+                    </p>
+                    <p>
+                        <strong>Kapaciteti:</strong><br>
+                        {{ tour.confirmed_booked_spots }} / {{ tour.max_participants }} persona
+                    </p>
+                    <div class="booking-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ tour.confirmed_percentage|default_if_none:0|floatformat:0 }}%;"></div>
+                        </div>
+                        <span class="progress-text">{{ tour.confirmed_percentage|default_if_none:0|floatformat:0 }}% e plotë</span>
+                    </div>
+                </div>
+
+                <!-- Status Timeline (if available) -->
+                {% if booking.status != 'cancelled' %}
+                <div class="tour-card-mini">
+                    <h3>Statusi i Prenotimit</h3>
+                    <div style="display: grid; gap: 0.8rem; font-size: 0.9rem;">
+                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                            <i class="fas fa-circle-check" style="color: var(--success);"></i>
+                            <span><strong>Prenim Kryer</strong><br><span style="color: var(--text-light);">{{ booking.created_at|date:"d M Y" }}</span></span>
+                        </div>
+                        
+                        {% if booking.status == 'confirmed' or booking.status == 'completed' %}
+                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                            <i class="fas fa-circle-check" style="color: var(--success);"></i>
+                            <span><strong>Konfirmuar nga Guida</strong><br><span style="color: var(--text-light);">{% if booking.confirmed_at %}{{ booking.confirmed_at|date:"d M Y" }}{% else %}Në pritje{% endif %}</span></span>
+                        </div>
+                        {% elif booking.status == 'pending' %}
+                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                            <i class="fas fa-circle" style="color: var(--warning);"></i>
+                            <span><strong>Në Pritje Konfirmimi</strong><br><span style="color: var(--text-light);">Guida do të kontaktojë</span></span>
+                        </div>
+                        {% endif %}
+
+                        {% if booking.status == 'completed' %}
+                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                            <i class="fas fa-circle-check" style="color: var(--success);"></i>
+                            <span><strong>Turi Përfunduar</strong><br><span style="color: var(--text-light);">Përvojë e shënuar</span></span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'users:tourist_dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kthehu në Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

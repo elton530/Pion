@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+import re
 from datetime import timedelta
 import uuid
 
@@ -192,9 +193,38 @@ class Booking(models.Model):
     
     def save(self, *args, **kwargs):
         """Llogarit çmimet dhe menaxhon vendet"""
+        def _to_decimal(value, field_name=None):
+            """Safely convert value to Decimal, extracting numeric substring when needed.
+
+            If conversion fails, raise ValueError with the field name for easier debugging.
+            """
+            if isinstance(value, Decimal):
+                return value
+            if value is None:
+                fname = field_name or 'value'
+                raise ValueError(f"{fname} is None; expected a numeric value.")
+
+            s = str(value).strip()
+            # Fast path
+            try:
+                return Decimal(s)
+            except InvalidOperation:
+                # Try removing spaces and thousands separators
+                cleaned = s.replace(' ', '')
+                # Extract first numeric-looking substring (handles currency symbols)
+                m = re.search(r'[-+]?[0-9]+(?:[\.,][0-9]+)?', cleaned)
+                if m:
+                    num = m.group(0).replace(',', '.')
+                    try:
+                        return Decimal(num)
+                    except InvalidOperation:
+                        pass
+                fname = field_name or 'value'
+                raise ValueError(f"{fname} could not be converted to Decimal: {value!r}")
         
         # Nëse krijohet për herë të parë
-        if not self.pk:
+        # Use self._state.adding because UUIDField may set a default PK on instantiation
+        if getattr(self, '_state', None) and getattr(self._state, 'adding', False):
             # Kontrollo vende të lira
             if self.tour.available_spots < self.num_people:
                 raise ValueError(
@@ -203,9 +233,15 @@ class Booking(models.Model):
             
             # Zgjidh çmimin aktual (me ose pa zbritje)
             self.price_per_person = self.tour.current_price
-            
+
+            # Guard: ensure tour has a valid price
+            if self.price_per_person is None:
+                raise ValueError(
+                    "Turi nuk ka një çmim të vendosur. Ju lutem kontrolloni konfigurimin e turit."
+                )
+
             # Llogarit çmimet
-            self.total_price = Decimal(str(self.price_per_person)) * Decimal(str(self.num_people))
+            self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
             self.discount_applied = Decimal('0.00')
             self.final_price = self.total_price
             
@@ -215,8 +251,8 @@ class Booking(models.Model):
         
         else:
             # Kur ndryshon, përditëso final_price nëse ndryshon num_people
-            self.total_price = Decimal(str(self.price_per_person)) * Decimal(str(self.num_people))
-            self.final_price = self.total_price - self.discount_applied
+            self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
+            self.final_price = self.total_price - _to_decimal(self.discount_applied, 'discount_applied')
         
         super().save(*args, **kwargs)
     

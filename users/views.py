@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage
 
 from .forms import (
     SignupForm, GuideProfileForm, GuideEditProfileForm,
@@ -27,7 +28,7 @@ def signup(request):
     """Signup view për të rinj përdorues"""
     
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('core:home')
     
     if request.method == "POST":
         form = SignupForm(request.POST)
@@ -35,11 +36,8 @@ def signup(request):
             user = form.save()
             role = form.cleaned_data.get("role")
             
-            # Krijo profilin manualisht
-            if role == "guide":
-                GuideProfile.objects.create(user=user)
-            else:
-                TouristProfile.objects.create(user=user)
+            # Profile creation is handled by the form's `save()` method.
+            # Keep this view simple and avoid duplicating profile creation.
             
             # Login automatik
             login(request, user)
@@ -57,7 +55,7 @@ def signup(request):
                 return redirect("users:guide_profile_edit")
             else:
                 messages.info(request, "✅ Paneli juaj është gati.")
-                return redirect("home")
+                return redirect("core:home")
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -118,13 +116,13 @@ class CustomLoginView(LoginView):
         except:
             pass
         
-        return reverse_lazy("home")
+        return reverse_lazy("core:home")
 
 
 class CustomLogoutView(LogoutView):
     """Custom logout view"""
     
-    next_page = 'home'
+    next_page = 'core:home'
     
     def dispatch(self, request, *args, **kwargs):
         messages.success(request, "✅ Ju shkëputët me sukses.")
@@ -153,7 +151,7 @@ def guide_profile_edit(request):
         profile = request.user.guide_profile
     except GuideProfile.DoesNotExist:
         messages.error(request, "❌ Nuk ke akses në këtë faqe. Duhet të jesh Guide.")
-        return redirect("home")
+        return redirect("core:home")
     
     form_class = GuideEditProfileForm if profile.status == "verified" else GuideProfileForm
     
@@ -164,14 +162,36 @@ def guide_profile_edit(request):
             messages.success(request, "✅ Profili yt u përditësua me sukses!")
             return redirect("users:guide_dashboard")
         else:
-            messages.error(request, "❌ Ka gabime në formë. Kontrolloi fushat.")
+            # Surface field-specific errors so the template/messages show helpful hints
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        label = form.fields[field].label if field in form.fields else field
+                        messages.error(request, f"{label}: {error}")
     else:
         form = form_class(instance=profile)
     
+    # Check media existence to avoid rendering broken URLs
+    photo_exists = False
+    cert_exists = False
+    try:
+        if profile.photo and default_storage.exists(profile.photo.name):
+            photo_exists = True
+    except Exception:
+        photo_exists = False
+
+    try:
+        if profile.certification_document and default_storage.exists(profile.certification_document.name):
+            cert_exists = True
+    except Exception:
+        cert_exists = False
+
     return render(
         request,
         "users/guide_profile_edit.html",
-        {"form": form, "profile": profile}
+        {"form": form, "profile": profile, "photo_exists": photo_exists, "cert_exists": cert_exists}
     )
 
 
@@ -183,7 +203,7 @@ def guide_dashboard(request):
         guide_profile = request.user.guide_profile
     except GuideProfile.DoesNotExist:
         messages.error(request, "❌ Kjo faqe është vetëm për guidat.")
-        return redirect("home")
+        return redirect("core:home")
     
     # Merr turet
     tours = Tour.objects.filter(guide=guide_profile).order_by("-date")
@@ -221,6 +241,7 @@ def guide_dashboard(request):
         'guide_profile': guide_profile,
         'tours': tours,
         'page_obj': page_obj,
+        'bookings': page_obj.object_list,
         'total_bookings': total_bookings,
         'pending_bookings': pending_bookings,
         'confirmed_bookings': confirmed_bookings,
@@ -286,7 +307,7 @@ def tourist_profile_edit(request):
         profile = request.user.tourist_profile
     except TouristProfile.DoesNotExist:
         messages.error(request, "❌ Nuk ke akses në këtë faqe. Duhet të jesh Turist.")
-        return redirect("home")
+        return redirect("core:home")
     
     if request.method == "POST":
         form = TouristEditProfileForm(request.POST, request.FILES, instance=profile)
@@ -312,7 +333,7 @@ def tourist_dashboard(request):
         tourist_profile = request.user.tourist_profile
     except TouristProfile.DoesNotExist:
         messages.error(request, "❌ Kjo faqe është vetëm për turistët.")
-        return redirect("home")
+        return redirect("core:home")
     
     # Merr reservimet
     bookings = Booking.objects.filter(tourist=tourist_profile).select_related(

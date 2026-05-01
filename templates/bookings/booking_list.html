@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Prenotime - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-list"></i> Prenotime Mia
+                </h1>
+                <p>Shfletim dhe menaxhim i të gjitha prenotimeve tuaja</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="booking-meta" style="margin-bottom: 2rem;">
+            <div class="booking-meta-item">
+                <strong>Gjithsej Prenotimesh</strong>
+                <span style="font-size: 1.5rem; color: var(--primary);">{{ total_bookings }}</span>
+            </div>
+            <div class="booking-meta-item">
+                <strong>Të Konfirmuara</strong>
+                <span style="font-size: 1.5rem; color: var(--success);">{{ confirmed_bookings }}</span>
+            </div>
+            <div class="booking-meta-item">
+                <strong>Prenotim i Fundit</strong>
+                <span>{% if page_obj.0 %}{{ page_obj.0.created_at|date:"d M Y" }}{% else %}Asnjë prenotim{% endif %}</span>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="booking-form-card" style="margin-bottom: 2rem;">
+            <h3>Kërkim dhe Filtrim</h3>
+            <form method="get" class="booking-form">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_search">Kërko</label>
+                        {{ form.search }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_status">Statusi</label>
+                        {{ form.status }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_date_from">Nga Data</label>
+                        {{ form.date_from }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_date_to">Deri Data</label>
+                        {{ form.date_to }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_sort_by">Renditje</label>
+                        {{ form.sort_by }}
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-search"></i> Kërko
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bookings List -->
+        {% if page_obj %}
+            {% for booking in page_obj %}
+            <div class="booking-card" style="margin-bottom: 1.5rem;">
+                <div class="card-top">
+                    <div>
+                        <h2 class="booking-title">{{ booking.tour.title }}</h2>
+                        <p style="margin: 0.5rem 0 0; color: var(--text-light);">
+                            <i class="fas fa-calendar-alt"></i> {{ booking.tour.date|date:"d F Y" }} · 
+                            <i class="fas fa-user-shield"></i> {{ booking.tour.guide.user.get_full_name|default:booking.tour.guide.user.username }}
+                        </p>
+                    </div>
+                    <div class="booking-badge {{ booking.status }}">
+                        <i class="fas fa-circle"></i> {{ booking.get_status_display }}
+                    </div>
+                </div>
+
+                <div class="booking-meta">
+                    <div class="booking-meta-item">
+                        <strong>Numri i Personave</strong>
+                        <span>{{ booking.num_people }}</span>
+                    </div>
+                    <div class="booking-meta-item">
+                        <strong>Çmimi Total</strong>
+                        <span style="color: var(--primary); font-weight: 700;">{{ booking.total_price }} {{ booking.tour.currency }}</span>
+                    </div>
+                    <div class="booking-meta-item">
+                        <strong>Data e Prenotimit</strong>
+                        <span>{{ booking.created_at|date:"d M Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="booking-actions">
+                    <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
+                        <i class="fas fa-eye"></i> Shiko Detajet
+                    </a>
+                    <a href="{% url 'tours:tour_detail' booking.tour.slug %}" class="btn btn-secondary">
+                        <i class="fas fa-mountain"></i> Shiko Turin
+                    </a>
+                    
+                    {% if booking.status == 'pending' %}
+                    <a href="{% url 'bookings:booking_edit' booking.id %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Redakto
+                    </a>
+                    <a href="{% url 'bookings:booking_cancel' booking.id %}" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Anulo
+                    </a>
+                    {% endif %}
+
+                    {% if booking.status == 'confirmed' %}
+                    <a href="{% url 'bookings:booking_confirm_participation' booking.id %}" class="btn btn-success">
+                        <i class="fas fa-check"></i> Konfirmo (24h)
+                    </a>
+                    {% endif %}
+
+                    {% if booking.status == 'completed' and not booking.review %}
+                    <a href="{% url 'bookings:create_booking_review' booking.id %}" class="btn btn-primary">
+                        <i class="fas fa-star"></i> Vlerëso
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; padding: 1rem 0;">
+                {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-secondary">
+                    <i class="fas fa-angle-double-left"></i> Fillim
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">
+                    <i class="fas fa-angle-left"></i> Përpara
+                </a>
+                {% endif %}
+
+                <span style="display: flex; align-items: center; padding: 0 1rem;">
+                    Faqja {{ page_obj.number }} të {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">
+                    Pas <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">
+                    Fundi <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="booking-empty">
+                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-light); display: block; margin-bottom: 1rem;"></i>
+                <h2>Nuk ka Prenotimesh</h2>
+                <p>Ende nuk ke ndonjë prenim. Eksploro turet dhe krijo prenotimin tënd të parë!</p>
+                <a href="{% url 'tours:tour_list' %}" class="btn btn-primary" style="margin-top: 1rem; display: inline-block;">
+                    <i class="fas fa-compass"></i> Shfletim Tureve
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

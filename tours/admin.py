@@ -1,7 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.urls import reverse
-from django.db.models import Count, Avg
 from .models import (
     Tour, TourImage, TourReview, TourType, TourSchedule,
     TourFAQ, TourHighlight, TourTag, TourStatistic, TourReviewImage
@@ -101,7 +99,7 @@ class TourAdmin(admin.ModelAdmin):
     list_display = [
         'title', 'guide_name', 'date', 'tour_type_display',
         'difficulty_display', 'price_display', 'booking_status',
-        'rating_display', 'status_badge', 'is_active'
+        'confirmed_bookings_display', 'rating_display', 'status_badge', 'is_active'
     ]
     
     list_filter = [
@@ -231,19 +229,13 @@ class TourAdmin(admin.ModelAdmin):
     
     def tour_type_display(self, obj):
         """Lloji i turit me ngjyrë"""
-        colors = {
-            'nature_walk': '#27ae60',
-            'alpine': '#2c3e50',
-            'bike_tour': '#e74c3c',
-            'cultural': '#f39c12',
-            'adventure': '#9b59b6',
-            'food': '#e67e22',
-        }
-        color = colors.get(obj.tour_type, '#95a5a6')
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 8px; border-radius: 3px;">{}</span>',
-            color, obj.get_tour_type_display()
-        )
+        if obj.tour_type:
+            color = obj.tour_type.color or '#95a5a6'
+            return format_html(
+                '<span style="background-color: {}; color: white; padding: 3px 8px; border-radius: 3px;">{}</span>',
+                color, obj.tour_type.name
+            )
+        return '—'
     tour_type_display.short_description = 'Lloji'
     tour_type_display.admin_order_field = 'tour_type'
     
@@ -273,7 +265,7 @@ class TourAdmin(admin.ModelAdmin):
     
     def booking_status(self, obj):
         """Statusi i prenotazioneve"""
-        percentage = obj.booking_percentage
+        percentage = obj.confirmed_percentage
         if percentage == 0:
             color = '#27ae60'  # green
             status = 'Bosh'
@@ -292,6 +284,14 @@ class TourAdmin(admin.ModelAdmin):
             color, status, percentage
         )
     booking_status.short_description = 'Statusi'
+    
+    def confirmed_bookings_display(self, obj):
+        """Numri i prenotimeve të konfirmuara"""
+        return format_html(
+            '<span style="font-weight: bold;">{}</span> / {}',
+            obj.booking_count, obj.max_participants
+        )
+    confirmed_bookings_display.short_description = 'Konfirmuar'
     
     def booking_percentage_display(self, obj):
         """Përqindja grafike e prenotazioneve"""
@@ -533,6 +533,62 @@ class TourFAQAdmin(admin.ModelAdmin):
 
 # ==================== TOUR TAG ADMIN ====================
 
+@admin.register(TourReviewImage)
+class TourReviewImageAdmin(admin.ModelAdmin):
+    """Admin për imazhet e vlerësimeve"""
+    
+    list_display = ['review', 'image_preview', 'uploaded_at']
+    list_filter = ['uploaded_at']
+    search_fields = ['review__tourist__user__first_name', 'review__tourist__user__last_name']
+    readonly_fields = ['image_preview', 'uploaded_at']
+    
+    fieldsets = (
+        ('Informacioni', {
+            'fields': ('review',)
+        }),
+        ('Imazhi', {
+            'fields': ('image', 'image_preview')
+        }),
+        ('Timestamp', {
+            'fields': ('uploaded_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def image_preview(self, obj):
+        """Paraqitje e imazhit"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 200px; max-height: 200px; border-radius: 4px;" />',
+                obj.image.url
+            )
+        return '—'
+    image_preview.short_description = 'Paraqitje'
+
+
+# ==================== TOUR HIGHLIGHT ADMIN ====================
+
+@admin.register(TourHighlight)
+class TourHighlightAdmin(admin.ModelAdmin):
+    """Admin për pikat kryesore"""
+    
+    list_display = ['tour', 'icon', 'title', 'order']
+    list_filter = ['tour']
+    search_fields = ['tour__title', 'title', 'description']
+    ordering = ['tour', 'order']
+    
+    fieldsets = (
+        ('Informacioni', {
+            'fields': ('tour', 'icon', 'title', 'order')
+        }),
+        ('Përshkrimi', {
+            'fields': ('description',)
+        }),
+    )
+
+
+# ==================== TOUR TAG ADMIN ====================
+
 @admin.register(TourTag)
 class TourTagAdmin(admin.ModelAdmin):
     """Admin për etiketat"""
@@ -546,7 +602,7 @@ class TourTagAdmin(admin.ModelAdmin):
     tour_count.short_description = 'Numri i Tureve'
 
 
-# ==================== TOUR STATISTIC ADMIN ====================
+# ==================== TOUR STATISTIC ADMIN ===================="
 
 @admin.register(TourStatistic)
 class TourStatisticAdmin(admin.ModelAdmin):

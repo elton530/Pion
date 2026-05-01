@@ -83,23 +83,23 @@ urlpatterns = [
     path("guide/profile/edit/", views.guide_profile_edit, name="guide_profile_edit"),
     
     # GET /users/guide/booking/<booking_id>/ - Detajet e booking-ut
-    path(
-        "guide/booking/<int:booking_id>/",
+        path(
+            "guide/booking/<uuid:booking_id>/",
         views.guide_booking_detail,
         name="guide_booking_detail"
     ),
     
     # POST /users/guide/booking/<booking_id>/confirm/ - Konfirmim booking-ut
-    path(
-        "guide/booking/<int:booking_id>/confirm/",
+        path(
+            "guide/booking/<uuid:booking_id>/confirm/",
         views.guide_booking_action,
         {"action": "confirm"},
         name="guide_booking_confirm"
     ),
     
     # POST /users/guide/booking/<booking_id>/cancel/ - Anulim booking-ut
-    path(
-        "guide/booking/<int:booking_id>/cancel/",
+        path(
+            "guide/booking/<uuid:booking_id>/cancel/",
         views.guide_booking_action,
         {"action": "cancel"},
         name="guide_booking_cancel"
@@ -118,25 +118,25 @@ urlpatterns = [
     ),
     
     # GET /users/tourist/booking/<booking_id>/ - Detajet e booking-ut
-    path(
-        "tourist/booking/<int:booking_id>/",
+        path(
+            "tourist/booking/<uuid:booking_id>/",
         views.tourist_booking_detail,
         name="tourist_booking_detail"
     ),
     
     # POST /users/tourist/booking/<booking_id>/confirm/ - Konfirmim pjesëmarrjeje (24h)
-    path(
-        "tourist/booking/<int:booking_id>/confirm/",
-        views.tourist_confirm_participation,
-        name="tourist_booking_confirm"
-    ),
+        path(
+            "tourist/booking/<uuid:booking_id>/confirm/",
+            views.tourist_confirm_participation,
+            name="tourist_booking_confirm"
+        ),
     
-    # POST /users/tourist/booking/<booking_id>/cancel/ - Anulim booking-ut
-    path(
-        "tourist/booking/<int:booking_id>/cancel/",
-        views.tourist_booking_cancel,
-        name="tourist_booking_cancel"
-    ),
+        # POST /users/tourist/booking/<booking_id>/cancel/ - Anulim booking-ut
+        path(
+            "tourist/booking/<uuid:booking_id>/cancel/",
+            views.tourist_booking_cancel,
+            name="tourist_booking_cancel"
+        ),
     
     
     # ==================== PROFILE VIEWS ====================

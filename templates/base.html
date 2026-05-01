@@ -36,6 +36,16 @@
     
     <!-- Header (global) -->
     {% include 'header.html' %}
+
+    {% if messages %}
+    <div class="flash-message-container" role="status" aria-live="polite">
+        {% for message in messages %}
+            <div class="flash-message flash-{{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     
     <!-- Përmbajtja kryesore -->
     <main id="main-content">

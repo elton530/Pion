@@ -60,6 +60,20 @@ class HomeView(TemplateView):
         context['total_reviews'] = Tour.objects.filter(
             reviews_count__gt=0
         ).aggregate(total=Count('reviews_count'))['total'] or 0
+        # Aliases used by templates / JS
+        context['tours_count'] = context['total_tours']
+        context['guides_count'] = context['total_guides']
+
+        # Upcoming tours (by date) for the homepage
+        try:
+            today = timezone.now().date()
+            context['upcoming_tours'] = Tour.objects.filter(
+                is_active=True,
+                status='published',
+                date__gte=today
+            ).order_by('date')[:8]
+        except Exception:
+            context['upcoming_tours'] = context.get('latest_tours', [])
         
         # Newsletter form
         context['newsletter_form'] = NewsletterSubscriptionForm()
