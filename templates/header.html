@@ -25,13 +25,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'core:about' %}" class="nav-link{% if request.resolver_match.url_name == 'about' %} active{% endif %}">
                         <i class="fas fa-info-circle"></i>
                         <span>Rreth Nesh</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'core:contact' %}" class="nav-link{% if request.resolver_match.url_name == 'contact' %} active{% endif %}">
                         <i class="fas fa-envelope"></i>
                         <span>Kontakti</span>
                     </a>
@@ -73,11 +73,11 @@
                             <span>Profili im</span>
                         </a>
                         {% endif %}
-                        <a href="#" class="dropdown-item">
+                        <a href="{% url 'users:saved_tours' %}" class="dropdown-item">
                             <i class="fas fa-bookmark"></i>
                             <span>Ture të ruajtura</span>
                         </a>
-                        <a href="#" class="dropdown-item">
+                        <a href="{% url 'users:history' %}" class="dropdown-item">
                             <i class="fas fa-history"></i>
                             <span>Historiku</span>
                         </a>
@@ -139,14 +139,14 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="mobile-nav-link">
+                        <a href="{% url 'core:about' %}" class="mobile-nav-link{% if request.resolver_match.url_name == 'about' %} active{% endif %}">
                             <i class="fas fa-info-circle"></i>
                             <span>Rreth Nesh</span>
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="mobile-nav-link">
+                        <a href="{% url 'core:contact' %}" class="mobile-nav-link{% if request.resolver_match.url_name == 'contact' %} active{% endif %}">
                             <i class="fas fa-envelope"></i>
                             <span>Kontakti</span>
                             <i class="fas fa-chevron-right"></i>
@@ -193,14 +193,14 @@
                                     {% endif %}
                             </li>
                             <li>
-                                <a href="#" class="mobile-nav-link">
+                                <a href="{% url 'users:saved_tours' %}" class="mobile-nav-link">
                                     <i class="fas fa-bookmark"></i>
                                     <span>Ture të ruajtura</span>
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="mobile-nav-link">
+                                <a href="{% url 'users:history' %}" class="mobile-nav-link">
                                     <i class="fas fa-history"></i>
                                     <span>Historiku</span>
                                     <i class="fas fa-chevron-right"></i>

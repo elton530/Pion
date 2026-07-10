@@ -356,13 +356,37 @@ def edit_tour(request, slug):
             messages.success(request, f'Turi "{tour.title}" u përditësua me sukses!')
             return redirect("tours:tour_detail", slug=tour.slug)
         else:
-            messages.error(request, "Ka gabime në formë. Provo përsëri.")
+            # Surface field-specific and non-field errors so users see exactly what failed
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        label = form.fields[field].label if field in form.fields else field
+                        messages.error(request, f"{label}: {error}")
     else:
         form = TourEditForm(instance=tour)
     
+    # Check that media files actually exist before rendering URLs to avoid 404s
+    main_image_exists = False
+    thumbnail_exists = False
+    try:
+        if tour.main_image and default_storage.exists(tour.main_image.name):
+            main_image_exists = True
+    except Exception:
+        main_image_exists = False
+
+    try:
+        if tour.thumbnail and default_storage.exists(tour.thumbnail.name):
+            thumbnail_exists = True
+    except Exception:
+        thumbnail_exists = False
+
     return render(request, "tours/edit_tour.html", {
         "form": form,
-        "tour": tour
+        "tour": tour,
+        "main_image_exists": main_image_exists,
+        "thumbnail_exists": thumbnail_exists,
     })
 
 
@@ -765,6 +789,7 @@ def tour_statistics(request, slug):
         'reviews_count': tour.reviews.filter(is_approved=True).count(),
         'average_rating': tour.average_rating,
         'booking_percentage': tour.booking_percentage,
+        'rating_distribution': list(tour.reviews.filter(is_approved=True).values('rating').annotate(count=Count('id')).order_by('rating')),
     }
     
     return render(request, "tours/tour_statistics.html", context)

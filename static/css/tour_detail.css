@@ -56,6 +56,50 @@
     filter: blur(40px);
 }
 
+/* ==================== STATS BAR (TOP/BOTTOM) ==================== */
+.tour-detail-wrapper .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    padding: 1.25rem;
+    margin: 0 auto 40px;
+    max-width: 1200px;
+    background: var(--detail-card);
+    border-radius: 16px;
+    box-shadow: var(--detail-shadow);
+    border: 1px solid var(--detail-border);
+}
+
+.tour-detail-wrapper .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.tour-detail-wrapper .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(16,185,129,0.06) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tour-detail-wrapper .stat-icon i { color: var(--detail-primary); font-size: 1.25rem; }
+
+.tour-detail-wrapper .stat-info { display: flex; flex-direction: column; }
+
+.tour-detail-wrapper .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--detail-primary); line-height: 1; }
+
+.tour-detail-wrapper .stat-label { font-size: 0.9rem; color: var(--detail-text-light); margin-top: 0.25rem; }
+
+@media (max-width: 800px) {
+    .tour-detail-wrapper .stats-bar { grid-template-columns: repeat(2, 1fr); }
+}
+
+
 .tour-detail-wrapper .header h1 {
     font-size: clamp(2.2rem, 5vw, 4rem);
     color: var(--detail-text);

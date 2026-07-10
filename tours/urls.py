@@ -3,6 +3,7 @@ from . import views
 from .views import (
     TourDetailView, TourListView, TourSearchView
 )
+from . import status_views
 
 app_name = "tours"
 
@@ -86,6 +87,16 @@ urlpatterns = [
     
     # POST /tours/review/<review_id>/delete/ - Fshirja e vlerësimit
     path("review/<int:review_id>/delete/", views.delete_review, name="delete_review"),
+    
+    # ==================== TOUR STATUS (AJAX) ====================
+    # GET /tours/api/status/<tour_id>/ - Merr statusin aktual të turit
+    path("api/status/<int:tour_id>/", status_views.get_tour_status, name="get_tour_status"),
+    
+    # POST /tours/api/status/update/ - Përditëso statusin e turit
+    path("api/status/update/", status_views.update_tour_status, name="update_tour_status"),
+    
+    # GET /tours/api/guide-tours-status/ - Merr statusin e të gjithë tureve të guide-it
+    path("api/guide-tours-status/", status_views.get_guide_tours_status, name="get_guide_tours_status"),
     
     # ==================== TOUR DETAIL (must come last) ====================
     # GET /tours/<slug>/ - Detajet e turit

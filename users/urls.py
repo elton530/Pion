@@ -109,6 +109,12 @@ urlpatterns = [
     # ==================== TOURIST ROUTES ====================
     # GET /users/tourist/dashboard/ - Dashboard i turistit
     path("tourist/dashboard/", views.tourist_dashboard, name="tourist_dashboard"),
+
+    # GET /users/saved-tours/ - Ture të ruajtura
+    path("saved-tours/", views.saved_tours, name="saved_tours"),
+
+    # GET /users/history/ - Historiku
+    path("history/", views.history, name="history"),
     
     # GET/POST /users/tourist/profile/edit/ - Redaktim profili
     path(

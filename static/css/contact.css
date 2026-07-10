@@ -1,0 +1,248 @@
+/* ==================== CONTACT PAGE ==================== */
+
+.contact-page {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    min-height: 100vh;
+}
+
+/* Hero Section */
+.contact-page .hero-section {
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    color: white;
+    padding: 6rem 2rem;
+    text-align: center;
+}
+
+.contact-page .hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+}
+
+.contact-page .hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+/* Contact Info Section */
+.contact-info-section {
+    padding: 6rem 2rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.info-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+    font-size: 2.5rem;
+    color: #0ea5e9;
+    margin-bottom: 1rem;
+}
+
+.info-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #0f172a;
+}
+
+.info-card p {
+    color: #64748b;
+}
+
+.info-card a {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.info-card a:hover {
+    color: #0284c7;
+}
+
+/* Contact Form Section */
+.contact-form-section {
+    padding: 6rem 2rem;
+    background: white;
+}
+
+.form-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.form-header h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #0f172a;
+}
+
+.form-header p {
+    font-size: 1.05rem;
+    color: #64748b;
+}
+
+/* Form Styling */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.contact-form textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.field-error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-success {
+    background: #ecfdf5;
+    color: #047857;
+    border-left: 4px solid #10b981;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid #dc2626;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+    width: 100%;
+}
+
+/* FAQ CTA Section */
+.faq-cta-section {
+    padding: 4rem 2rem;
+}
+
+.cta-card {
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.cta-card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.cta-card p {
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contact-page .hero-section h1 {
+        font-size: 2.2rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-form-section,
+    .contact-info-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cta-card {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-wrapper {
+        padding: 0 1rem;
+    }
+}

@@ -777,6 +777,76 @@
     z-index: 5;
 }
 
+/* ==================== INFO SECTION ==================== */
+
+.home-page .info-section {
+    padding: 6rem 2rem;
+    background: white;
+}
+
+.home-page .info-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.home-page .info-card {
+    background: var(--home-bg-soft);
+    padding: 2.5rem 2rem;
+    border-radius: var(--home-radius-lg);
+    text-align: center;
+    transition: var(--home-transition);
+    border: 2px solid transparent;
+}
+
+.home-page .info-card:hover {
+    border-color: var(--home-primary);
+    transform: translateY(-8px);
+    box-shadow: var(--home-shadow-lg);
+}
+
+.home-page .info-card-icon {
+    font-size: 3rem;
+    color: var(--home-primary);
+    margin-bottom: 1rem;
+    display: inline-block;
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--home-shadow);
+}
+
+.home-page .info-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--home-text);
+    margin: 1rem 0 0.75rem;
+}
+
+.home-page .info-card p {
+    font-size: 0.95rem;
+    color: var(--home-text-light);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.home-page .info-card .btn-text {
+    color: var(--home-primary);
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+}
+
+.home-page .info-card .btn-text:hover {
+    color: var(--home-primary-dark);
+    transform: translateX(3px);
+}
+
 /* ==================== ANIMATIONS ==================== */
 
 @keyframes fadeInUp {

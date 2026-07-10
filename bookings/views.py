@@ -356,6 +356,15 @@ def create_booking_review(request, booking_id):
             
             messages.success(request, "✅ Vlerësimi u regjistrua. Faleminderit!")
             return redirect("bookings:booking_detail", booking_id=booking.id)
+        else:
+            # Surface form errors in flash messages for visibility
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        label = form.fields[field].label if field in form.fields else field
+                        messages.error(request, f"{label}: {error}")
     
     else:
         form = BookingReviewForm()

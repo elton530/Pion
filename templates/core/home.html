@@ -67,7 +67,7 @@ Zbulo aventurat më të bukura në natyrën shqiptare. Rezervo ture me guida lok
                         <i class="fas fa-star"></i>
                     </div>
                     <div class="stat-info">
-                        <div class="stat-number">4.9</div>
+                        <div class="stat-number">{{ site_avg_rating|default:'4.9' }}</div>
                         <div class="stat-label">Vlerësim mesatar</div>
                     </div>
                 </div>
@@ -245,6 +245,45 @@ Zbulo aventurat më të bukura në natyrën shqiptare. Rezervo ture me guida lok
                     </a>
                 </div>
             {% endif %}
+        </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <div class="info-container">
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <h3>Rreth Nesh</h3>
+                <p>Zbulo më shumë rreth misionit dhe vlerave të Open Map</p>
+                <a href="{% url 'core:about' %}" class="btn btn-text">
+                    Lexo Më Shumë
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3>Pyetje të Shpeshta</h3>
+                <p>Gjej përgjigje për pyetjet më të zakonshme</p>
+                <a href="{% url 'core:faq_list' %}" class="btn btn-text">
+                    Shiko Pyetje
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3>Kontakti</h3>
+                <p>Na kontakto për çdo pyetje ose sugjerim</p>
+                <a href="{% url 'core:contact' %}" class="btn btn-text">
+                    Na Kontakto
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
         </div>
     </section>
 

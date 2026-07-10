@@ -1,0 +1,217 @@
+/* ==================== TOUR STATUS STYLES ==================== */
+
+/* Status Badges in Tour Cards */
+.status-badge-corner {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+.status-badge-corner span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.status-published {
+    background: rgba(16, 185, 129, 0.95);
+    color: white;
+}
+
+.status-published:before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffffff;
+    opacity: 0.8;
+}
+
+.status-draft {
+    background: rgba(251, 146, 60, 0.95);
+    color: white;
+}
+
+.status-hidden {
+    background: rgba(107, 114, 128, 0.95);
+    color: white;
+}
+
+.status-cancelled {
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+}
+
+/* Tour Stats Mini */
+.tour-stats-mini {
+    display: flex;
+    gap: 12px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.tour-stats-mini span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-stats-mini i {
+    color: #0ea5e9;
+}
+
+/* Status Selection Block */
+.status-selection-block {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f0f9ff;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 8px;
+}
+
+.status-selection-block label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.status-selection-block i {
+    color: #0ea5e9;
+}
+
+.status-info-text {
+    display: block;
+    margin-top: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.status-info-text strong {
+    color: #0f172a;
+}
+
+/* Status Confirmation Message */
+.status-confirmation {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #10b981;
+    background: #ecfdf5;
+}
+
+.confirmation-message {
+    color: #047857;
+    font-size: 0.9rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.confirmation-message:before {
+    content: '✓';
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Status Change Alert */
+.status-change-alert {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.status-change-alert.success {
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    color: #047857;
+}
+
+.status-change-alert.info {
+    background: #f0f9ff;
+    border-left: 4px solid #0ea5e9;
+    color: #0c4a6e;
+}
+
+.status-change-alert.warning {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+}
+
+.status-change-alert i {
+    font-size: 1.2rem;
+}
+
+/* Tour Card Enhancement */
+.tour-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tour-card:has(.status-published) {
+    border: 2px solid #d1fae5;
+    background: #f0fdf4;
+}
+
+.tour-card:has(.status-draft) {
+    border: 2px solid #fed7aa;
+    background: #fffbf0;
+}
+
+.tour-card:has(.status-cancelled) {
+    border: 2px solid #fee2e2;
+    background: #fef2f2;
+    opacity: 0.7;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .status-badge-corner span {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+
+    .tour-stats-mini {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .status-info-text {
+        font-size: 0.8rem;
+    }
+}

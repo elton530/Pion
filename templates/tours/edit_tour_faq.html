@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Redakto FAQ - {{ tour.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tour_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="page-header">
+    <h1>Redakto Pyetje për: {{ tour.title }}</h1>
+    <p>Ndrysho pyetjen ose përgjigjen sipas nevojës.</p>
+  </div>
+
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for err in form.non_field_errors %}
+          <div>{{ err }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+          {% endif %}
+          {% if field.errors %}
+            <div class="error-message">{% for e in field.errors %}{{ e }}<br>{% endfor %}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="form-actions">
+        <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-secondary">Kthehu</a>
+        <button type="submit" class="btn btn-primary">Ruaj FAQ</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

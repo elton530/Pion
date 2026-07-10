@@ -23,6 +23,21 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
         </p>
     </div>
 
+    <!-- Short tourist-friendly stats -->
+    <div class="tour-short-stats" style="text-align:center; margin-bottom:18px;">
+        <span class="rating-badge" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;box-shadow:0 6px 18px rgba(2,132,199,0.08);">
+            <i class="fas fa-star" style="color:#0ea5e9"></i>
+            <strong style="font-weight:700;color:#0ea5e9">{{ tour.average_rating|floatformat:1 }}</strong>
+            <small style="color:#64748b">· {{ tour.reviews_count }} vlerësime</small>
+        </span>
+
+        <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;box-shadow:0 6px 18px rgba(16,185,129,0.06);margin-left:12px">
+            <i class="fas fa-users" style="color:#10b981"></i>
+            <strong style="font-weight:700;color:#0f172a">{{ tour.available_spots }}</strong>
+            <small style="color:#64748b">vende të lira</small>
+        </span>
+    </div>
+
     <!-- Main Image -->
     {% if tour.main_image and main_image_exists %}
     <div class="main-image-wrapper">
@@ -333,6 +348,8 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
             {% endif %}
         </div>
 
+        {# Detailed stats removed for public view. Guides can see full analytics on their Stats page. #}
+
         <!-- Review Form -->
         {% if user.is_authenticated and user.tourist_profile %}
         <div class="review-form">
@@ -412,5 +429,6 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 {% endblock %}
 
 {% block extra_js %}
+    <script src="{% static 'js/home.js' %}"></script>
     <script src="{% static 'js/tour_detail.js' %}"></script>
 {% endblock %}

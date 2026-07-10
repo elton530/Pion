@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Statistika - {{ tour.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tour_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tour-detail-wrapper">
+    <div class="header">
+        <h1>Statistika për: {{ tour.title }}</h1>
+        <p class="tour-meta">Urdhëruar nga: {{ tour.guide.user.get_full_name }}</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-icon"><i class="fas fa-eye"></i></div>
+            <div class="stat-info">
+                <div class="stat-number" data-target="{{ stats.views|default:0 }}">0</div>
+                <div class="stat-label">Pamje</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+            <div class="stat-info">
+                <div class="stat-number" data-target="{{ tour.booking_count|default:0 }}">0</div>
+                <div class="stat-label">Totale prenotime</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+            <div class="stat-info">
+                <div class="stat-number" data-target="{{ booking_percentage|floatformat:0|default:0 }}">0</div>
+                <div class="stat-label">% e prenotimeve</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+            <div class="stat-info">
+                <div class="stat-number">{{ average_rating|floatformat:1 }}</div>
+                <div class="stat-label">Vlerësim mesatar</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-block" style="max-width:900px;margin:40px auto;">
+        <h2>Detaje shtesë</h2>
+        <ul>
+            <li><strong>Vlerësime të miratuara:</strong> {{ reviews_count }}</li>
+            <li><strong>Shikime totale:</strong> {{ stats.views|default:0 }}</li>
+            <li><strong>Vende maksimale:</strong> {{ tour.max_participants }}</li>
+            <li><strong>Vende të lira:</strong> {{ tour.available_spots }}</li>
+        </ul>
+    </div>
+
+    <div class="content-block" style="max-width:900px;margin:20px auto;">
+        <h2>Shpërndarja e vlerësimeve</h2>
+        <canvas id="ratingChart" width="600" height="280"></canvas>
+    </div>
+
+    <div style="text-align:center; margin-top:30px;">
+        <a href="{% url 'tours:edit_tour' tour.slug %}" class="btn btn-primary">Redakto Turin</a>
+        <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-outline">Shiko Turin</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/home.js' %}"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        (function() {
+            const dist = {
+                {% for d in rating_distribution %}
+                    {{ d.rating }}: {{ d.count }},{% endfor %}
+            };
+
+            const labels = ['1','2','3','4','5'];
+            const data = labels.map(l => dist[l] || 0);
+
+            const ctx = document.getElementById('ratingChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Numri i vlerësimeve',
+                            data: data,
+                            backgroundColor: ['#ef4444','#f59e0b','#fbbf24','#10b981','#0ea5e9'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision:0 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        })();
+    </script>
+{% endblock %}

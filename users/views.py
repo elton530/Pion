@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import DetailView, UpdateView
 from django.urls import reverse_lazy
-from django.db.models import Sum, Count, Avg
+from django.db.models import Sum, Count, Avg, Q
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
@@ -445,6 +445,103 @@ def tourist_confirm_participation(request, booking_id):
         )
     
     return redirect("users:tourist_dashboard")
+
+
+@login_required
+def saved_tours(request):
+    """Faqja e tureve të ruajtura për turistët dhe guidat."""
+
+    if hasattr(request.user, "tourist_profile"):
+        tourist_profile = request.user.tourist_profile
+        bookings = Booking.objects.filter(tourist=tourist_profile).select_related(
+            "tour__guide__user"
+        ).order_by("tour__date")
+
+        now = timezone.now()
+        saved_items = []
+        for booking in bookings:
+            tour_datetime = timezone.make_aware(
+                timezone.datetime.combine(booking.tour.date, booking.tour.time_start)
+            )
+            if tour_datetime > now and booking.status != "cancelled":
+                saved_items.append(booking)
+
+        context = {
+            "page_title": "Ture të ruajtura",
+            "page_subtitle": "Ture të planifikuara dhe të ardhshme që po ndjekësh.",
+            "role": "tourist",
+            "saved_items": saved_items,
+            "empty_message": "Nuk ke asnjë tur të ardhshëm të ruajtur aktualisht.",
+        }
+        return render(request, "users/activity_page.html", context)
+
+    if hasattr(request.user, "guide_profile"):
+        guide_profile = request.user.guide_profile
+        saved_items = Tour.objects.filter(
+            guide=guide_profile,
+            is_active=True,
+            status="published",
+            date__gte=timezone.now().date()
+        ).order_by("date", "time_start")
+
+        context = {
+            "page_title": "Ture të ruajtura",
+            "page_subtitle": "Turet aktive dhe të publikuara që po ofroni.",
+            "role": "guide",
+            "saved_items": saved_items,
+            "empty_message": "Nuk ka asnjë tur aktiv të planifikuar për momentin.",
+        }
+        return render(request, "users/activity_page.html", context)
+
+    messages.error(request, "❌ Nuk ke akses në këtë faqe.")
+    return redirect("core:home")
+
+
+@login_required
+def history(request):
+    """Faqja e historikut për turistët dhe guidat."""
+
+    if hasattr(request.user, "tourist_profile"):
+        tourist_profile = request.user.tourist_profile
+        bookings = Booking.objects.filter(tourist=tourist_profile).select_related(
+            "tour__guide__user"
+        ).order_by("-tour__date")
+
+        now = timezone.now()
+        history_items = []
+        for booking in bookings:
+            tour_datetime = timezone.make_aware(
+                timezone.datetime.combine(booking.tour.date, booking.tour.time_start)
+            )
+            if tour_datetime <= now or booking.status in ["completed", "cancelled", "no_show"]:
+                history_items.append(booking)
+
+        context = {
+            "page_title": "Historiku",
+            "page_subtitle": "Përvoja dhe turët e kaluara që ke ndjekur.",
+            "role": "tourist",
+            "history_items": history_items,
+            "empty_message": "Nuk ka ende histori të turëve të tua.",
+        }
+        return render(request, "users/activity_page.html", context)
+
+    if hasattr(request.user, "guide_profile"):
+        guide_profile = request.user.guide_profile
+        history_items = Tour.objects.filter(guide=guide_profile).filter(
+            Q(date__lt=timezone.now().date()) | Q(status__in=["completed", "cancelled"]) | Q(is_active=False)
+        ).order_by("-date", "-time_start")
+
+        context = {
+            "page_title": "Historiku",
+            "page_subtitle": "Turet e kaluara dhe aktiviteti i kaluar i udhëzuesit.",
+            "role": "guide",
+            "history_items": history_items,
+            "empty_message": "Nuk ka ende histori të tureve tuaja.",
+        }
+        return render(request, "users/activity_page.html", context)
+
+    messages.error(request, "❌ Nuk ke akses në këtë faqe.")
+    return redirect("core:home")
 
 
 # ==================== PROFILE VIEWS ====================

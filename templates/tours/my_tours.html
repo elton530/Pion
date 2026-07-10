@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Turet e Mia - Pion{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/tour_status.css' %}">
+<link rel="stylesheet" href="{% static 'css/header.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="page-header">
+    <h1>Menaxho Turet e Mia</h1>
+    <p>Lista e tureve që ke krijuar. Përdor butonat për të redaktuar ose shtuar elemente.</p>
+  </div>
+
+  <div class="actions">
+    <a href="{% url 'tours:create_tour' %}" class="btn btn-primary">Krijo Tur të Ri</a>
+  </div>
+
+  <div class="tour-grid">
+    {% if tours %}
+      {% for tour in tours %}
+        <div class="tour-card">
+          {% if tour.main_image %}
+            <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}">
+          {% endif %}
+          <!-- Status Badge -->
+          <div class="status-badge-corner">
+            {% if tour.status == 'published' %}
+              <span class="status-published" title="Turi është publikuar"><i class="fas fa-check-circle"></i> Publikuar</span>
+            {% elif tour.status == 'draft' %}
+              <span class="status-draft" title="Turi në draft - nuk është publikuar"><i class="fas fa-edit"></i> Draft</span>
+            {% elif tour.status == 'hidden' %}
+              <span class="status-hidden" title="Turi është i fshehur"><i class="fas fa-eye-slash"></i> I Fshehur</span>
+            {% elif tour.status == 'cancelled' %}
+              <span class="status-cancelled" title="Turi është anuluar"><i class="fas fa-ban"></i> Anuluar</span>
+            {% else %}
+              <span class="status-draft"><i class="fas fa-question-circle"></i> {{ tour.get_status_display }}</span>
+            {% endif %}
+          </div>
+          <h3>{{ tour.title }}</h3>
+          <p>{{ tour.date|date:"d F Y" }} · {{ tour.location_region }}</p>
+          <!-- Tour Stats -->
+          <div class="tour-stats-mini">
+            <span><i class="fas fa-users"></i> {{ tour.confirmed_booked_spots }}/{{ tour.max_participants }}</span>
+            <span><i class="fas fa-star"></i> {{ tour.average_rating|default:"0"|floatformat:1 }}</span>
+          </div>
+          <div class="card-actions">
+            <a href="{% url 'tours:edit_tour' tour.slug %}" class="btn btn-secondary">Redakto</a>
+            <a href="{% url 'tours:add_tour_image' tour.slug %}" class="btn btn-outline">Foto</a>
+            <a href="{% url 'tours:add_tour_schedule' tour.slug %}" class="btn btn-outline">Program</a>
+            <a href="{% url 'tours:add_tour_faq' tour.slug %}" class="btn btn-outline">FAQ</a>
+            <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-link">Shiko</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <p>Nuk ke ture të krijuara ende.</p>
+        <a href="{% url 'tours:create_tour' %}" class="btn btn-primary">Krijo Tur të Ri</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/tour_status.js' %}"></script>
+{% endblock %}

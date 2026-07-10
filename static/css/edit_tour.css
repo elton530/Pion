@@ -1,0 +1,156 @@
+/* edit_tour.css */
+.edit-tour {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    min-height: 100vh;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.edit-tour .container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edit-tour .container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.edit-tour h1 {
+    text-align: center;
+    color: #27ae60;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+.edit-tour .form-group {
+    margin-bottom: 20px;
+}
+
+.edit-tour label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.edit-tour input, .edit-tour textarea, .edit-tour select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.edit-tour input:focus, .edit-tour textarea:focus, .edit-tour select:focus {
+    border-color: #27ae60;
+    outline: none;
+}
+
+.edit-tour button {
+    background: #27ae60;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.edit-tour button:hover {
+    background: #219a52;
+}
+
+.edit-tour .messages {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 1.1em;
+}
+
+.edit-tour .messages .alert {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.edit-tour .messages .alert-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.edit-tour .messages .alert-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* New layout styles */
+.edit-tour .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 6px 20px rgba(10,20,30,0.06);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.card-title { font-size: 1.6rem; margin:0; color:#1f8a5f; }
+.card-subtitle { color:#6b7280; margin:0; font-size:0.95rem }
+
+.form-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items:start; }
+.panel { background: transparent; }
+.sidebar { padding-left: 8px; }
+
+.form-row { margin-bottom: 14px; }
+.form-row.two-col { display:flex; gap:12px; }
+.form-row.two-col > div { flex:1 }
+
+.image-preview { width:100%; height:200px; border:1px dashed #e6e6e6; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fafafa }
+.image-preview img { max-width:100%; max-height:100%; object-fit:cover }
+.image-preview .placeholder { color:#8892a6 }
+
+.media-block { margin-bottom:14px }
+.price-block { margin-top:12px }
+
+.help { display:block; color:#6b7280; font-size:0.9rem; margin-top:6px }
+.field-error { color:#b91c1c; font-size:0.9rem; margin-top:6px }
+
+.form-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:20px }
+.btn-primary { background:#10b981; color:#fff; padding:10px 16px; border-radius:8px; border:none; cursor:pointer }
+.btn-outline { display:inline-block; padding:10px 16px; border-radius:8px; border:1px solid #d1d5db; color:#374151; text-decoration:none }
+
+/* ripple */
+.ripple { position:relative; overflow:hidden }
+.ripple__wave { position:absolute; border-radius:50%; background:rgba(255,255,255,0.25); transform:scale(0); animation:ripple 600ms linear; pointer-events:none }
+@keyframes ripple { to { transform:scale(4); opacity:0 } }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .edit-tour .container { padding:20px }
+}

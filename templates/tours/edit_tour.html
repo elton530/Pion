@@ -1,64 +1,224 @@
-<!DOCTYPE html>
-<html lang="sq">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redakto Tur - {{ tour.title }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #27ae60; margin-bottom: 20px; }
-        .form-group { margin-bottom: 20px; }
-        label { display:block; margin-bottom:8px; font-weight:bold; color:#2c3e50; }
-        input, textarea, select { width:100%; padding:12px; border:1px solid #ddd; border-radius:6px; font-size:16px; }
-        button { background:#27ae60; color:#fff; padding:12px 20px; border:none; border-radius:6px; font-size:16px; cursor:pointer; }
-        button:hover { background:#219a52; }
-        .messages { list-style:none; padding:15px; margin-bottom:20px; border-radius:6px; }
-        .success { background:#d4edda; color:#155724; }
-        .error { background:#f8d7da; color:#721c24; }
-    </style>
-</head>
+{% block title %}Redakto Tur — {{ tour.title }}{% endblock %}
 
-<body>
-    <div class="container">
-        <h1>Redakto Turin: {{ tour.title }}</h1>
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/edit_tour.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tour_status.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-tour container">
+    <div class="card">
+        <header class="card-header">
+            <h1 class="card-title">Redakto Turin</h1>
+            <p class="card-subtitle">{{ tour.title }}</p>
+        </header>
 
         {% if messages %}
-        <ul class="messages">
+        <div class="messages">
             {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
-        </ul>
+        </div>
         {% endif %}
 
-        {% if form.non_field_errors %}
-        <ul class="messages error">
-            {% for err in form.non_field_errors %}
-            <li>{{ err }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" class="profile-form">
             {% csrf_token %}
-            {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-                {{ field }}
-                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-                {% if field.errors %}
-                <ul class="messages error">
-                    {% for ferr in field.errors %}
-                    <li>{{ ferr }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+
+            <div class="form-grid">
+                <section class="panel">
+                    <h2>Informacion Bazë</h2>
+                    <div class="form-row">
+                        <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                        {{ form.title }}
+                        {% if form.title.help_text %}<small class="help">{{ form.title.help_text }}</small>{% endif %}
+                        {% for e in form.title.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.tour_type.id_for_label }}">{{ form.tour_type.label }}</label>
+                            {{ form.tour_type }}
+                            {% for e in form.tour_type.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}</label>
+                            {{ form.difficulty }}
+                            {% for e in form.difficulty.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.age_group.id_for_label }}">{{ form.age_group.label }}</label>
+                            {{ form.age_group }}
+                            {% for e in form.age_group.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.languages.id_for_label }}">{{ form.languages.label }}</label>
+                            {{ form.languages }}
+                            {% for e in form.languages.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.short_description.id_for_label }}">{{ form.short_description.label }}</label>
+                        {{ form.short_description }}
+                        {% for e in form.short_description.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.full_description.id_for_label }}">{{ form.full_description.label }}</label>
+                        {{ form.full_description }}
+                        {% for e in form.full_description.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                </section>
+
+                <aside class="panel sidebar">
+                    <h2>Media & Çmim</h2>
+
+                    <div class="media-block">
+                        <label>{{ form.main_image.label }}</label>
+                        <div class="image-preview" id="main-image-preview">
+                            {% if main_image_exists %}
+                                <img src="{{ tour.main_image.url }}" alt="main image">
+                            {% else %}
+                                <div class="placeholder">Fotografia kryesore</div>
+                            {% endif %}
+                        </div>
+                        {{ form.main_image }}
+                        {% for e in form.main_image.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="media-block">
+                        <label>{{ form.thumbnail.label }}</label>
+                        <div class="image-preview" id="thumbnail-preview">
+                            {% if thumbnail_exists %}
+                                <img src="{{ tour.thumbnail.url }}" alt="thumbnail">
+                            {% else %}
+                                <div class="placeholder">Miniaturë</div>
+                            {% endif %}
+                        </div>
+                        {{ form.thumbnail }}
+                        {% for e in form.thumbnail.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="price-block">
+                        <label for="{{ form.price_per_person.id_for_label }}">{{ form.price_per_person.label }}</label>
+                        {{ form.price_per_person }}
+                        {% for e in form.price_per_person.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+
+                        <label for="{{ form.currency.id_for_label }}">{{ form.currency.label }}</label>
+                        {{ form.currency }}
+                        {% for e in form.currency.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+
+                        <!-- Status Selection with Info -->
+                        <div class="status-selection-block">
+                            <label for="{{ form.status.id_for_label }}">
+                                <i class="fas fa-info-circle"></i> {{ form.status.label }}
+                            </label>
+                            {{ form.status }}
+                            {% for e in form.status.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            <small class="status-info-text">
+                                <strong>Publiku:</strong> Turet publikuar shfaqen në listën publike<br>
+                                <strong>Draft:</strong> Turet në draft nuk shfaqen publikisht
+                            </small>
+                            <div id="status-change-confirmation" class="status-confirmation" style="display:none;">
+                                <p class="confirmation-message"></p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
-            {% endfor %}
-            <button type="submit">Ruaj Ndryshimet</button>
+
+            <div class="form-grid">
+                <section class="panel">
+                    <h2>Vendndodhja & Orari</h2>
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.location_city.id_for_label }}">{{ form.location_city.label }}</label>
+                            {{ form.location_city }}
+                            {% for e in form.location_city.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_region.id_for_label }}">{{ form.location_region.label }}</label>
+                            {{ form.location_region }}
+                            {% for e in form.location_region.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.meeting_point.id_for_label }}">{{ form.meeting_point.label }}</label>
+                        {{ form.meeting_point }}
+                        {% for e in form.meeting_point.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        {% if form.meeting_point.help_text %}<small class="help">{{ form.meeting_point.help_text }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+                            {{ form.date }}
+                            {% for e in form.date.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.time_start.id_for_label }}">{{ form.time_start.label }}</label>
+                            {{ form.time_start }}
+                            {% for e in form.time_start.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>Kapacitet & Detaje</h2>
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.min_participants.id_for_label }}">{{ form.min_participants.label }}</label>
+                            {{ form.min_participants }}
+                        </div>
+                        <div>
+                            <label for="{{ form.max_participants.id_for_label }}">{{ form.max_participants.label }}</label>
+                            {{ form.max_participants }}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.duration_hours.id_for_label }}">{{ form.duration_hours.label }}</label>
+                            {{ form.duration_hours }}
+                        </div>
+                        <div>
+                            <label for="{{ form.duration_days.id_for_label }}">{{ form.duration_days.label }}</label>
+                            {{ form.duration_days }}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.cancellation_deadline_hours.id_for_label }}">{{ form.cancellation_deadline_hours.label }}</label>
+                            {{ form.cancellation_deadline_hours }}
+                            {% for e in form.cancellation_deadline_hours.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.refund_percentage.id_for_label }}">{{ form.refund_percentage.label }}</label>
+                            {{ form.refund_percentage }}
+                            {% for e in form.refund_percentage.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary ripple">Ruaj Ndryshimet</button>
+                <a href="{% url 'users:guide_dashboard' %}" class="btn-outline">Anulo</a>
+            </div>
         </form>
     </div>
-</body>
+</div>
+{% endblock %}
 
-</html>
+{% block extra_js %}
+    <script src="{% static 'js/edit_tour.js' %}"></script>
+    <script src="{% static 'js/tour_status.js' %}"></script>
+{% endblock %}

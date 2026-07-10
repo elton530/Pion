@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rreth Nesh — Open Map{% endblock %}
+
+{% block meta_description %}
+Zbulo rreth platfores Open Map, misiones dhe vlerat tona për të promovuar turizmin e natyrës në Shqipëri.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Rreth Nesh</h1>
+            <p class="hero-subtitle">Misioni ynë: Të hapim dera të reja për zbulimin e bukurive të Shqipërisë</p>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="story-section">
+        <div class="container">
+            <div class="story-grid">
+                <div class="story-content">
+                    <h2>Ç'eshte Open Map?</h2>
+                    <p>
+                        Open Map është platforma më e avancuar për zbulimin dhe rezervimin e aventurave në natyrë në Shqipëri. 
+                        Jemi të dedikuar të lidhim aventurierë me guida lokale profesioniste për të krijuar përvoja të paharrueshme.
+                    </p>
+                    <p>
+                        Me më shumë se {{ total_tours }} ture aktive, {{ total_guides }} guida të verifikuar dhe mijëra 
+                        turistë të lumtur, Open Map po bëhet destinacioni i parë për aventura në natyrë.
+                    </p>
+                    <div class="story-stats">
+                        <div class="stat">
+                            <div class="stat-number">{{ total_tours }}+</div>
+                            <div class="stat-label">Ture Aktive</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">{{ total_guides }}+</div>
+                            <div class="stat-label">Guida Profesioniste</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">{{ total_tourists }}+</div>
+                            <div class="stat-label">Aventurierë</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-image">
+                    <img src="{% static 'images/about-hero.jpg' %}" alt="Rreth Open Map" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="container">
+            <h2 class="section-title">Vlerat Tona</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Pasion për Natyrën</h3>
+                    <p>
+                        Ne besojmë në forcën transformuese të natyrës. Çdo tur është disa për 
+                        të promovuar turizmën e qëndrueshëm dhe mbrojtjen e mjedisit.
+                    </p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Komunitet</h3>
+                    <p>
+                        Jemi më shumë se një platforme. Jemi një komunitet i aventurierëve, 
+                        guidave dhe mbështetësve të natyrës.
+                    </p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Siguri & Cilësi</h3>
+                    <p>
+                        Siguria e aventurierëve është prioriteti ynë. Të gjithë guidat janë 
+                        profesionistë të licencuar me përvojë.
+                    </p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Përvojë Unike</h3>
+                    <p>
+                        Çdo tur është i dizajnuar për të ofruar përvoja autentike dhe të paharrueshme 
+                        në disa nga vendet më të bukura.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Us Section -->
+    <section class="why-us-section">
+        <div class="container">
+            <h2 class="section-title">Pse të zgjedhësh Open Map?</h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h3>Guida të Verifikuar</h3>
+                        <p>Të gjithë guidat janë profesionistë me sertifikata dhe përvojë të dokumentuar.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h3>Transparencë Totale</h3>
+                        <p>Çmimet, përshkrimet dhe vlerësimet janë gjithmonë të plota dhe të ndershta.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h3>Mbështetje 24/7</h3>
+                        <p>Ekipi ynë është gjithmonë gati të ndihmojë me pyetje ose probleme.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h3>Garantim Kualiteti</h3>
+                        <p>Nëse nuk jeni të kënaqur, ne garantojmë rimbursimet ose ndryshimet.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h3>Sigurim Përfshirës</h3>
+                        <p>Të gjitha turet përfshijnë sigurimin para aksidenteve dhe emergjencave.</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h3>Platforma e Sigurt</h3>
+                        <p>Pagesë të sigurta me enkriptim SSL dhe politika të qarta për privatësinë.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <h2>Gati për aventurën e radhës?</h2>
+                <p>Bashkohu me komunitetin Open Map dhe zbulo bukuritë e Shqipërisë</p>
+                <div class="cta-buttons">
+                    <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
+                        <i class="fas fa-compass"></i>
+                        <span>Shiko Turet</span>
+                    </a>
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline">
+                        <i class="fas fa-envelope"></i>
+                        <span>Na Kontakto</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

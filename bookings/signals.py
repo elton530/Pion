@@ -66,6 +66,9 @@ def track_status_change(sender, instance, **kwargs):
         try:
             old_instance = Booking.objects.get(pk=instance.pk)
             
+            # Cache old status for post_save handlers
+            instance._old_status = old_instance.status
+
             # Nëse statusi ndryshon në "confirmed"
             if old_instance.status != instance.status and instance.status == "confirmed":
                 instance.confirmed_at = timezone.now()
@@ -83,6 +86,35 @@ def track_status_change(sender, instance, **kwargs):
             pass
         except Exception as e:
             logger.error(f"Gabim në track_status_change: {e}")
+
+
+@receiver(post_save, sender=Booking)
+def apply_status_transition_effects(sender, instance, created, **kwargs):
+    """Apply side-effects for status transitions: adjust available_spots and booking_count."""
+    try:
+        old_status = getattr(instance, '_old_status', None)
+        new_status = instance.status
+
+        # If status transitioned to cancelled from a non-cancelled state, return seats
+        if old_status != 'cancelled' and new_status == 'cancelled':
+            instance.tour.available_spots += instance.num_people
+            instance.tour.save(update_fields=['available_spots', 'updated_at'])
+            logger.info(f"Vendet u kthyen pas anulimit: {instance.num_people} për turin {instance.tour.title}")
+
+        # If status transitioned from cancelled to active (confirmed/pending), deduct seats
+        if old_status == 'cancelled' and new_status != 'cancelled':
+            # Ensure not to go negative
+            instance.tour.available_spots = max(0, instance.tour.available_spots - instance.num_people)
+            instance.tour.save(update_fields=['available_spots', 'updated_at'])
+            logger.info(f"Vendet u rimbajtën pas rikthimit të prenimit: {instance.num_people} për turin {instance.tour.title}")
+
+        # Always refresh booking_count to reflect confirmed/completed
+        instance.tour.booking_count = instance.tour.bookings.filter(
+            status__in=['confirmed', 'completed']
+        ).count()
+        instance.tour.save(update_fields=['booking_count'])
+    except Exception as e:
+        logger.error(f"Gabim në apply_status_transition_effects: {e}")
 
 
 @receiver(post_delete, sender=Booking)

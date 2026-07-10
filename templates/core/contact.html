@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kontakti — Open Map{% endblock %}
+
+{% block meta_description %}
+Kontakto ekipin Open Map për pyetje, sugjerime ose probleme. Ne jemi këtu për të ndihmuar!
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Na Kontakto</h1>
+            <p class="hero-subtitle">Kemi pyetje? Jemi këtu për të ndihmuar!</p>
+        </div>
+    </section>
+
+    <!-- Contact Info Section -->
+    <section class="contact-info-section">
+        <div class="container">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Adresa</h3>
+                    <p>Tiranë, Shqipëri</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Telefon</h3>
+                    <p><a href="tel:+355696969696">+355 69 696 9696</a></p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email</h3>
+                    <p><a href="mailto:info@openmap.al">info@openmap.al</a></p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Orari</h3>
+                    <p>E hënë - E diel: 08:00 - 20:00</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="contact-form-section">
+        <div class="container">
+            <div class="form-wrapper">
+                <div class="form-header">
+                    <h2>Dërgoni Mesazh</h2>
+                    <p>Plotëso formularin më poshtë dhe ne do të kontaktohemi me ty sa më shpejt të mundemi.</p>
+                </div>
+
+                <form method="post" class="contact-form">
+                    {% csrf_token %}
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form.name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form.phone.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <div class="field-error">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form.subject.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.message }}
+                        {% if form.message.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.message.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Dërgoni Mesazhin</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ CTA Section -->
+    <section class="faq-cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <h2>Nuk gjen përgjigjen që kërkon?</h2>
+                <p>Vizito faqen tonë të Pyetjeve të Shpeshta për më shumë informacion.</p>
+                <a href="{% url 'core:faq_list' %}" class="btn btn-outline">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Shiko Pyetje të Shpeshta</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.contact-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Add loading state
+                    const btn = form.querySelector('button[type="submit"]');
+                    const originalText = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Duke dërguar...</span>';
+                });
+            }
+        });
+    </script>
+{% endblock %}

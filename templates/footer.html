@@ -28,21 +28,21 @@
                     <div class="stat">
                         <i class="fas fa-mountain"></i>
                         <div>
-                            <strong>24+</strong>
+                            <strong>{{ tours_count|default:0 }}+</strong>
                             <span>Ture aktive</span>
                         </div>
                     </div>
                     <div class="stat">
                         <i class="fas fa-users"></i>
                         <div>
-                            <strong>12+</strong>
+                            <strong>{{ guides_count|default:0 }}+</strong>
                             <span>Guida</span>
                         </div>
                     </div>
                     <div class="stat">
                         <i class="fas fa-star"></i>
                         <div>
-                            <strong>4.9</strong>
+                            <strong>{{ site_avg_rating|default:"0.0" }}</strong>
                             <span>Vlerësim</span>
                         </div>
                     </div>
@@ -70,7 +70,7 @@
                     </li>
                     
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:about' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Rreth Nesh</span>
                         </a>
@@ -94,25 +94,25 @@
                 <ul class="footer-links">
                     
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:contact' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Kontakti</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:terms' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Kushtet e Përdorimit</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:privacy' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Politika e Privatësisë</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:faq_list' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Pyetje të Shpeshta</span>
                         </a>
