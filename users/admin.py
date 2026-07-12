@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Count, Avg
@@ -131,12 +133,18 @@ class GuideProfileAdmin(admin.ModelAdmin):
     
     def rating_display(self, obj):
         """Vlerësimi me yje"""
-        if obj.average_rating == 0:
+        try:
+            average_rating = Decimal(str(obj.average_rating))
+        except (InvalidOperation, TypeError, ValueError):
+            average_rating = None
+
+        if average_rating is None or average_rating == 0:
             return '—'
-        stars = '⭐' * int(obj.average_rating)
+
+        stars = '⭐' * int(average_rating)
         return format_html(
-            '{} {:.1f}/5 ({})',
-            stars, obj.average_rating, obj.reviews_count
+            '{} {}/5 ({})',
+            stars, f"{average_rating:.1f}", obj.reviews_count
         )
     rating_display.short_description = 'Vlerësimi'
     rating_display.admin_order_field = 'average_rating'

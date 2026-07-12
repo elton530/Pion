@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
@@ -255,9 +257,14 @@ class TourAdmin(admin.ModelAdmin):
     
     def price_display(self, obj):
         """Çmimi me valutë"""
+        try:
+            price = Decimal(str(obj.price_per_person))
+            price_text = f"{price:.2f}"
+        except (InvalidOperation, TypeError, ValueError):
+            price_text = str(obj.price_per_person or "")
         return format_html(
             '{} {}',
-            obj.price_per_person,
+            price_text,
             obj.get_currency_display()
         )
     price_display.short_description = 'Çmimi'
@@ -265,7 +272,13 @@ class TourAdmin(admin.ModelAdmin):
     
     def booking_status(self, obj):
         """Statusi i prenotazioneve"""
-        percentage = obj.confirmed_percentage
+        try:
+            percentage = Decimal(str(obj.confirmed_percentage))
+            percentage_text = f"{percentage:.0f}"
+        except (InvalidOperation, TypeError, ValueError):
+            percentage = Decimal('0')
+            percentage_text = '0'
+
         if percentage == 0:
             color = '#27ae60'  # green
             status = 'Bosh'
@@ -278,10 +291,10 @@ class TourAdmin(admin.ModelAdmin):
         else:
             color = '#e74c3c'  # red
             status = 'Plotë'
-        
+
         return format_html(
-            '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{} ({:.0f}%)</span>',
-            color, status, percentage
+            '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{} ({}%)</span>',
+            color, status, percentage_text
         )
     booking_status.short_description = 'Statusi'
     
@@ -295,24 +308,36 @@ class TourAdmin(admin.ModelAdmin):
     
     def booking_percentage_display(self, obj):
         """Përqindja grafike e prenotazioneve"""
-        percentage = obj.booking_percentage
+        try:
+            percentage = Decimal(str(obj.booking_percentage))
+            percentage_text = f"{percentage:.1f}"
+        except (InvalidOperation, TypeError, ValueError):
+            percentage = Decimal('0')
+            percentage_text = '0.0'
         return format_html(
             '<div style="width: 200px; height: 20px; background-color: #ecf0f1; border-radius: 10px; overflow: hidden;">'
             '<div style="width: {}%; height: 100%; background-color: #3498db;"></div>'
-            '</div> {:.1f}% ({}/{})',
-            percentage, percentage, obj.max_participants - obj.available_spots, obj.max_participants
+            '</div> {}% ({}/{})',
+            percentage, percentage_text, obj.max_participants - obj.available_spots, obj.max_participants
         )
     booking_percentage_display.short_description = 'Përqindja e Prenotazioneve'
     
     def rating_display(self, obj):
         """Vlerësimi me yje"""
-        if obj.average_rating == 0:
+        try:
+            average_rating = Decimal(str(obj.average_rating))
+            rating_text = f"{average_rating:.1f}"
+        except (InvalidOperation, TypeError, ValueError):
+            average_rating = None
+            rating_text = '0.0'
+
+        if average_rating is None or average_rating == 0:
             return '—'
-        
-        stars = '⭐' * int(obj.average_rating)
+
+        stars = '⭐' * int(average_rating)
         return format_html(
-            '{} {:.1f}/5 ({})',
-            stars, obj.average_rating, obj.reviews_count
+            '{} {}/5 ({})',
+            stars, rating_text, obj.reviews_count
         )
     rating_display.short_description = 'Vlerësimi'
     rating_display.admin_order_field = 'average_rating'

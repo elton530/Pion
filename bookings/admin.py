@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
@@ -114,9 +116,14 @@ class BookingAdmin(admin.ModelAdmin):
     
     def price_display(self, obj):
         """Çmimi final"""
+        try:
+            amount = Decimal(str(obj.final_price))
+            amount_text = f"{amount:.2f}"
+        except (InvalidOperation, TypeError, ValueError):
+            amount_text = str(obj.final_price or "")
         return format_html(
-            '💰 {:.2f} {}',
-            obj.final_price,
+            '💰 {} {}',
+            amount_text,
             obj.tour.currency
         )
     price_display.short_description = 'Çmimi'
@@ -162,9 +169,14 @@ class BookingAdmin(admin.ModelAdmin):
     def refund_info(self, obj):
         """Informacioni i rimburses"""
         if obj.status == 'cancelled':
+            try:
+                refund_amount = Decimal(str(obj.refund_amount))
+                refund_text = f"{refund_amount:.2f}"
+            except (InvalidOperation, TypeError, ValueError):
+                refund_text = str(obj.refund_amount or "")
             return format_html(
-                '<span style="color: green; font-weight: bold;">↩️ Rimbursim: {:.2f} {}</span>',
-                obj.refund_amount,
+                '<span style="color: green; font-weight: bold;">↩️ Rimbursim: {} {}</span>',
+                refund_text,
                 obj.tour.currency
             )
         return '—'
@@ -284,9 +296,14 @@ class PaymentAdmin(admin.ModelAdmin):
     
     def amount_display(self, obj):
         """Shfaq shumën"""
+        try:
+            amount = Decimal(str(obj.amount))
+            amount_text = f"{amount:.2f}"
+        except (InvalidOperation, TypeError, ValueError):
+            amount_text = str(obj.amount or "")
         return format_html(
-            '💰 {:.2f} {}',
-            obj.amount,
+            '💰 {} {}',
+            amount_text,
             obj.currency
         )
     amount_display.short_description = 'Shuma'

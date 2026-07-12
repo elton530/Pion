@@ -20,21 +20,47 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # ==================== SECURITY SETTINGS ====================
 
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env("DEBUG")
+SECRET_KEY = env("SECRET_KEY", default="django-insecure-super-long-development-secret-key-change-me")
+DEBUG = env("DEBUG", default=False)
+ENVIRONMENT = env("ENVIRONMENT", default="production" if not DEBUG else "development")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
+
+# When behind a proxy (nginx, haproxy, ngrok), respect X-Forwarded-Proto
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# CSRF trusted origins — include local HTTPS endpoints for dev workflows
+CSRF_TRUSTED_ORIGINS = env(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://127.0.0.1:8000,https://localhost:8000",
+).split(",")
 
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True)
+    SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True)
+    CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True)
     SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = env("SECURE_HSTS_SECONDS", default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
+    SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=True)
     SECURE_CONTENT_SECURITY_POLICY = {
         "default-src": ("'self'",),
         "script-src": ("'self'", "'unsafe-inline'"),
         "style-src": ("'self'", "'unsafe-inline'"),
     }
+else:
+    # Development defaults: explicitly disable strict HTTPS-only behaviors
+    # even if environment variables are set. This ensures local development
+    # (when DEBUG=True) won't redirect or require TLS and avoids ERR_SSL_*
+    # errors while testing without certificates. IMPORTANT: do NOT keep
+    # these settings enabled in production.
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    # Avoid enforcing content security policy in dev (helps with local assets)
+    SECURE_CONTENT_SECURITY_POLICY = {}
 
 
 # ==================== APPLICATION DEFINITION ====================
@@ -79,6 +105,18 @@ MIDDLEWARE = [
     # Security
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Development helper: when DEBUG=True we may be running locally without HTTPS.
+# To avoid development-time errors (ERR_SSL_PROTOCOL_ERROR when someone visits
+# https://127.0.0.1 while the dev server speaks HTTP), remove the
+# SecurityMiddleware in dev so Django won't enforce some HTTPS-only behaviors.
+# This is safe for local development only; DO NOT enable in production.
+if DEBUG:
+    try:
+        MIDDLEWARE.remove("django.middleware.security.SecurityMiddleware")
+        SECURITY_MIDDLEWARE_DISABLED = True
+    except ValueError:
+        SECURITY_MIDDLEWARE_DISABLED = False
 
 ROOT_URLCONF = "tour_platform.urls"
 

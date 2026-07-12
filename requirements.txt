@@ -22,3 +22,5 @@ sentry-sdk==1.42.0
 
 # Security
 django-csp==3.8
+pyOpenSSL==23.2.0
+Werkzeug==3.0.0

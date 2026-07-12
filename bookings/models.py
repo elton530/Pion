@@ -254,7 +254,19 @@ class Booking(models.Model):
             self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
             self.final_price = self.total_price - _to_decimal(self.discount_applied, 'discount_applied')
         
+        created = getattr(self, '_state', None) and getattr(self._state, 'adding', False)
         super().save(*args, **kwargs)
+
+        if created:
+            Payment.objects.get_or_create(
+                booking=self,
+                defaults={
+                    'amount': self.final_price,
+                    'currency': self.tour.currency,
+                    'payment_method': 'card',
+                    'status': 'pending',
+                }
+            )
     
     def cancel(self, reason=None, cancelled_by="tourist", notes=""):
         """Anulo prenimin dhe kthej vendet"""
@@ -428,6 +440,8 @@ class Payment(models.Model):
         # Konfirmo prenimin automatikisht
         if self.booking.status == "pending":
             self.booking.confirm()
+
+        self.save(update_fields=['status', 'paid_at', 'transaction_id'])
     
     def mark_as_failed(self):
         """Marko si dështoi"""
