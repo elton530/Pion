@@ -17,12 +17,13 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
     <!-- Header Section -->
     <section class="list-header">
         <div class="header-content">
+            <span class="eyebrow">Eksploro Shqipërinë</span>
             <h1 class="page-title">
                 <i class="fas fa-compass"></i>
-                Ture Turistike në Shqipëri
+                <span>Ture Turistike në Shqipëri</span>
             </h1>
             <p class="page-subtitle">
-                Zgjidh ndërmjet dhjetëra aventurave të emocionuese me guida profesioniste
+                Zgjidh ndërmjet dhjetëra aventurash të emocionuara, me guida profesioniste dhe një eksperiencë autentike të udhëtimit.
             </p>
         </div>
     </section>
@@ -139,7 +140,7 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                     <div class="tour-footer">
                         <div class="tour-price">
                             <span class="price-amount">{{ tour.price_per_person }}</span>
-                            <span class="price-label">Lekë/person</span>
+                            <span class="price-label">{{ tour.get_currency_display }}/person</span>
                         </div>
                         <button class="tour-action" aria-label="Shiko detajet e turit">
                             <i class="fas fa-arrow-right"></i>

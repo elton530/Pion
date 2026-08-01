@@ -89,14 +89,6 @@
         <p><strong>Mirëseerdhët, {{ request.user.first_name }}!</strong> Shto një tur të ri për t'ua ofruar turistëve.
         </p>
 
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-
         {% if form.non_field_errors %}
         <ul class="messages error">
             {% for err in form.non_field_errors %}

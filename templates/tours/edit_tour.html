@@ -106,15 +106,28 @@
                     </div>
 
                     <div class="price-block">
-                        <label for="{{ form.price_per_person.id_for_label }}">{{ form.price_per_person.label }}</label>
-                        {{ form.price_per_person }}
-                        {% for e in form.price_per_person.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        <div class="price-inline-card">
+                            <div>
+                                <label for="{{ form.price_per_person.id_for_label }}">{{ form.price_per_person.label }}</label>
+                                {{ form.price_per_person }}
+                                {% for e in form.price_per_person.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
+                            <div>
+                                <label for="{{ form.currency.id_for_label }}">{{ form.currency.label }}</label>
+                                {{ form.currency }}
+                                {% for e in form.currency.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
+                        </div>
 
-                        <label for="{{ form.currency.id_for_label }}">{{ form.currency.label }}</label>
-                        {{ form.currency }}
-                        {% for e in form.currency.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        <div class="quick-links">
+                            <a href="{% url 'tours:edit_tour_pricing' tour.slug %}" class="quick-link">
+                                <i class="fas fa-tags"></i> Menaxho çmimet
+                            </a>
+                            <a href="{% url 'tours:tour_statistics' tour.slug %}" class="quick-link">
+                                <i class="fas fa-chart-line"></i> Shiko statistikat
+                            </a>
+                        </div>
 
-                        <!-- Status Selection with Info -->
                         <div class="status-selection-block">
                             <label for="{{ form.status.id_for_label }}">
                                 <i class="fas fa-info-circle"></i> {{ form.status.label }}
@@ -204,6 +217,88 @@
                             <label for="{{ form.refund_percentage.id_for_label }}">{{ form.refund_percentage.label }}</label>
                             {{ form.refund_percentage }}
                             {% for e in form.refund_percentage.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="form-grid">
+                <section class="panel">
+                    <h2>Detajet e Turit</h2>
+
+                    <div class="form-row">
+                        <label for="{{ form.highlights.id_for_label }}">{{ form.highlights.label }}</label>
+                        {{ form.highlights }}
+                        <small class="help">Pikat kryesore, një për rresht.</small>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.included.id_for_label }}">{{ form.included.label }}</label>
+                        {{ form.included }}
+                        <small class="help">Çfarë përfshihet në çmim, një për rresht.</small>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.not_included.id_for_label }}">{{ form.not_included.label }}</label>
+                        {{ form.not_included }}
+                        <small class="help">Çfarë nuk përfshihet, një për rresht.</small>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.what_to_bring.id_for_label }}">{{ form.what_to_bring.label }}</label>
+                        {{ form.what_to_bring }}
+                        <small class="help">Çfarë të marrësh me vete, një për rresht.</small>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>Detaje shtesë</h2>
+
+                    <div class="form-row">
+                        <label for="{{ form.requirements.id_for_label }}">{{ form.requirements.label }}</label>
+                        {{ form.requirements }}
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.health_warnings.id_for_label }}">{{ form.health_warnings.label }}</label>
+                        {{ form.health_warnings }}
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.equipment_provided.id_for_label }}">{{ form.equipment_provided.label }}</label>
+                        {{ form.equipment_provided }}
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.transportation_included.id_for_label }}">{{ form.transportation_included.label }}</label>
+                            {{ form.transportation_included }}
+                        </div>
+                        <div>
+                            <label for="{{ form.transportation_details.id_for_label }}">Detajet e transportit</label>
+                            {{ form.transportation_details }}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.meal_included.id_for_label }}">{{ form.meal_included.label }}</label>
+                            {{ form.meal_included }}
+                        </div>
+                        <div>
+                            <label for="{{ form.meal_details.id_for_label }}">Detajet e vakteve</label>
+                            {{ form.meal_details }}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.accommodation_included.id_for_label }}">{{ form.accommodation_included.label }}</label>
+                            {{ form.accommodation_included }}
+                        </div>
+                        <div>
+                            <label for="{{ form.accommodation_details.id_for_label }}">Detajet e akomodimit</label>
+                            {{ form.accommodation_details }}
                         </div>
                     </div>
                 </section>

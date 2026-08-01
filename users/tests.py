@@ -33,3 +33,17 @@ class ActivityPagesTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Historiku")
+
+    def test_guide_dashboard_shows_quick_actions(self):
+        user = User.objects.create_user(
+            username="guide_dashboard_user",
+            password="testpass123",
+            first_name="Ardi",
+        )
+        GuideProfile.objects.create(user=user, location="Tiranë")
+
+        self.client.login(username="guide_dashboard_user", password="testpass123")
+        response = self.client.get(reverse("users:guide_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Veprime të shpejta")

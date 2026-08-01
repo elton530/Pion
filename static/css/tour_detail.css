@@ -1,5 +1,124 @@
 /* ==================== TOUR DETAIL STYLES - MODERN GLASSMORPHISM ==================== */
 
+.tour-statistics-page .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    padding: 0 24px;
+}
+
+.tour-statistics-page .stat-card,
+.tour-statistics-page .detail-card {
+    background: rgba(255,255,255,0.86);
+    border: 1px solid var(--detail-border);
+    border-radius: var(--detail-radius);
+    box-shadow: var(--detail-shadow);
+    padding: 24px;
+}
+
+.tour-statistics-page .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tour-statistics-page .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.tour-statistics-page .stat-number {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--detail-text);
+    line-height: 1.1;
+}
+
+.tour-statistics-page .stat-label {
+    color: var(--detail-text-light);
+    font-size: 0.95rem;
+    margin-top: 4px;
+}
+
+.tour-statistics-page .stats-panels {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 22px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.tour-statistics-page .detail-card h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--detail-primary-dark);
+    font-size: 1.2rem;
+}
+
+.tour-statistics-page .detail-list {
+    display: grid;
+    gap: 10px;
+}
+
+.tour-statistics-page .detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.tour-statistics-page .detail-row:last-child {
+    border-bottom: none;
+}
+
+.tour-statistics-page .stats-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.tour-statistics-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.tour-statistics-page .btn-primary {
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
+    color: white;
+}
+
+.tour-statistics-page .btn-outline {
+    border: 1px solid var(--detail-border);
+    color: var(--detail-text);
+    background: rgba(255,255,255,0.8);
+}
+
+@media (max-width: 900px) {
+    .tour-statistics-page .stats-grid,
+    .tour-statistics-page .stats-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
 .tour-detail-wrapper {
     /* CSS Variables - Modern Color Palette */
     --detail-primary: #0ea5e9;
@@ -19,7 +138,7 @@
     --detail-shadow-lg: 0 20px 50px rgba(2, 132, 199, 0.18);
     --detail-radius: 20px;
     --detail-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
+
     background: var(--detail-bg);
     min-height: 100vh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -29,11 +148,40 @@
     backdrop-filter: blur(10px);
 }
 
+/* ==================== TOP NAV / BREADCRUMB ==================== */
+
+.tour-detail-wrapper .top-nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 24px 0;
+}
+
+.tour-detail-wrapper .top-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--detail-text-light);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--detail-card);
+    box-shadow: var(--detail-shadow);
+    border: 1px solid var(--detail-border);
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .top-back-link:hover {
+    color: var(--detail-primary-dark);
+    transform: translateX(-4px);
+}
+
 /* ==================== HEADER - MODERN HERO ==================== */
 
 .tour-detail-wrapper .header {
     text-align: center;
-    margin: 80px 0 60px;
+    margin: 40px 0 50px;
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
@@ -56,50 +204,6 @@
     filter: blur(40px);
 }
 
-/* ==================== STATS BAR (TOP/BOTTOM) ==================== */
-.tour-detail-wrapper .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-    padding: 1.25rem;
-    margin: 0 auto 40px;
-    max-width: 1200px;
-    background: var(--detail-card);
-    border-radius: 16px;
-    box-shadow: var(--detail-shadow);
-    border: 1px solid var(--detail-border);
-}
-
-.tour-detail-wrapper .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-}
-
-.tour-detail-wrapper .stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(16,185,129,0.06) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.tour-detail-wrapper .stat-icon i { color: var(--detail-primary); font-size: 1.25rem; }
-
-.tour-detail-wrapper .stat-info { display: flex; flex-direction: column; }
-
-.tour-detail-wrapper .stat-number { font-size: 1.6rem; font-weight: 800; color: var(--detail-primary); line-height: 1; }
-
-.tour-detail-wrapper .stat-label { font-size: 0.9rem; color: var(--detail-text-light); margin-top: 0.25rem; }
-
-@media (max-width: 800px) {
-    .tour-detail-wrapper .stats-bar { grid-template-columns: repeat(2, 1fr); }
-}
-
-
 .tour-detail-wrapper .header h1 {
     font-size: clamp(2.2rem, 5vw, 4rem);
     color: var(--detail-text);
@@ -114,27 +218,54 @@
 }
 
 .tour-detail-wrapper .tour-meta {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     color: var(--detail-text-light);
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 24px;
     flex-wrap: wrap;
-    background: var(--detail-card);
-    backdrop-filter: blur(10px);
-    padding: 16px 32px;
-    border-radius: 50px;
-    box-shadow: var(--detail-shadow);
-    border: 1px solid var(--detail-border);
-    max-width: fit-content;
-    margin: 0 auto;
+    margin: 0 0 20px;
 }
 
 .tour-detail-wrapper .tour-meta i {
     color: var(--detail-primary);
-    margin-right: 8px;
+    margin-right: 6px;
     font-size: 1.1em;
 }
+
+/* Short stat chips under the title */
+.tour-detail-wrapper .tour-short-stats {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.tour-detail-wrapper .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--detail-shadow);
+    border: 1px solid var(--detail-border);
+    font-size: 0.95rem;
+}
+
+.tour-detail-wrapper .chip strong {
+    color: var(--detail-text);
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .chip small {
+    color: var(--detail-text-light);
+}
+
+.tour-detail-wrapper .chip-rating i { color: #f59e0b; }
+.tour-detail-wrapper .chip-spots i { color: var(--detail-success); }
+.tour-detail-wrapper .chip-type i { color: var(--detail-primary); }
 
 /* ==================== MAIN IMAGE - MODERN HOVER EFFECT ==================== */
 
@@ -142,7 +273,7 @@
     border-radius: var(--detail-radius);
     overflow: hidden;
     box-shadow: var(--detail-shadow-lg);
-    margin-bottom: 80px;
+    margin-bottom: 56px;
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
@@ -152,7 +283,7 @@
 
 .tour-detail-wrapper .main-image {
     width: 100%;
-    height: clamp(350px, 50vh, 600px);
+    height: clamp(320px, 46vh, 560px);
     object-fit: cover;
     display: block;
     transition: var(--detail-transition);
@@ -178,21 +309,256 @@
     opacity: 1;
 }
 
+/* ==================== TWO COLUMN LAYOUT ==================== */
+
+.tour-detail-wrapper .tour-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    align-items: start;
+}
+
+.tour-detail-wrapper .tour-main-col {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+.tour-detail-wrapper .tour-sidebar {
+    position: sticky;
+    top: 24px;
+}
+
+/* ==================== BOOKING SIDEBAR CARD ==================== */
+
+.tour-detail-wrapper .booking-card {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow-lg);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: center;
+    width: 100%;
+}
+
+.status-badge.status-empty {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+}
+
+.status-badge.status-available {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+
+.status-badge.status-limited {
+    background: rgba(245, 158, 11, 0.14);
+    color: #b45309;
+}
+
+.status-badge.status-full {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+.status-badge .percentage {
+    font-weight: 800;
+    opacity: 0.8;
+}
+
+.tour-detail-wrapper .price-box {
+    text-align: center;
+    padding: 8px 0 4px;
+    border-bottom: 1px solid var(--detail-border);
+    padding-bottom: 20px;
+}
+
+.tour-detail-wrapper .price-now {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.tour-detail-wrapper .price-old {
+    text-decoration: line-through;
+    color: var(--detail-text-light);
+    font-size: 1.05rem;
+}
+
+.tour-detail-wrapper .price-new {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--detail-primary-dark);
+    line-height: 1.1;
+}
+
+.tour-detail-wrapper .price-label {
+    font-size: 0.85rem;
+    color: var(--detail-text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.booking-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: var(--detail-text-light);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: var(--detail-text);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.tour-detail-wrapper .reserve-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 50px;
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.35);
+    transition: var(--detail-transition);
+    border: none;
+    cursor: pointer;
+    gap: 10px;
+    font-family: inherit;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+    flex-direction: column;
+    text-align: center;
+}
+
+.tour-detail-wrapper .reserve-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.6s;
+}
+
+.tour-detail-wrapper .reserve-btn:hover::before {
+    left: 100%;
+}
+
+.tour-detail-wrapper .reserve-btn:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 18px 40px rgba(14, 165, 233, 0.45);
+}
+
+.tour-detail-wrapper .reserve-btn:active {
+    transform: translateY(-1px);
+}
+
+.tour-detail-wrapper .reserve-btn i {
+    font-size: 1.3rem;
+}
+
+.tour-detail-wrapper .spots-count {
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+.tour-detail-wrapper .signup-prompt {
+    background: linear-gradient(135deg, var(--detail-success) 0%, var(--detail-primary) 100%);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.35);
+}
+
+.tour-detail-wrapper .signup-prompt:hover {
+    box-shadow: 0 18px 40px rgba(16, 185, 129, 0.45);
+}
+
+.tour-detail-wrapper .no-spots {
+    font-size: 1.1rem;
+    color: var(--detail-danger);
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(239, 68, 68, 0.08);
+    padding: 18px;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.tour-detail-wrapper .sidebar-meeting-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--detail-text-light);
+    padding-top: 12px;
+    border-top: 1px solid var(--detail-border);
+}
+
+.tour-detail-wrapper .sidebar-meeting-point i {
+    color: var(--detail-primary);
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
 /* ==================== INFO GRID - GLASS CARDS ==================== */
 
 .tour-detail-wrapper .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 28px;
-    margin: 80px auto;
-    max-width: 1200px;
-    padding: 0 24px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
 }
 
 .tour-detail-wrapper .info-card {
     background: var(--detail-card);
     backdrop-filter: blur(10px);
-    padding: 32px 24px;
+    padding: 28px 20px;
     border-radius: var(--detail-radius);
     box-shadow: var(--detail-shadow);
     text-align: center;
@@ -215,7 +581,7 @@
 }
 
 .tour-detail-wrapper .info-card:hover {
-    transform: translateY(-12px) scale(1.02);
+    transform: translateY(-10px) scale(1.02);
     box-shadow: var(--detail-shadow-lg);
     border-color: rgba(14, 165, 233, 0.4);
 }
@@ -225,11 +591,11 @@
 }
 
 .tour-detail-wrapper .info-icon {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     color: var(--detail-primary);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     display: inline-block;
-    padding: 16px;
+    padding: 14px;
     background: rgba(14, 165, 233, 0.1);
     border-radius: 50%;
     transition: var(--detail-transition);
@@ -242,22 +608,22 @@
 
 .tour-detail-wrapper .info-card strong {
     display: block;
-    font-size: clamp(1.5rem, 2vw, 2.2rem);
+    font-size: clamp(1.4rem, 2vw, 1.9rem);
     color: var(--detail-primary);
-    margin: 12px 0 8px;
+    margin: 10px 0 6px;
     font-weight: 700;
 }
 
 .tour-detail-wrapper .info-card span {
     color: var(--detail-text-light);
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     display: block;
 }
 
 /* Booking Progress */
 .booking-progress {
-    margin-top: 16px;
+    margin-top: 14px;
 }
 
 .progress-bar {
@@ -287,15 +653,13 @@
 .tour-detail-wrapper .guide-section {
     background: var(--detail-card);
     backdrop-filter: blur(10px);
-    padding: 48px;
+    padding: 40px;
     border-radius: var(--detail-radius);
     border: 1px solid var(--detail-border);
     box-shadow: var(--detail-shadow);
     display: flex;
     align-items: center;
-    gap: 40px;
-    margin: 80px auto;
-    max-width: 1200px;
+    gap: 32px;
     position: relative;
     overflow: hidden;
 }
@@ -320,48 +684,48 @@
 }
 
 .tour-detail-wrapper .guide-photo {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     object-fit: cover;
     border: 6px solid var(--detail-card);
     box-shadow: 0 15px 40px rgba(14, 165, 233, 0.25);
     transition: var(--detail-transition);
-    position: relative;
 }
 
 .tour-detail-wrapper .guide-photo:hover {
-    transform: scale(1.1) rotate(2deg);
+    transform: scale(1.08) rotate(2deg);
 }
 
 .tour-detail-wrapper .guide-initial {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--detail-primary), var(--detail-primary-dark));
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 4rem;
+    font-size: 3.6rem;
     font-weight: 700;
     box-shadow: 0 15px 40px rgba(14, 165, 233, 0.25);
     transition: var(--detail-transition);
 }
 
 .tour-detail-wrapper .guide-initial:hover {
-    transform: scale(1.1) rotate(2deg);
+    transform: scale(1.08) rotate(2deg);
 }
 
 .tour-detail-wrapper .guide-info {
     flex: 1;
     position: relative;
     z-index: 2;
+    min-width: 0;
 }
 
 .tour-detail-wrapper .guide-info h3 {
-    font-size: clamp(1.5rem, 2vw, 2rem);
-    margin-bottom: 24px;
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    margin-bottom: 20px;
     color: var(--detail-text);
     display: flex;
     align-items: center;
@@ -373,7 +737,7 @@
     background: rgba(14, 165, 233, 0.1);
     padding: 8px;
     border-radius: 50%;
-    font-size: 1.2em;
+    font-size: 1.1em;
 }
 
 .tour-detail-wrapper .guide-details p {
@@ -390,6 +754,7 @@
     margin-right: 12px;
     margin-top: 4px;
     font-size: 1.1em;
+    flex-shrink: 0;
 }
 
 .tour-detail-wrapper .guide-details strong {
@@ -408,19 +773,17 @@
 .tour-detail-wrapper .description {
     background: var(--detail-card);
     backdrop-filter: blur(10px);
-    padding: 48px;
+    padding: 40px;
     border-radius: var(--detail-radius);
     border: 1px solid var(--detail-border);
     box-shadow: var(--detail-shadow);
-    margin: 80px auto;
-    max-width: 1200px;
     position: relative;
 }
 
 .tour-detail-wrapper .description h2 {
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-size: clamp(1.5rem, 3vw, 2rem);
     color: var(--detail-text);
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -428,7 +791,7 @@
 }
 
 .tour-detail-wrapper .description h2 i {
-    font-size: 1.5em;
+    font-size: 1.4em;
     color: var(--detail-primary);
     background: rgba(14, 165, 233, 0.1);
     padding: 12px;
@@ -436,393 +799,36 @@
 }
 
 .tour-detail-wrapper .description p {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     color: var(--detail-text-light);
     line-height: 1.9;
     margin-bottom: 24px;
 }
 
 .tour-detail-wrapper .location-info {
-    margin-top: 40px;
-    padding: 24px;
+    margin-top: 32px;
+    padding: 22px;
     background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
     border-radius: 16px;
     border-left: 5px solid var(--detail-primary);
     display: flex;
-    gap: 16px;
+    gap: 14px;
     align-items: flex-start;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
 }
 
 .tour-detail-wrapper .location-info i {
     color: var(--detail-primary);
     margin-top: 4px;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
-}
-
-/* ==================== GALLERY - MODERN GRID ==================== */
-
-.tour-detail-wrapper .gallery-section {
-    margin: 80px auto;
-    max-width: 1200px;
-    padding: 0 24px;
-}
-
-.tour-detail-wrapper .gallery-section h2 {
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    color: var(--detail-text);
-    margin-bottom: 40px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-weight: 700;
-}
-
-.tour-detail-wrapper .gallery-section h2 i {
-    font-size: 1.5em;
-    color: var(--detail-primary);
-    background: rgba(14, 165, 233, 0.1);
-    padding: 12px;
-    border-radius: 50%;
-}
-
-.tour-detail-wrapper .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 28px;
-}
-
-.tour-detail-wrapper .gallery-item {
-    border-radius: var(--detail-radius);
-    overflow: hidden;
-    box-shadow: var(--detail-shadow);
-    transition: var(--detail-transition);
-    cursor: pointer;
-    position: relative;
-    transform: perspective(1000px) rotateX(0) rotateY(0);
-    transform-style: preserve-3d;
-}
-
-.tour-detail-wrapper .gallery-item:hover {
-    transform: translateY(-8px) perspective(1000px) rotateX(2deg) rotateY(2deg);
-    box-shadow: var(--detail-shadow-lg);
-}
-
-.tour-detail-wrapper .gallery-img {
-    width: 100%;
-    height: 280px;
-    object-fit: cover;
-    display: block;
-    transition: var(--detail-transition);
-}
-
-.tour-detail-wrapper .gallery-item:hover .gallery-img {
-    transform: scale(1.1);
-}
-
-.tour-detail-wrapper .gallery-caption {
-    padding: 16px;
-    background: var(--detail-card);
-    color: var(--detail-text-light);
-    font-size: 0.95rem;
-    text-align: center;
-    font-weight: 500;
-    position: relative;
-    z-index: 2;
-}
-
-/* ==================== BOOKING OVERVIEW ==================== */
-
-.booking-overview {
-    margin-bottom: 40px;
-}
-
-.booking-status-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 24px;
-    border: 1px solid rgba(14, 165, 233, 0.2);
-    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.1);
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.status-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.status-header h3 {
-    font-size: 1.2rem;
-    color: var(--detail-text);
-    margin: 0;
-    font-weight: 600;
-}
-
-.status-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.status-badge.status-empty {
-    background: rgba(16, 185, 129, 0.9);
-    color: white;
-}
-
-.status-badge.status-available {
-    background: rgba(245, 158, 11, 0.9);
-    color: white;
-}
-
-.status-badge.status-limited {
-    background: rgba(239, 68, 68, 0.85);
-    color: white;
-}
-
-.status-badge.status-full {
-    background: rgba(239, 68, 68, 0.95);
-    color: white;
-}
-
-.status-badge .percentage {
-    font-weight: 800;
-    opacity: 0.9;
-}
-
-.booking-stats {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(14, 165, 233, 0.1);
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-.stat-label {
-    color: var(--detail-text-light);
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.stat-value {
-    color: var(--detail-text);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-/* ==================== RESERVE SECTION - MODERN CTA ==================== */
-
-.tour-detail-wrapper .reserve-section {
-    text-align: center;
-    margin: 100px auto 80px;
-    padding: 60px 40px;
-    background: var(--detail-card);
-    backdrop-filter: blur(10px);
-    border-radius: var(--detail-radius);
-    max-width: 1200px;
-    border: 1px solid var(--detail-border);
-    box-shadow: var(--detail-shadow);
-    position: relative;
-    overflow: hidden;
-}
-
-.tour-detail-wrapper .reserve-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-    pointer-events: none;
-}
-
-.tour-detail-wrapper .reserve-btn {
-    display: inline-block;
-    padding: 22px 64px;
-    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
-    color: white;
-    font-size: 1.25rem;
-    font-weight: 700;
-    text-decoration: none;
-    border-radius: 50px;
-    box-shadow: 0 15px 40px rgba(14, 165, 233, 0.4);
-    transition: var(--detail-transition);
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    font-family: inherit;
-    position: relative;
-    z-index: 2;
-    overflow: hidden;
-}
-
-.tour-detail-wrapper .reserve-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: 0.6s;
-}
-
-.tour-detail-wrapper .reserve-btn:hover::before {
-    left: 100%;
-}
-
-.tour-detail-wrapper .reserve-btn:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 25px 50px rgba(14, 165, 233, 0.5);
-}
-
-.tour-detail-wrapper .reserve-btn:active {
-    transform: translateY(-2px);
-}
-
-.tour-detail-wrapper .reserve-btn i {
-    font-size: 1.4rem;
-}
-
-.tour-detail-wrapper .spots-count {
-    font-size: 1rem;
-    opacity: 0.95;
-    display: block;
-    margin-top: 8px;
-}
-
-.tour-detail-wrapper .signup-prompt {
-    background: linear-gradient(135deg, var(--detail-success) 0%, var(--detail-primary) 100%);
-    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
-}
-
-.tour-detail-wrapper .signup-prompt:hover {
-    box-shadow: 0 25px 50px rgba(16, 185, 129, 0.5);
-}
-
-.tour-detail-wrapper .no-spots {
-    font-size: clamp(1.3rem, 2vw, 1.7rem);
-    color: var(--detail-danger);
-    font-weight: 700;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background: rgba(239, 68, 68, 0.08);
-    padding: 24px;
-    border-radius: 16px;
-}
-
-/* ==================== REVIEWS SECTION - MODERN GLASS ==================== */
-
-.tour-detail-wrapper .reviews-section {
-    background: var(--detail-card);
-    backdrop-filter: blur(10px);
-    padding: 48px;
-    border-radius: var(--detail-radius);
-    border: 1px solid var(--detail-border);
-    box-shadow: var(--detail-shadow);
-    margin: 80px auto;
-    max-width: 1200px;
-}
-
-.tour-detail-wrapper .reviews-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-bottom: 40px;
-    padding-bottom: 24px;
-    border-bottom: 2px solid var(--detail-border);
-}
-
-.tour-detail-wrapper .reviews-header h2 {
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    color: var(--detail-text);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-weight: 700;
-}
-
-.tour-detail-wrapper .reviews-header h2 i {
-    font-size: 1.5em;
-    color: var(--detail-primary);
-    background: rgba(14, 165, 233, 0.1);
-    padding: 12px;
-    border-radius: 50%;
-}
-
-.tour-detail-wrapper .rating-badge {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: white;
-    padding: 14px 28px;
-    border-radius: 50px;
-    font-size: 1.15rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
-    transition: var(--detail-transition);
-}
-
-.tour-detail-wrapper .rating-badge:hover {
-    transform: scale(1.05);
-}
-
-.tour-detail-wrapper .reviews-count {
-    font-size: 0.95rem;
-    font-weight: 500;
-    opacity: 0.95;
-}
-
-/* ==================== REVIEW FORM - MODERN GLASS ==================== */
-
-.tour-detail-wrapper .review-form {
-    background: var(--detail-card);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: var(--detail-radius);
-    border: 1px solid var(--detail-border);
-    margin-bottom: 48px;
-    box-shadow: var(--detail-shadow);
 }
 
 /* ==================== FEATURES LISTS ==================== */
 .tour-detail-wrapper .features-lists {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px;
-    max-width: 1200px;
-    margin: 40px auto 0;
-    padding: 0 24px 40px;
+    gap: 20px;
 }
 
 .tour-detail-wrapper .features-col {
@@ -831,6 +837,10 @@
     padding: 20px 18px;
     border-radius: 14px;
     box-shadow: 0 8px 30px rgba(2, 132, 199, 0.06);
+}
+
+.tour-detail-wrapper .features-col-included {
+    border-left: 4px solid var(--detail-success);
 }
 
 .tour-detail-wrapper .features-col h3 {
@@ -864,47 +874,176 @@
     font-weight: 800;
 }
 
-/* ==================== BACK LINK ==================== */
-.tour-detail-wrapper .back-link {
-    text-align: center;
-    margin: 40px 0 100px;
+.tour-detail-wrapper .included-flags {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
 }
 
-.tour-detail-wrapper .back-link a {
-    color: var(--detail-primary-dark);
-    font-weight: 700;
-    text-decoration: none;
-    display: inline-flex;
-    gap: 10px;
+.tour-detail-wrapper .included-flags p {
+    margin: 0;
+    color: var(--detail-text-light);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.tour-detail-wrapper .included-flags i {
+    color: var(--detail-success);
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+/* ==================== GALLERY - MODERN GRID ==================== */
+
+.tour-detail-wrapper .gallery-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--detail-text);
+    margin-bottom: 32px;
+    display: flex;
     align-items: center;
+    gap: 16px;
+    font-weight: 700;
 }
 
-/* ==================== RESPONSIVE TWEAKS ==================== */
-@media (max-width: 880px) {
-    .tour-detail-wrapper .guide-section {
-        flex-direction: column;
-        text-align: center;
-    }
+.tour-detail-wrapper .gallery-section h2 i {
+    font-size: 1.4em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
 
-    .tour-detail-wrapper .guide-photo, .tour-detail-wrapper .guide-initial {
-        margin: 0 auto;
-    }
+.tour-detail-wrapper .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
 
-    .tour-detail-wrapper .reserve-section {
-        padding: 32px 20px;
-        margin: 40px 16px;
-    }
+.tour-detail-wrapper .gallery-item {
+    border-radius: var(--detail-radius);
+    overflow: hidden;
+    box-shadow: var(--detail-shadow);
+    transition: var(--detail-transition);
+    cursor: pointer;
+    position: relative;
+    transform: perspective(1000px) rotateX(0) rotateY(0);
+    transform-style: preserve-3d;
+}
+
+.tour-detail-wrapper .gallery-item:hover {
+    transform: translateY(-8px) perspective(1000px) rotateX(2deg) rotateY(2deg);
+    box-shadow: var(--detail-shadow-lg);
+}
+
+.tour-detail-wrapper .gallery-img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .gallery-item:hover .gallery-img {
+    transform: scale(1.1);
+}
+
+.tour-detail-wrapper .gallery-caption {
+    padding: 14px;
+    background: var(--detail-card);
+    color: var(--detail-text-light);
+    font-size: 0.92rem;
+    text-align: center;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+}
+
+/* ==================== REVIEWS SECTION - MODERN GLASS ==================== */
+
+.tour-detail-wrapper .reviews-section {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+}
+
+.tour-detail-wrapper .reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--detail-border);
+}
+
+.tour-detail-wrapper .reviews-header h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--detail-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .reviews-header h2 i {
+    font-size: 1.4em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.tour-detail-wrapper .rating-badge {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .rating-badge:hover {
+    transform: scale(1.05);
+}
+
+.tour-detail-wrapper .reviews-count {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.95;
+}
+
+/* ==================== REVIEW FORM - MODERN GLASS ==================== */
+
+.tour-detail-wrapper .review-form {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 32px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    margin-bottom: 40px;
+    box-shadow: var(--detail-shadow);
 }
 
 .tour-detail-wrapper .review-form h3 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     color: var(--detail-text);
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     font-weight: 600;
 }
 
 .tour-detail-wrapper .form-group {
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
 
 .tour-detail-wrapper .form-group label {
@@ -912,11 +1051,11 @@
     font-weight: 600;
     color: var(--detail-text);
     margin-bottom: 12px;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
 }
 
 .tour-detail-wrapper .star-rating {
-    font-size: 3.2rem;
+    font-size: 2.8rem;
     display: flex;
     gap: 10px;
     margin-bottom: 16px;
@@ -962,13 +1101,13 @@
 
 .tour-detail-wrapper #comment {
     width: 100%;
-    padding: 18px;
+    padding: 16px;
     border: 1px solid var(--detail-border);
     border-radius: 16px;
     font-family: inherit;
     font-size: 1rem;
     resize: vertical;
-    min-height: 140px;
+    min-height: 130px;
     transition: var(--detail-transition);
     background: white;
 }
@@ -982,11 +1121,11 @@
 .tour-detail-wrapper .btn-submit {
     background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
     color: white;
-    padding: 16px 40px;
+    padding: 15px 36px;
     border: none;
     border-radius: 50px;
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     cursor: pointer;
     transition: var(--detail-transition);
     display: inline-flex;
@@ -1020,17 +1159,17 @@
 .tour-detail-wrapper .review-prompt {
     background: var(--detail-bg);
     backdrop-filter: blur(10px);
-    padding: 36px;
+    padding: 32px;
     border-radius: var(--detail-radius);
     border: 1px solid var(--detail-border);
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
     box-shadow: var(--detail-shadow);
 }
 
 .tour-detail-wrapper .review-prompt p {
     color: var(--detail-text-light);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     margin: 0;
     display: flex;
     align-items: center;
@@ -1072,13 +1211,13 @@
 
 .tour-detail-wrapper .reviews-list {
     display: grid;
-    gap: 24px;
+    gap: 20px;
 }
 
 .tour-detail-wrapper .review-item {
     background: var(--detail-bg);
     backdrop-filter: blur(10px);
-    padding: 28px;
+    padding: 24px;
     border-radius: 16px;
     border: 1px solid var(--detail-border);
     transition: var(--detail-transition);
@@ -1094,7 +1233,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
     gap: 16px;
 }
@@ -1108,11 +1247,11 @@
 .tour-detail-wrapper .reviewer-name {
     font-weight: 600;
     color: var(--detail-text);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
 }
 
 .tour-detail-wrapper .review-date {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--detail-text-light);
     background: rgba(100, 116, 139, 0.1);
     padding: 4px 10px;
@@ -1122,13 +1261,13 @@
 
 .tour-detail-wrapper .review-rating {
     color: #fbbf24;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     display: flex;
     gap: 4px;
 }
 
 .tour-detail-wrapper .review-rating i {
-    width: 22px;
+    width: 20px;
     transition: transform 0.3s ease;
 }
 
@@ -1140,14 +1279,14 @@
     color: var(--detail-text-light);
     line-height: 1.8;
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1rem;
 }
 
 .tour-detail-wrapper .no-reviews {
     text-align: center;
     color: var(--detail-text-light);
-    font-size: 1.1rem;
-    padding: 48px 24px;
+    font-size: 1.05rem;
+    padding: 40px 24px;
     background: var(--detail-bg);
     backdrop-filter: blur(10px);
     border-radius: 16px;
@@ -1160,7 +1299,7 @@
 }
 
 .tour-detail-wrapper .no-reviews i {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
     color: var(--detail-warning);
     margin: 0;
     opacity: 0.7;
@@ -1170,13 +1309,13 @@
 
 .tour-detail-wrapper .back-link {
     text-align: center;
-    margin: 100px auto 60px;
+    margin: 60px auto 40px;
     max-width: 1200px;
     padding: 0 24px;
 }
 
 .tour-detail-wrapper .back-link a {
-    display: inline-block;
+    display: inline-flex;
     padding: 16px 40px;
     background: var(--detail-info);
     color: white;
@@ -1184,7 +1323,6 @@
     border-radius: 50px;
     font-weight: 600;
     transition: var(--detail-transition);
-    display: inline-flex;
     align-items: center;
     gap: 12px;
     font-family: inherit;
@@ -1198,7 +1336,6 @@
 }
 
 .tour-detail-wrapper .back-link a i {
-    margin-right: 0;
     font-size: 1.1em;
     transition: transform 0.3s ease;
 }
@@ -1303,12 +1440,7 @@
 @media (max-width: 1200px) {
     .tour-detail-wrapper .header,
     .tour-detail-wrapper .main-image-wrapper,
-    .tour-detail-wrapper .info-grid,
-    .tour-detail-wrapper .guide-section,
-    .tour-detail-wrapper .description,
-    .tour-detail-wrapper .gallery-section,
-    .tour-detail-wrapper .reserve-section,
-    .tour-detail-wrapper .reviews-section,
+    .tour-detail-wrapper .tour-layout,
     .tour-detail-wrapper .back-link {
         max-width: 1000px;
     }
@@ -1317,109 +1449,106 @@
 @media (max-width: 992px) {
     .tour-detail-wrapper .header,
     .tour-detail-wrapper .main-image-wrapper,
-    .tour-detail-wrapper .info-grid,
-    .tour-detail-wrapper .guide-section,
-    .tour-detail-wrapper .description,
-    .tour-detail-wrapper .gallery-section,
-    .tour-detail-wrapper .reserve-section,
-    .tour-detail-wrapper .reviews-section,
+    .tour-detail-wrapper .tour-layout,
     .tour-detail-wrapper .back-link {
         max-width: 800px;
     }
-    
+
+    .tour-detail-wrapper .tour-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tour-detail-wrapper .tour-sidebar {
+        position: static;
+    }
+
     .tour-detail-wrapper .guide-section {
         flex-direction: column;
         text-align: center;
-        padding: 36px;
+        padding: 32px;
     }
 
     .tour-detail-wrapper .guide-info {
         text-align: left;
     }
-
-    .tour-detail-wrapper .tour-meta {
-        flex-direction: row;
-        padding: 14px 24px;
-    }
 }
 
 @media (max-width: 768px) {
+    .tour-detail-wrapper .top-nav {
+        padding: 16px 20px 0;
+    }
+
     .tour-detail-wrapper .header {
-        margin: 60px 0 40px;
+        margin: 24px 0 32px;
         padding: 0 20px;
     }
 
     .tour-detail-wrapper .tour-meta {
-        flex-direction: column;
-        gap: 12px;
-        padding: 12px 20px;
+        gap: 14px;
     }
 
     .tour-detail-wrapper .main-image-wrapper {
         padding: 0 20px;
-        margin-bottom: 60px;
+        margin-bottom: 40px;
+    }
+
+    .tour-detail-wrapper .tour-layout {
+        padding: 0 20px;
+        gap: 32px;
+    }
+
+    .tour-detail-wrapper .tour-main-col {
+        gap: 32px;
     }
 
     .tour-detail-wrapper .info-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 20px;
-        margin: 60px auto;
+        gap: 16px;
     }
 
     .tour-detail-wrapper .guide-section {
-        padding: 28px;
-        gap: 24px;
-        margin: 60px 20px;
+        padding: 24px;
+        gap: 20px;
     }
 
     .tour-detail-wrapper .guide-photo,
     .tour-detail-wrapper .guide-initial {
-        width: 140px;
-        height: 140px;
-        font-size: 3.5rem;
+        width: 120px;
+        height: 120px;
+        font-size: 3rem;
     }
 
     .tour-detail-wrapper .description,
     .tour-detail-wrapper .reviews-section {
-        padding: 32px;
-        margin: 60px 20px;
+        padding: 28px 24px;
     }
 
     .tour-detail-wrapper .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
     }
 
     .tour-detail-wrapper .gallery-img {
-        height: 240px;
+        height: 200px;
     }
 
-    .tour-detail-wrapper .reserve-section {
-        padding: 32px 24px;
-        margin: 80px 20px 60px;
-    }
-
-    .tour-detail-wrapper .reserve-btn {
-        width: 100%;
-        padding: 18px 24px;
-        font-size: 1.1rem;
-        justify-content: center;
+    .tour-detail-wrapper .booking-card {
+        padding: 24px 20px;
     }
 
     .tour-detail-wrapper .review-form,
     .tour-detail-wrapper .review-prompt {
-        padding: 28px;
+        padding: 24px;
     }
 
     .tour-detail-wrapper .star-rating {
-        font-size: 2.8rem;
+        font-size: 2.4rem;
     }
 
     .tour-detail-wrapper .review-header {
         flex-direction: column;
     }
-    
+
     .tour-detail-wrapper .notification {
         left: 20px;
         right: 20px;
@@ -1431,28 +1560,27 @@
     .tour-detail-wrapper .header h1 {
         font-size: 2rem;
     }
-    
+
     .tour-detail-wrapper .info-card {
-        padding: 28px 20px;
+        padding: 24px 18px;
     }
-    
+
     .tour-detail-wrapper .info-card strong {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
-    
+
     .tour-detail-wrapper .description p {
         font-size: 1rem;
     }
-    
+
     .tour-detail-wrapper .guide-info h3 {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
-    
-    .tour-detail-wrapper .reserve-btn {
-        font-size: 1rem;
-        padding: 16px 20px;
+
+    .tour-detail-wrapper .price-new {
+        font-size: 1.9rem;
     }
-    
+
     .tour-detail-wrapper .gallery {
         grid-template-columns: 1fr;
     }

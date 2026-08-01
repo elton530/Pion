@@ -396,7 +396,7 @@ def send_new_booking_email_to_guide(booking):
                 'tourist_phone': booking.tourist.phone or 'Nuk u sigurua',
                 'num_people': booking.num_people,
                 'total_price': booking.total_price,
-                'currency': booking.tour.currency,
+                'currency': booking.tour.get_currency_display(),
                 'notes': booking.notes or 'Nuk ka shënime',
             }
             # message = render_to_string('emails/new_booking_guide.html', context)
@@ -420,7 +420,7 @@ def send_booking_confirmation_email_to_tourist(booking):
                 'guide_name': booking.tour.guide.user.get_full_name() or booking.tour.guide.user.username,
                 'num_people': booking.num_people,
                 'total_price': booking.total_price,
-                'currency': booking.tour.currency,
+                'currency': booking.tour.get_currency_display(),
             }
             message = f"Prenimit u krye. Guide-i do të kontaktojë së shpejti."
             send_mail(subject, message, 'no-reply@platforma-jone.com', [tourist_email])
@@ -434,7 +434,7 @@ def send_cancellation_email(booking):
         tourist_email = booking.tourist.user.email
         if tourist_email:
             subject = f"❌ Anulim i prenimit për '{booking.tour.title}'"
-            message = f"Prenimit u anullua. Rimbursim: {booking.refund_amount} {booking.tour.currency}"
+            message = f"Prenimit u anullua. Rimbursim: {booking.refund_amount} {booking.tour.get_currency_display()}"
             send_mail(subject, message, 'no-reply@platforma-jone.com', [tourist_email])
     except Exception as e:
         print(f"Gabim në dërgimin e email anulimi: {e}")

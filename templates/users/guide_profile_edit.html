@@ -50,19 +50,6 @@
             </div>
         </div>
 
-        <!-- Messages -->
-        {% if messages %}
-        <div class="messages-container" id="messages-container">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}" role="alert">
-                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
-                <span>{{ message }}</span>
-                <button type="button" class="close-message" aria-label="Mbyll mesazhin">&times;</button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
         {% if form.non_field_errors %}
         <div class="form-errors">
             <ul class="messages error">

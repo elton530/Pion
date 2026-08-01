@@ -783,12 +783,20 @@ def tour_statistics(request, slug):
     except TourStatistic.DoesNotExist:
         stats = TourStatistic.objects.create(tour=tour)
     
+    confirmed_bookings_count = tour.bookings.filter(status__in=['confirmed', 'completed']).count()
+    confirmed_spots = tour.confirmed_booked_spots
+    booking_percentage = 0
+    if tour.max_participants:
+        booking_percentage = round((confirmed_spots / tour.max_participants) * 100, 1)
+
     context = {
         'tour': tour,
         'stats': stats,
         'reviews_count': tour.reviews.filter(is_approved=True).count(),
         'average_rating': tour.average_rating,
-        'booking_percentage': tour.booking_percentage,
+        'booking_percentage': booking_percentage,
+        'confirmed_bookings_count': confirmed_bookings_count,
+        'confirmed_spots': confirmed_spots,
         'rating_distribution': list(tour.reviews.filter(is_approved=True).values('rating').annotate(count=Count('id')).order_by('rating')),
     }
     

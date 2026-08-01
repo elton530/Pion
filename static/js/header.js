@@ -60,4 +60,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // ==================== GLOBAL FLASH MESSAGES ====================
+
+    const flashRows = document.querySelectorAll('.flash-message-row');
+
+    flashRows.forEach((row) => {
+        const closeButton = row.querySelector('.flash-message-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(12px)';
+                row.style.transition = 'opacity .2s ease, transform .2s ease';
+
+                setTimeout(() => {
+                    row.remove();
+                }, 180);
+            });
+        }
+    });
 });

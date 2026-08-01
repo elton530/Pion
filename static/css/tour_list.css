@@ -32,29 +32,49 @@
 }
 
 .header-content {
-    max-width: 800px;
+    max-width: 860px;
     margin: 0 auto;
     padding: 0 var(--space);
     position: relative;
     z-index: 1;
 }
 
+.eyebrow {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.08);
+    border: 1px solid rgba(15, 118, 110, 0.12);
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
 .page-title {
-    font-size: 3.5rem;
+    font-size: clamp(2.5rem, 4vw, 4rem);
     font-weight: 900;
     margin-bottom: 1rem;
     color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
-    letter-spacing: -0.02em;
+    gap: 1rem;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
 }
 
 .page-title i {
     color: var(--primary);
-    font-size: 3rem;
+    font-size: clamp(2rem, 3vw, 3rem);
     animation: float 3s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.page-title span {
+    display: inline-block;
 }
 
 @keyframes float {
@@ -63,10 +83,10 @@
 }
 
 .page-subtitle {
-    font-size: 1.15rem;
+    font-size: clamp(1rem, 1.3vw, 1.25rem);
     color: var(--text-light);
     line-height: 1.7;
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
     font-weight: 500;
 }

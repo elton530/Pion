@@ -36,14 +36,14 @@
                         <i class="fas fa-users"></i>
                         <div>
                             <strong>{{ guides_count|default:0 }}+</strong>
-                            <span>Guida</span>
+                            <span>Guida lokale</span>
                         </div>
                     </div>
                     <div class="stat">
                         <i class="fas fa-star"></i>
                         <div>
-                            <strong>{{ site_avg_rating|default:"0.0" }}</strong>
-                            <span>Vlerësim</span>
+                            <strong>{{ site_avg_rating|floatformat:1|default:"0.0" }}</strong>
+                            <span>Vlerësim mesatar</span>
                         </div>
                     </div>
                 </div>
@@ -76,9 +76,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:faq_list' %}">
                             <i class="fas fa-chevron-right"></i>
-                            <span>Blog & Këshilla</span>
+                            <span>Pyetje të Shpeshta</span>
                         </a>
                     </li>
                    

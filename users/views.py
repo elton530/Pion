@@ -281,9 +281,7 @@ def guide_booking_action(request, booking_id, action):
     
     if action == "confirm":
         if booking.status == "pending":
-            booking.status = "confirmed"
-            booking.confirmed_at = timezone.now()
-            booking.save(update_fields=['status', 'confirmed_at'])
+            booking.confirm()
             messages.success(
                 request,
                 f"✅ Rezervimi nga {booking.tourist.user.get_full_name()} u konfirmua!"

@@ -52,7 +52,7 @@
                     <div class="booking-meta-item">
                         <strong>Çmimi Total</strong>
                         <span style="font-size: 1.2rem; color: var(--primary); font-weight: 700;">
-                            {{ booking.total_price }} {{ tour.currency }}
+                            {{ booking.total_price }} {{ tour.get_currency_display }}
                         </span>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                     <h3>Informacioni i Turit</h3>
                     <p>
                         <strong>Çmimi per Person:</strong><br>
-                        {{ tour.price_per_person }} Lekë
+                        {{ tour.price_per_person }} {{ tour.get_currency_display }}
                     </p>
                     <p>
                         <strong>Kapaciteti:</strong><br>

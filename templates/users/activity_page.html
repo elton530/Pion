@@ -101,7 +101,7 @@
                                 </div>
                                 <div class="booking-info">
                                     <span><i class="fa-solid fa-location-dot"></i> {{ item.location_city }}</span>
-                                    <span><i class="fa-solid fa-coins"></i> {{ item.price_per_person }} Lekë</span>
+                                    <span><i class="fa-solid fa-coins"></i> {{ item.price_per_person }} {{ item.get_currency_display }}</span>
                                 </div>
                                 <div class="booking-info" style="border-top:1px solid var(--border); padding-top:1.2rem;">
                                     <span><i class="fa-regular fa-calendar"></i> {{ item.date|date:"d M Y" }}</span>
@@ -128,7 +128,7 @@
                                 </div>
                                 <div class="booking-info" style="margin-top:0.8rem;">
                                     <span><i class="fa-solid fa-calendar"></i> {{ item.tour.date|date:"d M Y" }}</span>
-                                    <span><i class="fa-solid fa-coins"></i> {{ item.total_price }} Lekë</span>
+                                    <span><i class="fa-solid fa-coins"></i> {{ item.total_price }} {{ item.tour.get_currency_display }}</span>
                                     <span><i class="fa-solid fa-user-tie"></i> {{ item.tour.guide.user.get_full_name|default:item.tour.guide.user.username }}</span>
                                 </div>
                                 <div style="margin-top:1.2rem;">
@@ -144,7 +144,7 @@
                                 <div class="booking-info" style="margin-top:0.8rem;">
                                     <span><i class="fa-solid fa-calendar"></i> {{ item.date|date:"d M Y" }}</span>
                                     <span><i class="fa-solid fa-location-dot"></i> {{ item.location_city }}</span>
-                                    <span><i class="fa-solid fa-coins"></i> {{ item.price_per_person }} Lekë</span>
+                                    <span><i class="fa-solid fa-coins"></i> {{ item.price_per_person }} {{ item.get_currency_display }}</span>
                                 </div>
                                 <div style="margin-top:1.2rem;">
                                     <a href="{% url 'tours:tour_detail' item.slug %}" class="btn btn-primary">Shiko detajet</a>

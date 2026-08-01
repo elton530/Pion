@@ -45,7 +45,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
-                <h3>{{ revenue }} Lekë</h3>
+                <h3>{{ revenue }} {% if tours %}{{ tours.0.get_currency_display }}{% else %}Lekë{% endif %}</h3>
                 <p>Të ardhura të pritshme</p>
             </div>
         </div>
@@ -91,7 +91,7 @@
                             <small>{{ booking.tourist.phone|default:"Pa telefon" }}</small>
                         </td>
                         <td>{{ booking.num_people }}</td>
-                        <td><strong>{{ booking.total_price }} Lekë</strong></td>
+                        <td><strong>{{ booking.total_price }} {{ booking.tour.get_currency_display }}</strong></td>
                         <td>
                             <span class="status-{{ booking.status }}">
                                 {{ booking.get_status_display }}
@@ -157,7 +157,7 @@
                                 {{ tour.available_spots }} / {{ tour.max_participants }}
                             </span>
                         </td>
-                        <td><strong>{{ tour.price_per_person }} Lekë</strong></td>
+                        <td><strong>{{ tour.price_per_person }} {{ tour.get_currency_display }}</strong></td>
                         <td>
                             {% if tour.is_active %}
                             <span class="status-confirmed">Aktiv</span>

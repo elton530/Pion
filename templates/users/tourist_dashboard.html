@@ -48,7 +48,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ total_spent|floatformat:0 }}</div>
-            <div class="stat-label">Shpenzime (Lekë)</div>
+            <div class="stat-label">Shpenzime</div>
         </div>
     </div>
 
@@ -100,12 +100,12 @@
             </div>
 
             <div class="booking-info" style="border-top:1px solid var(--border); padding-top:1.2rem;">
-                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
+                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
                 <span><i class="fa-regular fa-clock"></i> {{ booking.tour.time_start|time:"H:i" }}</span>
                 <span><i class="fa-solid fa-users"></i> {{ booking.num_people }} persona</span>
             </div>
 
-            <div class="price-big">{{ booking.total_price }} Lekë</div>
+            <div class="price-big">{{ booking.total_price }} {{ booking.tour.get_currency_display }}</div>
 
             <div class="action-buttons">
                 {% if booking.status == 'confirmed' and not booking.is_confirmed_24h %}
@@ -148,8 +148,8 @@
                 <span class="status-badge" style="background:#e5e7eb; color:#4b5563;">Përfunduar</span>
             </div>
             <div class="booking-info" style="margin-top:0.8rem;">
-                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
-                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} Lekë</span>
+                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
+                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} {{ booking.tour.get_currency_display }}</span>
             </div>
             <div style="margin-top:1.4rem;">
                 <a href="{% url 'tours:create_review' booking.tour.slug %}" class="btn btn-primary" 
