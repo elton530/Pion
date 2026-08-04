@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Admin - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-shell">
+        <div class="admin-header">
+            <h1>🏛️ Dashboard Admin</h1>
+            <p>Menaxho regjistrimet e guide-ve dhe miratimin e llogarive.</p>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📌</div>
+                <h3>{{ pending_count }}</h3>
+                <p>Guide në pritje</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <h3>{{ verified_count }}</h3>
+                <p>Guide të miratuar</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <h3>{{ rejected_count }}</h3>
+                <p>Guide të refuzuar</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <h3>{{ total_users }}</h3>
+                <p>Përdorues total</p>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Lista e guide-ve në pritje</h2>
+                <span class="badge">{{ pending_count }} në pritje</span>
+            </div>
+
+            {% if pending_guides %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Përdorues</th>
+                            <th>Vendndodhja</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Veprime</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for guide in pending_guides %}
+                            <tr>
+                                <td>
+                                    <span class="user-name">{{ guide.user.username }}</span><br>
+                                    <span class="user-meta">{{ guide.user.get_full_name|default:guide.user.username }}</span>
+                                </td>
+                                <td>{{ guide.location|default:'- ' }}</td>
+                                <td>{{ guide.user.email|default:'-' }}</td>
+                                <td><span class="status-tag">Në pritje</span></td>
+                                <td class="actions">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn-action approve">Mirato</button>
+                                    </form>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn-action reject">Refuzo</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    Nuk ka guide në pritje për momentin.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.generic import DetailView, UpdateView
 from django.urls import reverse_lazy
@@ -33,29 +33,35 @@ def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
             role = form.cleaned_data.get("role")
-            
-            # Profile creation is handled by the form's `save()` method.
-            # Keep this view simple and avoid duplicating profile creation.
-            
-            # Login automatik
+
+            if role == "guide":
+                user.is_active = False
+                user.save()
+                form.save_m2m() if hasattr(form, 'save_m2m') else None
+
+                GuideProfile.objects.get_or_create(user=user)
+                guide_profile = GuideProfile.objects.get(user=user)
+                guide_profile.status = "pending"
+                guide_profile.is_verified = False
+                guide_profile.is_active = False
+                guide_profile.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
+
+                messages.success(
+                    request,
+                    "🎉 Regjistrimi u krye me sukses. Llogaria juaj si guide do të aktivizohet pas miratimit të administratorit."
+                )
+                return redirect("users:login")
+
+            user.save()
             login(request, user)
-            
             messages.success(
                 request,
                 f"🎉 Mirëseerdhët {user.first_name}! Llogaria u krijua me sukses."
             )
-            
-            if role == "guide":
-                messages.info(
-                    request,
-                    "📋 Tani plotëso profilin tënd si Guide për të filluar të ofrosh ture!"
-                )
-                return redirect("users:guide_profile_edit")
-            else:
-                messages.info(request, "✅ Paneli juaj është gati.")
-                return redirect("core:home")
+            messages.info(request, "✅ Paneli juaj është gati.")
+            return redirect("core:home")
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -103,7 +109,10 @@ class CustomLoginView(LoginView):
     def get_success_url(self):
         """Redirect bazuar në rolin e përdoruesit"""
         user = self.request.user
-        
+
+        if user.is_staff or user.is_superuser:
+            return reverse_lazy("users:admin_dashboard")
+
         try:
             if GuideProfile.objects.filter(user=user).exists():
                 return reverse_lazy("users:guide_dashboard")
@@ -139,6 +148,46 @@ class CustomPasswordChangeView(PasswordChangeView):
     def form_valid(self, form):
         messages.success(self.request, "✅ Fjalëkalimi u ndryshua me sukses.")
         return super().form_valid(form)
+
+
+@user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser))
+def admin_dashboard(request):
+    """Dashboard i administratorit për miratimin e guide-ve."""
+    pending_guides = GuideProfile.objects.filter(status="pending").select_related("user").order_by("-created_at")
+    verified_guides = GuideProfile.objects.filter(status="verified").count()
+    rejected_guides = GuideProfile.objects.filter(status="rejected").count()
+
+    if request.method == "POST":
+        guide_id = request.POST.get("guide_id")
+        action = request.POST.get("action")
+        if guide_id and action in {"approve", "reject"}:
+            guide = get_object_or_404(GuideProfile, id=guide_id)
+            if action == "approve":
+                guide.status = "verified"
+                guide.is_verified = True
+                guide.is_active = True
+                guide.user.is_active = True
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
+                messages.success(request, f"✅ Guide '{guide.user.get_full_name() or guide.user.username}' u miratua.")
+            else:
+                guide.status = "rejected"
+                guide.is_verified = False
+                guide.is_active = False
+                guide.user.is_active = False
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
+                messages.warning(request, f"⚠️ Guide '{guide.user.get_full_name() or guide.user.username}' u refuzua.")
+            return redirect("users:admin_dashboard")
+
+    context = {
+        "pending_guides": pending_guides,
+        "pending_count": pending_guides.count(),
+        "verified_count": verified_guides,
+        "rejected_count": rejected_guides,
+        "total_users": __import__('django.contrib.auth').contrib.auth.models.User.objects.count(),
+    }
+    return render(request, "users/admin_dashboard.html", context)
 
 
 # ==================== GUIDE VIEWS ====================

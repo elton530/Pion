@@ -1,0 +1,216 @@
+.admin-dashboard {
+    padding: 40px 0 80px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+    min-height: 100vh;
+}
+
+.admin-dashboard .admin-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.admin-dashboard .admin-header {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff;
+    padding: 32px 28px;
+    border-radius: 20px;
+    box-shadow: 0 18px 38px rgba(37, 99, 235, 0.18);
+    margin-bottom: 28px;
+}
+
+.admin-dashboard .admin-header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(1.9rem, 2.8vw, 2.5rem);
+    font-weight: 800;
+}
+
+.admin-dashboard .admin-header p {
+    margin: 0;
+    opacity: 0.92;
+    font-size: 1rem;
+}
+
+.admin-dashboard .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.admin-dashboard .stat-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 22px 20px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-dashboard .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 35px rgba(37, 99, 235, 0.12);
+}
+
+.admin-dashboard .stat-card .stat-icon {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+}
+
+.admin-dashboard .stat-card h3 {
+    margin: 8px 0 4px;
+    font-size: 2rem;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.admin-dashboard .stat-card p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.admin-dashboard .panel {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    overflow: hidden;
+}
+
+.admin-dashboard .panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-dashboard .panel-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    color: #0f172a;
+}
+
+.admin-dashboard .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-dashboard th,
+.admin-dashboard td {
+    text-align: left;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.admin-dashboard th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-dashboard tbody tr:hover {
+    background: #f8fbff;
+}
+
+.admin-dashboard .status-tag {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-dashboard .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.admin-dashboard .actions form {
+    margin: 0;
+}
+
+.admin-dashboard .btn-action {
+    border: none;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.admin-dashboard .btn-action:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.admin-dashboard .btn-action.approve {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-dashboard .btn-action.reject {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.admin-dashboard .empty-state {
+    padding: 28px 24px;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.admin-dashboard .user-name {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.admin-dashboard .user-meta {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding-top: 24px;
+    }
+
+    .admin-dashboard .admin-shell {
+        padding: 0 12px;
+    }
+
+    .admin-dashboard .panel-header {
+        align-items: flex-start;
+    }
+
+    .admin-dashboard th,
+    .admin-dashboard td {
+        padding: 12px 14px;
+    }
+
+    .admin-dashboard .actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
