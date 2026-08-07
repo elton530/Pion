@@ -54,11 +54,37 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
         </div>
     </div>
 
-    <!-- Main Image -->
+    <!-- Hero Media Grid: main image + room for extra photos -->
     {% if tour.main_image and main_image_exists %}
-    <div class="main-image-wrapper">
-        <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="main-image" loading="lazy">
+    <div class="hero-media">
+        <a href="{{ tour.main_image.url }}" class="media-item media-main media-link"
+           data-src="{{ tour.main_image.url }}" data-caption="{{ tour.title }}">
+            <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="media-main-img" loading="lazy">
+            <span class="media-zoom"><i class="fas fa-expand"></i></span>
+        </a>
+
+        {% if additional_images %}
+        <div class="media-thumbs">
+            {% for img in additional_images|slice:":4" %}
+            <a href="{{ img.image.url }}" class="media-item media-thumb media-link"
+               data-src="{{ img.image.url }}" data-caption="{{ img.caption|default:'Foto nga turi' }}">
+                <img src="{{ img.image.url }}" alt="{{ img.caption|default:'Foto nga turi' }}" loading="lazy">
+                {% if forloop.last and additional_images|length > 4 %}
+                <span class="media-more">
+                    +{{ additional_images|length|add:"-4" }} foto
+                </span>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
+
+    {% if additional_images|length > 4 %}
+    <div class="hero-media-gallery-link">
+        <a href="#gallery"><i class="fas fa-images"></i> Shiko të gjitha fotot ({{ additional_images|length }})</a>
+    </div>
+    {% endif %}
     {% endif %}
 
     <!-- Two column layout: content + sticky booking sidebar -->
@@ -274,7 +300,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 
             <!-- Gallery -->
             {% if additional_images %}
-            <section class="gallery-section">
+            <section class="gallery-section" id="gallery">
                 <h2><i class="fas fa-images"></i> Galeri foto</h2>
                 <div class="gallery">
                     {% for img in additional_images %}

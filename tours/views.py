@@ -405,11 +405,21 @@ def edit_tour(request, slug):
     except Exception:
         thumbnail_exists = False
 
+    # Imazhet shtesë - filtro skedarët që mungojnë në storage
+    valid_images = []
+    for img in tour.images.all():
+        try:
+            if img.image and default_storage.exists(img.image.name):
+                valid_images.append(img)
+        except Exception:
+            continue
+
     return render(request, "tours/edit_tour.html", {
         "form": form,
         "tour": tour,
         "main_image_exists": main_image_exists,
         "thumbnail_exists": thumbnail_exists,
+        "additional_images": valid_images,
     })
 
 

@@ -146,9 +146,10 @@ function initStarRating() {
 
 /**
  * Initialize gallery lightbox (simple, no-dependency)
+ * Handles both the bottom gallery (.gallery-item) and hero media grid (.media-link)
  */
 function initGalleryLightbox() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
+    const galleryItems = document.querySelectorAll('.gallery-item, .media-link');
     if (!galleryItems || galleryItems.length === 0) return;
 
     // Create modal element
@@ -171,12 +172,15 @@ function initGalleryLightbox() {
     let lastFocused = null;
 
     galleryItems.forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
             const img = item.querySelector('img');
-            const src = img.getAttribute('src') || img.dataset.src || '';
-            const caption = item.querySelector('.gallery-caption')?.innerText || '';
+            const src = item.getAttribute('data-src') || (img ? (img.getAttribute('src') || img.dataset.src || '') : '');
+            const caption = item.getAttribute('data-caption')
+                || (item.querySelector('.gallery-caption') ? item.querySelector('.gallery-caption').innerText : '')
+                || (img ? img.alt : '');
             tlImg.src = src;
-            tlImg.alt = img.alt || '';
+            tlImg.alt = (img ? img.alt : '') || '';
             tlCaption.textContent = caption;
             lastFocused = document.activeElement;
             modal.classList.add('open');

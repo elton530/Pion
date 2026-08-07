@@ -238,76 +238,40 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
 }
 
 .tour-detail-wrapper .chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 5px;
+    padding: 5px 11px;
     border-radius: 999px;
     background: var(--detail-card);
     backdrop-filter: blur(10px);
     box-shadow: var(--detail-shadow);
     border: 1px solid var(--detail-border);
-    font-size: 0.95rem;
+    font-size: 0.78rem;
 }
 
 .tour-detail-wrapper .chip strong {
     color: var(--detail-text);
     font-weight: 700;
+    font-size: 0.88rem;
 }
 
 .tour-detail-wrapper .chip small {
     color: var(--detail-text-light);
+    font-size: 0.74rem;
+}
+
+.tour-detail-wrapper .chip i {
+    font-size: 0.82rem;
 }
 
 .tour-detail-wrapper .chip-rating i { color: #f59e0b; }
 .tour-detail-wrapper .chip-spots i { color: var(--detail-success); }
 .tour-detail-wrapper .chip-type i { color: var(--detail-primary); }
-
-/* ==================== MAIN IMAGE - MODERN HOVER EFFECT ==================== */
-
-.tour-detail-wrapper .main-image-wrapper {
-    border-radius: var(--detail-radius);
-    overflow: hidden;
-    box-shadow: var(--detail-shadow-lg);
-    margin-bottom: 56px;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 24px;
-    position: relative;
-}
-
-.tour-detail-wrapper .main-image {
-    width: 100%;
-    height: clamp(320px, 46vh, 560px);
-    object-fit: cover;
-    display: block;
-    transition: var(--detail-transition);
-    border-radius: var(--detail-radius);
-}
-
-.tour-detail-wrapper .main-image-wrapper:hover .main-image {
-    transform: scale(1.03) rotate(0.5deg);
-    filter: brightness(1.05) contrast(1.1);
-}
-
-.tour-detail-wrapper .main-image-wrapper::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-}
-
-.tour-detail-wrapper .main-image-wrapper:hover::after {
-    opacity: 1;
-}
 
 /* ==================== TWO COLUMN LAYOUT ==================== */
 
@@ -547,19 +511,179 @@
     flex-shrink: 0;
 }
 
+/* ==================== HERO MEDIA GRID - MODERN GALLERY HERO ==================== */
+
+.tour-detail-wrapper .hero-media {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 10px;
+    border-radius: var(--detail-radius);
+    overflow: hidden;
+    box-shadow: var(--detail-shadow-lg);
+    margin-bottom: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+}
+
+.tour-detail-wrapper .media-item {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    text-decoration: none;
+    cursor: zoom-in;
+}
+
+.tour-detail-wrapper .media-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+.tour-detail-wrapper .media-item:hover img {
+    transform: scale(1.05);
+    filter: brightness(0.9);
+}
+
+.tour-detail-wrapper .media-main {
+    min-height: 440px;
+    height: 100%;
+}
+
+.tour-detail-wrapper .media-main img {
+    position: absolute;
+    inset: 0;
+}
+
+.tour-detail-wrapper .media-zoom {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--detail-primary-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: var(--detail-transition);
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.25);
+    z-index: 2;
+}
+
+.tour-detail-wrapper .media-item:hover .media-zoom {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.tour-detail-wrapper .media-thumbs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(100px, 1fr);
+    gap: 10px;
+    min-height: 440px;
+}
+
+.tour-detail-wrapper .media-thumb img {
+    position: absolute;
+    inset: 0;
+}
+
+.tour-detail-wrapper .media-more {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.55);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    transition: background 0.3s ease;
+    z-index: 2;
+}
+
+.tour-detail-wrapper .media-thumb:hover .media-more {
+    background: rgba(2, 6, 23, 0.4);
+}
+
+.tour-detail-wrapper .hero-media-gallery-link {
+    text-align: center;
+    margin: 0 auto 56px;
+    max-width: 1200px;
+    padding: 0 24px;
+}
+
+.tour-detail-wrapper .hero-media-gallery-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--detail-card);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+    color: var(--detail-primary-dark);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .hero-media-gallery-link a:hover {
+    background: var(--detail-primary);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 992px) {
+    .tour-detail-wrapper .hero-media {
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+    }
+
+    .tour-detail-wrapper .media-main {
+        min-height: 320px;
+    }
+
+    .tour-detail-wrapper .media-thumbs {
+        min-height: 0;
+        grid-auto-rows: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tour-detail-wrapper .media-main {
+        min-height: 240px;
+    }
+
+    .tour-detail-wrapper .media-thumbs {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: 120px;
+    }
+}
+
 /* ==================== INFO GRID - GLASS CARDS ==================== */
 
 .tour-detail-wrapper .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
 }
 
 .tour-detail-wrapper .info-card {
     background: var(--detail-card);
     backdrop-filter: blur(10px);
-    padding: 28px 20px;
-    border-radius: var(--detail-radius);
+    padding: 20px 14px;
+    border-radius: 16px;
     box-shadow: var(--detail-shadow);
     text-align: center;
     transition: var(--detail-transition);
@@ -581,7 +705,7 @@
 }
 
 .tour-detail-wrapper .info-card:hover {
-    transform: translateY(-10px) scale(1.02);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: var(--detail-shadow-lg);
     border-color: rgba(14, 165, 233, 0.4);
 }
@@ -591,33 +715,33 @@
 }
 
 .tour-detail-wrapper .info-icon {
-    font-size: 2.2rem;
+    font-size: 1.35rem;
     color: var(--detail-primary);
-    margin-bottom: 14px;
+    margin-bottom: 8px;
     display: inline-block;
-    padding: 14px;
+    padding: 10px;
     background: rgba(14, 165, 233, 0.1);
     border-radius: 50%;
     transition: var(--detail-transition);
 }
 
 .tour-detail-wrapper .info-card:hover .info-icon {
-    transform: scale(1.15) rotate(5deg);
+    transform: scale(1.12) rotate(5deg);
     background: rgba(14, 165, 233, 0.2);
 }
 
 .tour-detail-wrapper .info-card strong {
     display: block;
-    font-size: clamp(1.4rem, 2vw, 1.9rem);
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
     color: var(--detail-primary);
-    margin: 10px 0 6px;
+    margin: 6px 0 4px;
     font-weight: 700;
 }
 
 .tour-detail-wrapper .info-card span {
     color: var(--detail-text-light);
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     display: block;
 }
 
@@ -1439,7 +1563,8 @@
 
 @media (max-width: 1200px) {
     .tour-detail-wrapper .header,
-    .tour-detail-wrapper .main-image-wrapper,
+    .tour-detail-wrapper .hero-media,
+    .tour-detail-wrapper .hero-media-gallery-link,
     .tour-detail-wrapper .tour-layout,
     .tour-detail-wrapper .back-link {
         max-width: 1000px;
@@ -1448,7 +1573,8 @@
 
 @media (max-width: 992px) {
     .tour-detail-wrapper .header,
-    .tour-detail-wrapper .main-image-wrapper,
+    .tour-detail-wrapper .hero-media,
+    .tour-detail-wrapper .hero-media-gallery-link,
     .tour-detail-wrapper .tour-layout,
     .tour-detail-wrapper .back-link {
         max-width: 800px;
@@ -1485,11 +1611,6 @@
 
     .tour-detail-wrapper .tour-meta {
         gap: 14px;
-    }
-
-    .tour-detail-wrapper .main-image-wrapper {
-        padding: 0 20px;
-        margin-bottom: 40px;
     }
 
     .tour-detail-wrapper .tour-layout {

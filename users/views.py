@@ -336,7 +336,17 @@ def guide_dashboard(request):
         return redirect("core:home")
     
     # Merr turet
-    tours = Tour.objects.filter(guide=guide_profile).order_by("-date")
+    tours = Tour.objects.filter(guide=guide_profile).select_related("tour_type").order_by("-date")
+    
+    today = timezone.now().date()
+    upcoming_tours = tours.filter(
+        is_active=True,
+        status__in=["published", "draft"],
+        date__gte=today,
+    ).order_by("date")
+    past_tours = tours.filter(
+        Q(date__lt=today) | Q(status="completed")
+    ).order_by("-date")
     
     # Merr reservimet
     bookings = Booking.objects.filter(tour__guide=guide_profile).select_related(
@@ -352,33 +362,54 @@ def guide_dashboard(request):
     total_bookings = bookings.count()
     pending_bookings = bookings.filter(status="pending").count()
     confirmed_bookings = bookings.filter(status="confirmed").count()
+    completed_bookings = bookings.filter(status="completed").count()
     cancelled_bookings = bookings.filter(status="cancelled").count()
     
-    # Të ardhura
-    revenue = bookings.filter(status="confirmed").aggregate(
-        total=Sum("total_price")
-    )["total"] or 0
+    # Të ardhura (të konfirmuara e të përfunduara), të ndara sipas valutës
+    revenue_bookings = bookings.filter(status__in=["confirmed", "completed"]).select_related("tour")
+    revenue_by_currency = {}
+    for b in revenue_bookings:
+        cur = b.tour.currency or "ALL"
+        revenue_by_currency[cur] = revenue_by_currency.get(cur, 0) + b.total_price
+    revenue_by_currency = [
+        {"currency": cur, "total": total, "label": cur}
+        for cur, total in sorted(revenue_by_currency.items())
+    ]
+    revenue = revenue_bookings.aggregate(total=Sum("total_price"))["total"] or 0
     
     # Vlerësime
     reviews = TourReview.objects.filter(
         tour__guide=guide_profile,
         is_approved=True
-    )
+    ).select_related("tourist__user", "tour")
+    recent_reviews = reviews.order_by("-created_at")[:5]
     
     avg_rating = reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+    
+    # Shpërndarja e notave
+    rating_distribution = {}
+    for d in reviews.values('rating').annotate(count=Count('id')):
+        rating_distribution[d['rating']] = d['count']
     
     context = {
         'guide_profile': guide_profile,
         'tours': tours,
+        'upcoming_tours': upcoming_tours[:5],
+        'upcoming_tours_count': upcoming_tours.count(),
+        'past_tours': past_tours[:5],
         'page_obj': page_obj,
         'bookings': page_obj.object_list,
         'total_bookings': total_bookings,
         'pending_bookings': pending_bookings,
         'confirmed_bookings': confirmed_bookings,
+        'completed_bookings': completed_bookings,
         'cancelled_bookings': cancelled_bookings,
         'revenue': revenue,
+        'revenue_by_currency': revenue_by_currency,
         'reviews_count': reviews.count(),
         'avg_rating': round(avg_rating, 1),
+        'recent_reviews': recent_reviews,
+        'rating_distribution': rating_distribution,
         'total_tourists': bookings.values('tourist').distinct().count(),
     }
     

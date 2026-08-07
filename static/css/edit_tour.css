@@ -178,10 +178,195 @@
 .checkbox-row input { width:auto; margin:0 }
 .pricing-grid { grid-template-columns: 1fr 1fr; }
 
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.info-box i {
+    color: #0284c7;
+    margin-top: 3px;
+}
+
 /* ripple */
 .ripple { position:relative; overflow:hidden }
 .ripple__wave { position:absolute; border-radius:50%; background:rgba(255,255,255,0.25); transform:scale(0); animation:ripple 600ms linear; pointer-events:none }
 @keyframes ripple { to { transform:scale(4); opacity:0 } }
+
+/* ==================== GALLERY MANAGER ==================== */
+.edit-tour .form-grid-full { grid-template-columns: 1fr; }
+
+.edit-tour .gallery-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.edit-tour .gallery-panel h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0f172a;
+    font-size: 1.15rem;
+    margin: 0 0 6px;
+}
+
+.edit-tour .gallery-panel h2 i { color: #2563eb; }
+
+.edit-tour .gallery-help {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 16px;
+}
+
+.edit-tour .gallery-manager-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.edit-tour .gallery-manager-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #e2e8f0;
+    border: 1px solid #e2e8f0;
+}
+
+.edit-tour .gallery-manager-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.edit-tour .gallery-manager-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(2, 6, 23, 0.75) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.edit-tour .gallery-manager-item:hover .gallery-manager-overlay {
+    opacity: 1;
+}
+
+.edit-tour .gallery-manager-caption {
+    color: #fff;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-tour .gallery-delete-form { margin: 0; }
+
+.edit-tour .gallery-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.92);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-family: inherit;
+}
+
+.edit-tour .gallery-delete-btn:hover {
+    background: #dc2626;
+}
+
+.edit-tour .gallery-empty {
+    text-align: center;
+    color: #94a3b8;
+    padding: 28px 20px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.edit-tour .gallery-empty i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+.edit-tour .gallery-empty p { margin: 0; font-size: 0.92rem; }
+
+.edit-tour .gallery-upload {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.edit-tour .gallery-upload h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #0f172a;
+    margin: 0 0 14px;
+}
+
+.edit-tour .gallery-upload h3 i { color: #10b981; }
+
+.edit-tour .gallery-upload .form-row { margin-bottom: 12px; }
+
+.edit-tour .gallery-upload label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.edit-tour .gallery-file-field input[type="file"] {
+    padding: 10px;
+    font-size: 0.88rem;
+}
+
+.edit-tour .gallery-upload .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .edit-tour .form-grid-full { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+    .edit-tour .gallery-manager-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}
 
 /* Responsive */
 @media (max-width: 900px) {

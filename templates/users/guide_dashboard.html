@@ -10,181 +10,287 @@
 {% block content %}
 <div class="guide-dashboard">
     <div class="container">
-        <!-- Mirëseardhje e re e përmirësuar -->
+
+        <!-- Mirëseardhje -->
         <div class="welcome-container">
             <div class="welcome-badge">
                 <h2>Mirëseardhje përsëri!</h2>
-                <div class="username">{{ guide_profile.user.get_full_name|default:guide_profile.user.username }}</div>
+                <div class="username">
+                    {{ guide_profile.user.get_full_name|default:guide_profile.user.username }}
+                    {% if guide_profile.is_verified %}
+                    <i class="fas fa-check-circle welcome-verified" title="Guide i verifikuar"></i>
+                    {% endif %}
+                </div>
                 <div class="welcome-stats">
-                    <span class="welcome-stat">Udhëzues Aktiv</span>
-                    <span class="welcome-stat">{{ tours.count }} Ture</span>
+                    <span class="welcome-stat"><i class="fas fa-mountain"></i> {{ tours.count }} Ture</span>
+                    <span class="welcome-stat"><i class="fas fa-calendar-check"></i> {{ upcoming_tours_count }} të ardhshme</span>
                 </div>
             </div>
             <p class="welcome-message">
-                Kjo është pulti juaj për të menaxhuar turet, rezervimet dhe të ardhurat. 
+                Kjo është pulti juaj për të menaxhuar turet, rezervimet dhe të ardhurat.
                 Gjithçka që ju nevojitet për të menaxhuar biznesin tuaj të udhëzimit është këtu.
             </p>
         </div>
 
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Statistikat -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">📋</div>
+                <div class="stat-icon"><i class="fas fa-mountain-sun"></i></div>
                 <h3>{{ tours.count }}</h3>
                 <p>Ture të krijuara</p>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">👥</div>
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
                 <h3>{{ total_bookings }}</h3>
                 <p>Rezervime totale</p>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">⏳</div>
+                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
                 <h3>{{ pending_bookings }}</h3>
                 <p>Në pritje konfirmimi</p>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <h3>{{ revenue }} {% if tours %}{{ tours.0.get_currency_display }}{% else %}Lekë{% endif %}</h3>
-                <p>Të ardhura të pritshme</p>
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <h3>{{ avg_rating|floatformat:1 }}<small>/5</small></h3>
+                <p>{{ reviews_count }} vlerësime</p>
             </div>
         </div>
 
-        <div class="section" style="margin-top: 1.5rem;">
-            <h2>⚡ Veprime të shpejta</h2>
+        <!-- Të ardhura + turistë -->
+        <div class="revenue-row">
+            <div class="revenue-card">
+                <div class="revenue-icon"><i class="fas fa-wallet"></i></div>
+                <div class="revenue-content">
+                    <span class="revenue-label">Të ardhura nga rezervimet</span>
+                    <span class="revenue-value">
+                        {% if revenue_by_currency %}
+                            {% for rc in revenue_by_currency %}
+                                <strong>{{ rc.total }} {{ rc.currency }}</strong>{% if not forloop.last %} <span class="revenue-sep">+</span>{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <strong>0</strong>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="revenue-card">
+                <div class="revenue-icon"><i class="fas fa-user-check"></i></div>
+                <div class="revenue-content">
+                    <span class="revenue-label">Turistë unikë</span>
+                    <span class="revenue-value"><strong>{{ total_tourists }}</strong></span>
+                </div>
+            </div>
+            <div class="revenue-card">
+                <div class="revenue-icon"><i class="fas fa-check-double"></i></div>
+                <div class="revenue-content">
+                    <span class="revenue-label">Ture të ardhshme</span>
+                    <span class="revenue-value"><strong>{{ upcoming_tours_count }}</strong></span>
+                </div>
+            </div>
         </div>
 
-        <!-- Krijo tur të ri -->
-        <a href="{% url 'tours:create_tour' %}" class="btn-create">
-            <span>➕</span>
-            <span>Krijo Tur të Ri</span>
-        </a>
-
-        <!-- Edit Profile Button -->
-        <a href="{% url 'users:guide_profile_edit' %}" class="btn-edit-profile" style="margin-left:12px;">
-            <span>⚙️</span>
-            <span>Edito Profilin</span>
-        </a>
+        <!-- Veprime të shpejta -->
+        <div class="quick-actions">
+            <a href="{% url 'tours:create_tour' %}" class="btn-create">
+                <i class="fas fa-plus"></i>
+                <span>Krijo Tur të Ri</span>
+            </a>
+            <a href="{% url 'tours:my_tours' %}" class="btn-edit-profile">
+                <i class="fas fa-list"></i>
+                <span>Turet e Mia</span>
+            </a>
+            <a href="{% url 'users:guide_profile_edit' %}" class="btn-edit-profile">
+                <i class="fas fa-user-cog"></i>
+                <span>Edito Profilin</span>
+            </a>
+            <a href="{% url 'users:guide_profile_public' guide_profile.user.username %}" class="btn-edit-profile" target="_blank" rel="noopener">
+                <i class="fas fa-eye"></i>
+                <span>Shiko Profilin Publik</span>
+            </a>
+        </div>
 
         <!-- Rezervimet -->
         <div class="section">
-            <h2>📋 Rezervimet e fundit</h2>
+            <div class="section-header">
+                <h2><i class="fas fa-clipboard-list"></i> Rezervimet e fundit</h2>
+                <div class="booking-filters">
+                    <span class="filter-chip"><i class="fas fa-check-circle"></i> {{ confirmed_bookings }} konfirmuar</span>
+                    <span class="filter-chip chip-pending"><i class="fas fa-hourglass-half"></i> {{ pending_bookings }} në pritje</span>
+                    <span class="filter-chip chip-done"><i class="fas fa-flag-checkered"></i> {{ completed_bookings }} përfunduar</span>
+                    <span class="filter-chip chip-cancelled"><i class="fas fa-ban"></i> {{ cancelled_bookings }} anuluar</span>
+                </div>
+            </div>
+
             {% if bookings %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data rezervimit</th>
-                        <th>Tur</th>
-                        <th>Tourist</th>
-                        <th>Persona</th>
-                        <th>Çmim total</th>
-                        <th>Status</th>
-                        <th>Veprime</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for booking in bookings %}
-                    <tr>
-                        <td>{{ booking.created_at|date:"d M Y H:i" }}</td>
-                        <td>
-                            <strong>{{ booking.tour.title }}</strong><br>
-                            <small>{{ booking.tour.date|date:"d M Y" }}</small>
-                        </td>
-                        <td>
-                            <strong>{{ booking.tourist.user.get_full_name|default:booking.tourist.user.username }}</strong><br>
-                            <small>{{ booking.tourist.phone|default:"Pa telefon" }}</small>
-                        </td>
-                        <td>{{ booking.num_people }}</td>
-                        <td><strong>{{ booking.total_price }} {{ booking.tour.get_currency_display }}</strong></td>
-                        <td>
-                            <span class="status-{{ booking.status }}">
-                                {{ booking.get_status_display }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if booking.status == 'pending' %}
-                            <form action="{% url 'users:guide_booking_confirm' booking.id %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button class="btn btn-confirm" type="submit">
-                                    <span>✓</span>
-                                    <span>Konfirmo</span>
-                                </button>
-                            </form>
-                            <form action="{% url 'users:guide_booking_cancel' booking.id %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button class="btn btn-cancel" type="submit">
-                                    <span>✗</span>
-                                    <span>Anullo</span>
-                                </button>
-                            </form>
-                            {% else %}
-                            <span style="color: #95a5a6; font-size: 0.9em;">Pa veprim</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data rezervimit</th>
+                            <th>Tur</th>
+                            <th>Tourist</th>
+                            <th>Persona</th>
+                            <th>Çmim total</th>
+                            <th>Status</th>
+                            <th>Veprime</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.created_at|date:"d M Y H:i" }}</td>
+                            <td>
+                                <strong>{{ booking.tour.title }}</strong><br>
+                                <small class="muted">{{ booking.tour.date|date:"d M Y" }}</small>
+                            </td>
+                            <td>
+                                <strong>{{ booking.tourist.user.get_full_name|default:booking.tourist.user.username }}</strong><br>
+                                <small class="muted"><i class="fas fa-phone-alt"></i> {{ booking.tourist.phone|default:"Pa telefon" }}</small>
+                            </td>
+                            <td>{{ booking.num_people }}</td>
+                            <td><strong>{{ booking.total_price }} {{ booking.tour.get_currency_display }}</strong></td>
+                            <td>
+                                <span class="status-{{ booking.status }}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="booking-actions">
+                                    {% if booking.status == 'pending' %}
+                                    <form action="{% url 'users:guide_booking_confirm' booking.id %}" method="post" class="inline-form">
+                                        {% csrf_token %}
+                                        <button class="btn btn-confirm" type="submit">
+                                            <i class="fas fa-check"></i>
+                                            <span>Konfirmo</span>
+                                        </button>
+                                    </form>
+                                    <form action="{% url 'users:guide_booking_cancel' booking.id %}" method="post" class="inline-form">
+                                        {% csrf_token %}
+                                        <button class="btn btn-cancel" type="submit">
+                                            <i class="fas fa-times"></i>
+                                            <span>Anullo</span>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="muted">Pa veprim</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Më parë</a>
+                {% endif %}
+                <span class="page-current">Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Tjetra &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
             {% else %}
             <div class="no-data">
-                Ende nuk ke asnjë rezervim. Kur turistët të rezervojnë ture tënde, do të shfaqen këtu!
+                <i class="fas fa-inbox"></i>
+                <p>Ende nuk ke asnjë rezervim. Kur turistët të rezervojnë ture tënde, do të shfaqen këtu!</p>
             </div>
             {% endif %}
         </div>
 
-        <!-- Turet e mia -->
+        <!-- Ture të ardhshme -->
         <div class="section">
-            <h2>🌄 Turet e mia</h2>
-            {% if tours %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Titull</th>
-                        <th>Data</th>
-                        <th>Lloji</th>
-                        <th>Vende të lira</th>
-                        <th>Çmim</th>
-                        <th>Status</th>
-                        <th>Veprime</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tour in tours %}
-                    <tr>
-                        <td>
-                            <strong>{{ tour.title }}</strong>
-                        </td>
-                        <td>{{ tour.date|date:"d M Y" }}</td>
-                        <td>{{ tour.tour_type.name|default:"—" }}</td>
-                        <td>
-                            <span class="status-{% if tour.available_spots > 0 %}confirmed{% else %}cancelled{% endif %}">
-                                {{ tour.available_spots }} / {{ tour.max_participants }}
-                            </span>
-                        </td>
-                        <td><strong>{{ tour.price_per_person }} {{ tour.get_currency_display }}</strong></td>
-                        <td>
-                            {% if tour.is_active %}
-                            <span class="status-confirmed">Aktiv</span>
-                            {% else %}
-                            <span class="status-cancelled">Joaktiv</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a class="btn-small" href="{% url 'tours:edit_tour' tour.slug %}">Edito</a>
-                            <a class="btn-small" href="{% url 'tours:edit_tour_pricing' tour.slug %}">Çmimet</a>
-                            <a class="btn-small" href="{% url 'tours:tour_statistics' tour.slug %}">Statistika</a>
-                            <a class="btn-small" href="{% url 'tours:tour_detail' tour.slug %}">Shiko</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-day"></i> Ture të ardhshme</h2>
+                <a href="{% url 'tours:my_tours' %}" class="view-all">Shiko të gjitha <i class="fas fa-arrow-right"></i></a>
+            </div>
+            {% if upcoming_tours %}
+            <div class="upcoming-list">
+                {% for tour in upcoming_tours %}
+                <div class="upcoming-item">
+                    <div class="upcoming-date">
+                        <span class="upcoming-day">{{ tour.date|date:"d" }}</span>
+                        <span class="upcoming-month">{{ tour.date|date:"M" }}</span>
+                    </div>
+                    <div class="upcoming-info">
+                        <strong>{{ tour.title }}</strong>
+                        <span class="muted">
+                            <i class="fas fa-clock"></i> {{ tour.time_start|default:"—" }}
+                            <i class="fas fa-map-marker-alt"></i> {{ tour.location_city|default:"—" }}
+                        </span>
+                    </div>
+                    <div class="upcoming-meta">
+                        <span class="spots {{ tour.is_active|yesno:'open,closed' }}">
+                            <i class="fas fa-users"></i> {{ tour.available_spots }}/{{ tour.max_participants }}
+                        </span>
+                    </div>
+                    <div class="upcoming-actions">
+                        <a class="btn-small" href="{% url 'tours:edit_tour' tour.slug %}"><i class="fas fa-edit"></i> Edito</a>
+                        <a class="btn-small" href="{% url 'tours:tour_detail' tour.slug %}"><i class="fas fa-eye"></i> Shiko</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
             {% else %}
-            <div class="no-data">
-                Nuk ke krijuar ende asnjë tur. Filloni duke krijuar një aventurë të re!
+            <div class="no-data small">
+                <i class="fas fa-calendar-plus"></i>
+                <p>Nuk ke ture të ardhshme. Krijo një tur të ri për të filluar!</p>
             </div>
             {% endif %}
         </div>
+
+        <!-- Vlerësime -->
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-star"></i> Vlerësimet më të fundit</h2>
+                <span class="rating-summary">
+                    <i class="fas fa-star"></i> {{ avg_rating|floatformat:1 }} nga {{ reviews_count }} vlerësime
+                </span>
+            </div>
+            {% if recent_reviews %}
+            <div class="reviews-grid">
+                {% for r in recent_reviews %}
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <div class="reviewer-avatar">{{ r.tourist.user.first_name.0|default:'?'|upper }}</div>
+                        <div>
+                            <strong>{{ r.tourist.user.get_full_name|default:r.tourist.user.username }}</strong>
+                            <span class="muted review-tour"><i class="fas fa-mountain"></i> {{ r.tour.title }}</span>
+                        </div>
+                        <span class="review-stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= r.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    {% if r.comment %}
+                    <p class="review-comment">“{{ r.comment }}”</p>
+                    {% endif %}
+                    <span class="review-date muted">{{ r.created_at|date:"d M Y" }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-data small">
+                <i class="fas fa-comment-dots"></i>
+                <p>Ende nuk ke vlerësime. Vlerësimet e turistëve do të shfaqen këtu.</p>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 {% endblock %}

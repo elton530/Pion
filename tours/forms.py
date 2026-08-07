@@ -99,10 +99,10 @@ class TourReviewForm(forms.ModelForm):
 
 class TourImageForm(forms.ModelForm):
     """Forma për imazhet shtesë të turit"""
-    
+
     class Meta:
         model = TourImage
-        fields = ['image', 'caption', 'order', 'is_primary']
+        fields = ['image', 'caption']
         widgets = {
             'image': forms.FileInput(
                 attrs={
@@ -116,22 +116,10 @@ class TourImageForm(forms.ModelForm):
                     'maxlength': '200'
                 }
             ),
-            'order': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'min': '0',
-                    'placeholder': 'Rendi i shfaqjes'
-                }
-            ),
-            'is_primary': forms.CheckboxInput(
-                attrs={'class': 'form-check-input'}
-            ),
         }
         labels = {
             'image': 'Imazhi',
             'caption': 'Përshkrimi',
-            'order': 'Rendi',
-            'is_primary': 'Vendose si foto kryesore',
         }
 
 

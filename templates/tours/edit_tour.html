@@ -146,9 +146,66 @@
                 </aside>
             </div>
 
-            <div class="form-grid">
-                <section class="panel">
-                    <h2>Vendndodhja & Orari</h2>
+            <div class="form-grid form-grid-full">
+                <section class="panel gallery-panel">
+                    <h2><i class="fas fa-images"></i> Galeria e Fotove</h2>
+                    <p class="gallery-help">
+                        Shto foto shtesë për turin. Ato shfaqen në faqen e detajeve pranë fotos kryesore
+                        (deri në 4 të para në krye, të gjitha në galeri).
+                    </p>
+
+                    {% if additional_images %}
+                    <div class="gallery-manager-grid">
+                        {% for img in additional_images %}
+                        <div class="gallery-manager-item">
+                            <img src="{{ img.image.url }}" alt="{{ img.caption|default:'Foto e turit' }}">
+                            <div class="gallery-manager-overlay">
+                                <span class="gallery-manager-caption">{{ img.caption|default:'Pa përshkrim' }}</span>
+                                <form method="post"
+                                      action="{% url 'tours:delete_tour_image' img.id %}"
+                                      class="gallery-delete-form"
+                                      onsubmit="return confirm('A je i sigurt që dëshiron ta fshish këtë foto?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="gallery-delete-btn" title="Fshi foton">
+                                        <i class="fas fa-trash-alt"></i> Fshi
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="gallery-empty">
+                        <i class="fas fa-images"></i>
+                        <p>Ende nuk ke shtuar foto shtesë. Ngarko foton e parë më poshtë.</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="gallery-upload">
+                        <h3><i class="fas fa-upload"></i> Ngarko foto të reja</h3>
+                        <form method="post" action="{% url 'tours:add_tour_image' tour.slug %}"
+                              enctype="multipart/form-data" class="gallery-upload-form">
+                            {% csrf_token %}
+                            <div class="form-row two-col">
+                                <div class="gallery-file-field">
+                                    <label for="gallery-file">Zgjidh foto</label>
+                                    <input type="file" name="image" id="gallery-file"
+                                           accept="image/*" required class="form-control">
+                                </div>
+                                <div>
+                                    <label for="gallery-caption">Përshkrim (opsional)</label>
+                                    <input type="text" name="caption" id="gallery-caption"
+                                           maxlength="200" placeholder="P.sh. 'Pamja nga maja e malit'"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary ripple">
+                                <i class="fas fa-plus"></i> Shto Foto
+                            </button>
+                        </form>
+                    </div>
+                </section>
+            </div>
                     <div class="form-row two-col">
                         <div>
                             <label for="{{ form.location_city.id_for_label }}">{{ form.location_city.label }}</label>
