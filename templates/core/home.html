@@ -368,7 +368,7 @@
 
                             <div class="tour-type">
                                 <i class="fas fa-hiking"></i>
-                                {{ tour.get_tour_type_display|default:"Aventurë në natyrë" }}
+                                {{ tour.tour_type.name|default:"Aventurë në natyrë" }}
                             </div>
 
                             <h3 class="tour-title">

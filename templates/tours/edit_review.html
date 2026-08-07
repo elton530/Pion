@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ndrysho Vlerësimin - {{ review.tour.title }} - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tour_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tour-detail-wrapper">
+    <div class="top-nav">
+        <a href="{{ review.tour.get_absolute_url }}" class="top-back-link">
+            <i class="fas fa-arrow-left"></i> Kthehu te {{ review.tour.title }}
+        </a>
+    </div>
+
+    <div class="header">
+        <h1>Ndrysho vlerësimin</h1>
+        <p class="tour-meta">
+            <span><i class="fas fa-hiking"></i> {{ review.tour.title }}</span>
+            <span><i class="fas fa-calendar"></i> {{ review.tour.date|date:"d F Y" }}</span>
+        </p>
+    </div>
+
+    <div class="edit-review-layout">
+        <div class="review-form edit-review-form">
+            <h3><i class="fas fa-edit"></i> Vlerësimi yt</h3>
+            <form action="{% url 'tours:edit_review' review.id %}" method="post" id="review-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Vlerëso këtë tur</label>
+                    <div class="star-rating" id="star-rating" data-target="rating-value" data-value="{{ review.rating }}">
+                        <span class="star" data-value="1" title="1 yll">★</span>
+                        <span class="star" data-value="2" title="2 ylla">★</span>
+                        <span class="star" data-value="3" title="3 ylla">★</span>
+                        <span class="star" data-value="4" title="4 ylla">★</span>
+                        <span class="star" data-value="5" title="5 ylla">★</span>
+                    </div>
+                    <input type="hidden" name="rating" id="rating-value" value="{{ review.rating }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Titulli i vlerësimit <small>(opsionale)</small></label>
+                    <input type="text" name="title" id="title" class="review-title-input"
+                           value="{{ review.title }}" placeholder="P.sh. 'Përvojë fantastike në mal'">
+                </div>
+
+                <!-- Detailed ratings -->
+                <div class="detail-ratings-group">
+                    <label class="detail-ratings-label"><i class="fas fa-sliders-h"></i> Vlerëso me detaje</label>
+                    <div class="detail-ratings-grid">
+                        <div class="form-group detail-rating-item">
+                            <label for="guide_rating">Udhëzuesi</label>
+                            <div class="star-rating" id="star-rating-guide" data-target="guide_rating" data-value="{{ review.guide_rating|default:0 }}">
+                                <span class="star" data-value="1" title="1">★</span>
+                                <span class="star" data-value="2" title="2">★</span>
+                                <span class="star" data-value="3" title="3">★</span>
+                                <span class="star" data-value="4" title="4">★</span>
+                                <span class="star" data-value="5" title="5">★</span>
+                            </div>
+                            <input type="hidden" name="guide_rating" id="guide_rating" value="{{ review.guide_rating|default:0 }}">
+                        </div>
+                        <div class="form-group detail-rating-item">
+                            <label for="value_rating">Vlerë për para</label>
+                            <div class="star-rating" id="star-rating-value" data-target="value_rating" data-value="{{ review.value_rating|default:0 }}">
+                                <span class="star" data-value="1" title="1">★</span>
+                                <span class="star" data-value="2" title="2">★</span>
+                                <span class="star" data-value="3" title="3">★</span>
+                                <span class="star" data-value="4" title="4">★</span>
+                                <span class="star" data-value="5" title="5">★</span>
+                            </div>
+                            <input type="hidden" name="value_rating" id="value_rating" value="{{ review.value_rating|default:0 }}">
+                        </div>
+                        <div class="form-group detail-rating-item">
+                            <label for="experience_rating">Përvoja e përgjithshme</label>
+                            <div class="star-rating" id="star-rating-experience" data-target="experience_rating" data-value="{{ review.experience_rating|default:0 }}">
+                                <span class="star" data-value="1" title="1">★</span>
+                                <span class="star" data-value="2" title="2">★</span>
+                                <span class="star" data-value="3" title="3">★</span>
+                                <span class="star" data-value="4" title="4">★</span>
+                                <span class="star" data-value="5" title="5">★</span>
+                            </div>
+                            <input type="hidden" name="experience_rating" id="experience_rating" value="{{ review.experience_rating|default:0 }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="comment">Komentari yt</label>
+                    <textarea name="comment" id="comment" rows="4"
+                              placeholder="Shkruani komentin tuaj këtu...">{{ review.comment }}</textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-save"></i> Ruaj ndryshimet
+                    </button>
+                    <a href="{{ review.tour.get_absolute_url }}" class="btn-cancel">Anulo</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/tour_detail.js' %}"></script>
+{% endblock %}

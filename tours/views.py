@@ -255,11 +255,34 @@ class TourDetailView(DetailView):
             is_approved=True,
             is_featured=True
         ).select_related("tourist__user")[:3]
-        
-        # Numri i vlerësimeve për çdo notë
-        context["rating_distribution"] = tour.reviews.filter(
-            is_approved=True
-        ).values('rating').annotate(count=Count('id')).order_by('rating')
+
+        # Shpërndarja e notave (5 -> 1) me përqindje për grafikun
+        approved_reviews = tour.reviews.filter(is_approved=True)
+        dist_raw = {
+            d['rating']: d['count']
+            for d in approved_reviews.values('rating').annotate(count=Count('id'))
+        }
+        total_ratings = sum(dist_raw.values()) or 1
+        context["rating_distribution"] = [
+            {
+                'rating': star,
+                'count': dist_raw.get(star, 0),
+                'percentage': round((dist_raw.get(star, 0) / total_ratings) * 100, 1),
+            }
+            for star in range(5, 0, -1)
+        ]
+
+        # Statistika të detalizuara të vlerësimeve (për vetë guidën)
+        detail_agg = approved_reviews.aggregate(
+            avg_guide=Avg('guide_rating'),
+            avg_value=Avg('value_rating'),
+            avg_experience=Avg('experience_rating'),
+        )
+        context["detail_ratings"] = {
+            'guide': detail_agg['avg_guide'],
+            'value': detail_agg['avg_value'],
+            'experience': detail_agg['avg_experience'],
+        }
         
         # Forma e vlerësimit
         context["review_form"] = TourReviewForm()
@@ -677,6 +700,11 @@ def create_review(request, slug):
         return redirect("tours:tour_detail", slug=slug)
     
     if request.method == "POST":
+        # Nëse përdoruesi ka lënë tashmë një vlerësim, ridrejtoje te redaktimi
+        if TourReview.objects.filter(tour=tour, tourist=request.user.tourist_profile).exists():
+            messages.info(request, "Ti ke lënë tashmë një vlerësim për këtë tur. Mund ta ndryshosh nga seksioni i vlerësimit tënd.")
+            return redirect("tours:tour_detail", slug=slug)
+
         form = TourReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)

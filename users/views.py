@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -152,40 +153,120 @@ class CustomPasswordChangeView(PasswordChangeView):
 
 @user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser))
 def admin_dashboard(request):
-    """Dashboard i administratorit për miratimin e guide-ve."""
+    """Dashboard i administratorit për miratimin e guide-ve dhe monitorimin e platformës."""
     pending_guides = GuideProfile.objects.filter(status="pending").select_related("user").order_by("-created_at")
-    verified_guides = GuideProfile.objects.filter(status="verified").count()
-    rejected_guides = GuideProfile.objects.filter(status="rejected").count()
+    verified_guides = GuideProfile.objects.filter(status="verified").select_related("user").order_by("-verified_at", "-updated_at")
+    rejected_guides = GuideProfile.objects.filter(status="rejected").select_related("user").order_by("-updated_at")
+    suspended_guides = GuideProfile.objects.filter(status="suspended").select_related("user").order_by("-updated_at")
+
+    # ===== Statistika të pasuruara për guide-t e miratuar =====
+    verified_ids = [g.id for g in verified_guides]
+    if verified_ids:
+        booking_stats = (
+            Booking.objects.filter(tour__guide_id__in=verified_ids)
+            .values("tour__guide_id")
+            .annotate(
+                booking_count=Count("id"),
+                tourist_count=Count("tourist", distinct=True),
+                revenue=Sum(
+                    "final_price",
+                    filter=Q(status__in=["confirmed", "completed"]),
+                ),
+            )
+        )
+        guide_booking_stats = {row["tour__guide_id"]: row for row in booking_stats}
+
+        tour_counts = dict(
+            Tour.objects.filter(guide_id__in=verified_ids, is_active=True)
+            .values_list("guide_id")
+            .annotate(c=Count("id"))
+            .order_by()
+        )
+    else:
+        guide_booking_stats = {}
+        tour_counts = {}
+
+    for guide in verified_guides:
+        stats = guide_booking_stats.get(guide.id, {})
+        guide.admin_tour_count = tour_counts.get(guide.id, 0)
+        guide.admin_booking_count = stats.get("booking_count", 0)
+        guide.admin_tourist_count = stats.get("tourist_count", 0)
+        guide.admin_revenue = stats.get("revenue") or 0
+
+    verified_count = verified_guides.count()
+    total_tourists = TouristProfile.objects.count()
+    total_tours = Tour.objects.count()
+    active_tours = Tour.objects.filter(is_active=True, status="published").count()
+    total_bookings = Booking.objects.count()
+    pending_bookings = Booking.objects.filter(status="pending").count()
+    confirmed_bookings = Booking.objects.filter(status="confirmed").count()
+    completed_bookings = Booking.objects.filter(status="completed").count()
+    platform_revenue = Booking.objects.filter(status__in=["confirmed", "completed"]).aggregate(
+        total=Sum("final_price")
+    )["total"] or 0
+
+    recent_bookings = Booking.objects.select_related("tour", "tourist__user").order_by("-created_at")[:5]
 
     if request.method == "POST":
         guide_id = request.POST.get("guide_id")
         action = request.POST.get("action")
-        if guide_id and action in {"approve", "reject"}:
+        if guide_id and action in {"approve", "reject", "suspend", "reactivate"}:
             guide = get_object_or_404(GuideProfile, id=guide_id)
+            name = guide.user.get_full_name() or guide.user.username
+
             if action == "approve":
                 guide.status = "verified"
                 guide.is_verified = True
                 guide.is_active = True
+                guide.verified_at = timezone.now()
                 guide.user.is_active = True
                 guide.user.save(update_fields=["is_active"])
-                guide.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
-                messages.success(request, f"✅ Guide '{guide.user.get_full_name() or guide.user.username}' u miratua.")
-            else:
+                guide.save(update_fields=["status", "is_verified", "is_active", "verified_at", "updated_at"])
+                messages.success(request, f"✅ Guide '{name}' u miratua.")
+            elif action == "reject":
                 guide.status = "rejected"
                 guide.is_verified = False
                 guide.is_active = False
                 guide.user.is_active = False
                 guide.user.save(update_fields=["is_active"])
                 guide.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
-                messages.warning(request, f"⚠️ Guide '{guide.user.get_full_name() or guide.user.username}' u refuzua.")
+                messages.warning(request, f"⚠️ Guide '{name}' u refuzua.")
+            elif action == "suspend":
+                guide.status = "suspended"
+                guide.is_active = False
+                guide.user.is_active = False
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_active", "updated_at"])
+                messages.warning(request, f"🚫 Guide '{name}' u pezullua.")
+            elif action == "reactivate":
+                guide.status = "verified"
+                guide.is_active = True
+                guide.user.is_active = True
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_active", "updated_at"])
+                messages.success(request, f"✅ Guide '{name}' u riaktivizua.")
             return redirect("users:admin_dashboard")
 
     context = {
         "pending_guides": pending_guides,
         "pending_count": pending_guides.count(),
-        "verified_count": verified_guides,
-        "rejected_count": rejected_guides,
-        "total_users": __import__('django.contrib.auth').contrib.auth.models.User.objects.count(),
+        "verified_guides": verified_guides,
+        "verified_count": verified_count,
+        "rejected_count": rejected_guides.count(),
+        "rejected_guides": rejected_guides,
+        "suspended_count": suspended_guides.count(),
+        "suspended_guides": suspended_guides,
+        "total_guides": GuideProfile.objects.count(),
+        "total_users": User.objects.count(),
+        "total_tourists": total_tourists,
+        "total_tours": total_tours,
+        "active_tours": active_tours,
+        "total_bookings": total_bookings,
+        "pending_bookings": pending_bookings,
+        "confirmed_bookings": confirmed_bookings,
+        "completed_bookings": completed_bookings,
+        "platform_revenue": platform_revenue,
+        "recent_bookings": recent_bookings,
     }
     return render(request, "users/admin_dashboard.html", context)
 
@@ -605,19 +686,51 @@ class UserProfileDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         guide = self.object
-        
+
         # Tours
         context['tours'] = Tour.objects.filter(guide=guide, is_active=True).order_by('-date')[:6]
-        
+
         # Reviews
-        context['reviews'] = TourReview.objects.filter(
+        approved_reviews = TourReview.objects.filter(
             tour__guide=guide,
             is_approved=True
-        ).order_by('-created_at')[:5]
-        
-        context['avg_rating'] = TourReview.objects.filter(
-            tour__guide=guide,
-            is_approved=True
-        ).aggregate(avg=Avg('rating'))['avg'] or 0
-        
+        )
+        context['reviews'] = approved_reviews.select_related(
+            'tourist__user', 'tour'
+        ).order_by('-created_at')[:6]
+
+        context['featured_reviews'] = approved_reviews.filter(
+            is_featured=True
+        ).select_related('tourist__user', 'tour').order_by('-created_at')[:3]
+
+        context['avg_rating'] = approved_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+        context['reviews_count'] = approved_reviews.count()
+
+        # Shpërndarja e notave (5 -> 1) me përqindje për grafikun
+        dist_raw = {
+            d['rating']: d['count']
+            for d in approved_reviews.values('rating').annotate(count=Count('id'))
+        }
+        total_ratings = sum(dist_raw.values()) or 1
+        context['rating_distribution'] = [
+            {
+                'rating': star,
+                'count': dist_raw.get(star, 0),
+                'percentage': round((dist_raw.get(star, 0) / total_ratings) * 100, 1),
+            }
+            for star in range(5, 0, -1)
+        ]
+
+        # Detajet e vlerësimeve
+        detail_agg = approved_reviews.aggregate(
+            avg_guide=Avg('guide_rating'),
+            avg_value=Avg('value_rating'),
+            avg_experience=Avg('experience_rating'),
+        )
+        context['detail_ratings'] = {
+            'guide': detail_agg['avg_guide'],
+            'value': detail_agg['avg_value'],
+            'experience': detail_agg['avg_experience'],
+        }
+
         return context

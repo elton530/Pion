@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load reviews_extras %}
+
+{% block title %}{{ guide.full_name }} - Guide Lokal në Open Map{% endblock %}
+
+{% block meta_description %}
+Profili publik i guidës {{ guide.full_name }}. Zbulo turet e tij/saj në natyrën shqiptare dhe vlerësimet e turistëve.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/guide_profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="guide-profile-page">
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav class="profile-breadcrumb" aria-label="Navigim">
+            <a href="{% url 'tours:tour_list' %}"><i class="fas fa-home"></i> Kryefaqja</a>
+            <span class="profile-breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+            <span>Guida</span>
+            <span class="profile-breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+            <span class="profile-breadcrumb-current">{{ guide.full_name }}</span>
+        </nav>
+
+        <!-- Profile Hero -->
+        <section class="profile-hero">
+            <div class="profile-hero-cover"></div>
+            <div class="profile-hero-inner">
+                <div class="profile-hero-avatar">
+                    {% if guide.photo %}
+                        <img src="{{ guide.photo.url }}" alt="{{ guide.full_name }}" class="profile-hero-img">
+                    {% else %}
+                        <div class="profile-hero-img profile-hero-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                    {% if guide.is_verified %}
+                    <span class="profile-verified-badge" title="Guide i verifikuar">
+                        <i class="fas fa-check-circle"></i>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="profile-hero-info">
+                    <div class="profile-hero-name-row">
+                        <h1>{{ guide.full_name }}</h1>
+                        {% if guide.is_verified %}
+                        <span class="profile-verified-tag">
+                            <i class="fas fa-badge-check"></i> Verifikuar
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="profile-hero-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ guide.location }}
+                        {% if guide.specialty %}
+                        <span class="profile-specialty-chip">
+                            <i class="fas fa-compass"></i> {{ guide.get_specialty_display }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="profile-hero-rating">
+                        <span class="profile-hero-stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= avg_rating|floor_stars %}<i class="fas fa-star"></i>
+                                {% elif forloop.counter == avg_rating|floor_stars|add:1 and avg_rating|has_half_star %}<i class="fas fa-star-half-alt"></i>
+                                {% else %}<i class="far fa-star"></i>{% endif %}
+                            {% endfor %}
+                        </span>
+                        <span class="profile-hero-rating-value">{{ avg_rating|floatformat:1 }}</span>
+                        <span class="profile-hero-rating-count">({{ reviews_count }} vlerësime)</span>
+                        {% if guide.years_experience %}
+                        <span class="profile-hero-exp"><i class="fas fa-medal"></i> {{ guide.years_experience }} vjet përvojë</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Row -->
+        <section class="profile-stats-row">
+            <div class="profile-stat-item">
+                <span class="profile-stat-icon icon-rating"><i class="fas fa-star"></i></span>
+                <div>
+                    <strong>{{ avg_rating|floatformat:1 }}</strong>
+                    <span>Vlerësim mesatar</span>
+                </div>
+            </div>
+            <div class="profile-stat-item">
+                <span class="profile-stat-icon icon-tours"><i class="fas fa-mountain-sun"></i></span>
+                <div>
+                    <strong>{{ tours|length }}</strong>
+                    <span>Ture aktive</span>
+                </div>
+            </div>
+            <div class="profile-stat-item">
+                <span class="profile-stat-icon icon-reviews"><i class="fas fa-comments"></i></span>
+                <div>
+                    <strong>{{ reviews_count }}</strong>
+                    <span>Vlerësime</span>
+                </div>
+            </div>
+            {% if guide.total_tourists %}
+            <div class="profile-stat-item">
+                <span class="profile-stat-icon icon-tourists"><i class="fas fa-users"></i></span>
+                <div>
+                    <strong>{{ guide.total_tourists }}</strong>
+                    <span>Turistë të udhëhequr</span>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="profile-layout">
+
+            <!-- ============ MAIN COLUMN ============ -->
+            <div class="profile-main-col">
+
+                <!-- Bio -->
+                {% if guide.bio %}
+                <section class="profile-card">
+                    <h2 class="profile-card-title"><i class="fas fa-user-circle"></i> Rreth {{ guide.first_name|default:guide.full_name }}</h2>
+                    <p class="profile-bio">{{ guide.bio }}</p>
+                </section>
+                {% endif %}
+
+                <!-- Tours -->
+                <section class="profile-card">
+                    <h2 class="profile-card-title"><i class="fas fa-mountain"></i> Turet e {{ guide.first_name|default:guide.full_name }}</h2>
+                    {% if tours %}
+                    <div class="tour-grid" id="tour-grid">
+                        {% for tour in tours %}
+                        <div class="tour-card">
+                            <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
+                                <div class="tour-image-wrapper">
+                                    {% if tour.main_image %}
+                                        <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="tour-image" loading="lazy">
+                                    {% else %}
+                                        <div class="no-image-placeholder">
+                                            <i class="fas fa-mountain"></i>
+                                            <span>Pa foto</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if tour.available_spots > 0 %}
+                                    <div class="tour-badge available">
+                                        <i class="fas fa-check-circle"></i>
+                                        {{ tour.available_spots }} vende
+                                    </div>
+                                    {% else %}
+                                    <div class="tour-badge sold-out">
+                                        <i class="fas fa-times-circle"></i>
+                                        Mbushur
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="tour-info">
+                                    <h3 class="tour-title">{{ tour.title }}</h3>
+                                    <div class="tour-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            {{ tour.date|date:"d M Y" }}
+                                        </span>
+                                        <span class="meta-item">
+                                            <i class="fas fa-hourglass-end"></i>
+                                            {{ tour.duration_hours }}h
+                                        </span>
+                                    </div>
+                                    <div class="tour-footer">
+                                        <div class="tour-price">
+                                            <span class="price-amount">{{ tour.price_per_person }}</span>
+                                            <span class="price-label">{{ tour.get_currency_display }}/person</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-data">
+                        Nuk ka ture aktive për momentin nga ky guide.
+                    </div>
+                    {% endif %}
+                </section>
+
+                <!-- Reviews -->
+                <section class="profile-card">
+                    <h2 class="profile-card-title"><i class="fas fa-star"></i> Vlerësimet</h2>
+
+                    {% if reviews_count > 0 %}
+                    <!-- Rating summary -->
+                    <div class="profile-rating-summary">
+                        <div class="profile-rating-big">
+                            <span class="profile-rating-num">{{ avg_rating|floatformat:1 }}</span>
+                            <span class="profile-rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= avg_rating|floor_stars %}<i class="fas fa-star"></i>
+                                    {% elif forloop.counter == avg_rating|floor_stars|add:1 and avg_rating|has_half_star %}<i class="fas fa-star-half-alt"></i>
+                                    {% else %}<i class="far fa-star"></i>{% endif %}
+                                {% endfor %}
+                            </span>
+                            <span class="profile-rating-total">{{ reviews_count }} vlerësime</span>
+                        </div>
+                        <div class="profile-rating-bars">
+                            {% for d in rating_distribution %}
+                            <div class="profile-rating-bar-row">
+                                <span class="profile-rating-bar-label">{{ d.rating }} <i class="fas fa-star"></i></span>
+                                <div class="profile-rating-bar-track">
+                                    <div class="profile-rating-bar-fill" style="width: {{ d.percentage }}%"></div>
+                                </div>
+                                <span class="profile-rating-bar-count">{{ d.count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if detail_ratings.guide %}
+                        <div class="profile-rating-details">
+                            <span class="profile-rating-detail-item"><i class="fas fa-user-tie"></i> Udhëzuesi: <strong>{{ detail_ratings.guide|floatformat:1 }}</strong></span>
+                            <span class="profile-rating-detail-item"><i class="fas fa-coins"></i> Vlera: <strong>{{ detail_ratings.value|floatformat:1 }}</strong></span>
+                            <span class="profile-rating-detail-item"><i class="fas fa-hiking"></i> Përvoja: <strong>{{ detail_ratings.experience|floatformat:1 }}</strong></span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if featured_reviews %}
+                    <div class="profile-featured-reviews">
+                        {% for r in featured_reviews %}
+                        <div class="profile-featured-review">
+                            <div class="profile-featured-review-top">
+                                <i class="fas fa-quote-left profile-featured-quote"></i>
+                                <span class="profile-featured-badge"><i class="fas fa-crown"></i> Vlerësim i veçantë</span>
+                            </div>
+                            <div class="profile-featured-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= r.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                                {% endfor %}
+                            </div>
+                            {% if r.comment %}
+                            <p class="profile-featured-comment">“{{ r.comment }}”</p>
+                            {% endif %}
+                            <p class="profile-featured-author">{{ r.tourist.user.get_full_name|default:r.tourist.user.username }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if reviews %}
+                    <div class="profile-reviews-list">
+                        {% for review in reviews %}
+                        <div class="profile-review-item">
+                            <div class="profile-review-header">
+                                <div class="profile-reviewer">
+                                    <div class="profile-reviewer-avatar">
+                                        {{ review.tourist.user.first_name.0|default:'?'|upper }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ review.tourist.user.get_full_name|default:review.tourist.user.username }}</strong>
+                                        {% if review.is_verified %}
+                                        <span class="profile-review-verified" title="Vlerësim i verifikuar"><i class="fas fa-check-circle"></i></span>
+                                        {% endif %}
+                                        <span class="profile-review-date">{{ review.created_at|date:"d M Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="profile-review-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="profile-review-tour">
+                                <i class="fas fa-mountain"></i>
+                                {{ review.tour.title }}
+                            </p>
+                            {% if review.comment %}
+                            <p class="profile-review-comment">{{ review.comment }}</p>
+                            {% endif %}
+                            {% if review.guide_rating or review.value_rating or review.experience_rating %}
+                            <div class="profile-review-detail-tags">
+                                {% if review.guide_rating %}
+                                <span class="profile-review-detail-tag"><i class="fas fa-user-tie"></i> Udhëzuesi <strong>{{ review.guide_rating }}/5</strong></span>
+                                {% endif %}
+                                {% if review.value_rating %}
+                                <span class="profile-review-detail-tag"><i class="fas fa-coins"></i> Vlera <strong>{{ review.value_rating }}/5</strong></span>
+                                {% endif %}
+                                {% if review.experience_rating %}
+                                <span class="profile-review-detail-tag"><i class="fas fa-hiking"></i> Përvoja <strong>{{ review.experience_rating }}/5</strong></span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-data">
+                        Nuk ka ende vlerësime për këtë guide.
+                    </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <!-- ============ SIDEBAR ============ -->
+            <aside class="profile-sidebar">
+
+                <!-- Info -->
+                <div class="profile-sidebar-card">
+                    <h3 class="profile-sidebar-title"><i class="fas fa-info-circle"></i> Informacion</h3>
+                    <div class="profile-sidebar-details">
+                        {% if guide.languages_list %}
+                        <div class="profile-sidebar-detail">
+                            <div class="profile-sidebar-detail-label"><i class="fas fa-language"></i> Gjuhët</div>
+                            <div class="profile-chips">
+                                {% for lang in guide.languages_list %}
+                                <span class="profile-chip">{{ lang }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if guide.specialties_list %}
+                        <div class="profile-sidebar-detail">
+                            <div class="profile-sidebar-detail-label"><i class="fas fa-compass"></i> Specializimet</div>
+                            <div class="profile-chips">
+                                {% for sp in guide.specialties_list %}
+                                <span class="profile-chip chip-specialty">{{ sp }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if guide.years_experience %}
+                        <div class="profile-sidebar-detail">
+                            <div class="profile-sidebar-detail-label"><i class="fas fa-clock"></i> Përvoja</div>
+                            <p class="profile-sidebar-detail-value">{{ guide.years_experience }} vjet</p>
+                        </div>
+                        {% endif %}
+
+                        {% if guide.experience_level %}
+                        <div class="profile-sidebar-detail">
+                            <div class="profile-sidebar-detail-label"><i class="fas fa-signal"></i> Niveli</div>
+                            <p class="profile-sidebar-detail-value">{{ guide.get_experience_level_display }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if guide.certifications_list %}
+                        <div class="profile-sidebar-detail">
+                            <div class="profile-sidebar-detail-label"><i class="fas fa-certificate"></i> Certifikimet</div>
+                            <ul class="profile-cert-list">
+                                {% for cert in guide.certifications_list %}
+                                <li><i class="fas fa-check-circle"></i> {{ cert }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Contact & Social -->
+                {% if guide.phone or guide.website or guide.instagram or guide.facebook %}
+                <div class="profile-sidebar-card">
+                    <h3 class="profile-sidebar-title"><i class="fas fa-address-card"></i> Kontakt</h3>
+                    <div class="profile-contact-list">
+                        {% if guide.phone %}
+                        <a href="tel:{{ guide.phone }}" class="profile-contact-item">
+                            <i class="fas fa-phone"></i> {{ guide.phone }}
+                        </a>
+                        {% endif %}
+                        {% if guide.website %}
+                        <a href="{{ guide.website }}" target="_blank" rel="noopener noreferrer" class="profile-contact-item">
+                            <i class="fas fa-globe"></i> Uebfaqja
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% if guide.instagram or guide.facebook %}
+                    <div class="profile-social">
+                        {% if guide.instagram %}
+                        <a href="{{ guide.instagram }}" target="_blank" rel="noopener noreferrer" class="profile-social-link social-instagram" title="Instagram" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        {% endif %}
+                        {% if guide.facebook %}
+                        <a href="{{ guide.facebook }}" target="_blank" rel="noopener noreferrer" class="profile-social-link social-facebook" title="Facebook" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- CTA -->
+                <div class="profile-sidebar-card profile-cta-card">
+                    <h3 class="profile-sidebar-title"><i class="fas fa-paper-plane"></i> Eksploro aventurën</h3>
+                    <p class="profile-cta-text">Gjej turet e {{ guide.first_name|default:guide.full_name }} dhe përjeto natyrën shqiptare.</p>
+                    <a href="{% url 'tours:tour_list' %}" class="profile-cta-btn">
+                        <i class="fas fa-compass"></i> Shiko të gjitha turet
+                    </a>
+                </div>
+
+            </aside>
+
+        </div><!-- /.profile-layout -->
+
+    </div>
+</div>
+{% endblock %}

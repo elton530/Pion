@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Paneli im — Pion{% endblock %}
+{% block title %}Paneli im — Open Map{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/turist_dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container tourist-dashboard">
 
     <header>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -89,14 +89,14 @@
                     {% else %}status-pending{% endif %}">
                     {% if booking.is_confirmed_24h %}Konfirmuar 24h
                     {% elif booking.status == 'confirmed' %}Konfirmuar
-                    {% elif booking.status == 'cancelled' %}Anulluar
+                    {% elif booking.status == 'cancelled' %}Anuluar
                     {% else %}Në Pritje{% endif %}
                 </span>
             </div>
 
             <div class="booking-info">
                 <span><i class="fa-solid fa-user-tie"></i> {{ booking.tour.guide.user.get_full_name|default:booking.tour.guide.user.username }}</span>
-                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.location_start }}</span>
+                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.meeting_point }}</span>
             </div>
 
             <div class="booking-info" style="border-top:1px solid var(--border); padding-top:1.2rem;">

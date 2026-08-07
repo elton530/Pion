@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load reviews_extras %}
 
 {% block title %}{{ tour.title }} - {{ tour.date|date:"d F Y" }} - Open Map{% endblock %}
 
@@ -68,14 +69,14 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 
             <!-- Info Grid -->
             <div class="info-grid">
-                <div class="info-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="info-card">
                     <div class="info-icon icon-price">
                         <i class="fas fa-coins"></i>
                     </div>
                     <strong>{{ tour.price_per_person }} {{ tour.get_currency_display }}</strong>
                     <span>Çmimi për person</span>
                 </div>
-                <div class="info-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="info-card">
                     <div class="info-icon icon-bookings">
                         <i class="fas fa-user-check"></i>
                     </div>
@@ -88,7 +89,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                         <span class="progress-text">{{ tour.confirmed_percentage|floatformat:1 }}% e plotë</span>
                     </div>
                 </div>
-                <div class="info-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="info-card">
                     <div class="info-icon icon-type">
                         <i class="fas fa-route"></i>
                     </div>
@@ -99,14 +100,14 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                     {% endif %}
                     <span>Lloji i turit</span>
                 </div>
-                <div class="info-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="info-card">
                     <div class="info-icon icon-difficulty">
                         <i class="fas fa-mountain"></i>
                     </div>
                     <strong>{{ tour.get_difficulty_display }}</strong>
                     <span>Vështirësia</span>
                 </div>
-                <div class="info-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="info-card">
                     <div class="info-icon icon-duration">
                         <i class="fas fa-stopwatch"></i>
                     </div>
@@ -114,7 +115,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                     <span>Kohëzgjatja</span>
                 </div>
                 {% if tour.distance_km %}
-                <div class="info-card" data-aos="fade-up" data-aos-delay="500">
+                <div class="info-card">
                     <div class="info-icon icon-distance">
                         <i class="fas fa-map-signs"></i>
                     </div>
@@ -125,21 +126,47 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
             </div>
 
             <!-- Guide Section -->
-            <div class="guide-section" data-aos="fade-left">
-                <div class="guide-photo-wrapper">
-                    {% if tour.guide.photo %}
-                    <img src="{{ tour.guide.photo.url }}" alt="{{ tour.guide.user.get_full_name }}" class="guide-photo">
-                    {% else %}
-                    <div class="guide-initial">
-                        {{ tour.guide.user.first_name.0|upper }}
+            <div class="guide-section">
+                <a href="{% url 'users:guide_profile_public' username=tour.guide.user.username %}" class="guide-photo-link" aria-label="Shiko profilin e {{ tour.guide.user.get_full_name }}">
+                    <div class="guide-photo-wrapper">
+                        {% if tour.guide.photo %}
+                        <img src="{{ tour.guide.photo.url }}" alt="{{ tour.guide.user.get_full_name }}" class="guide-photo">
+                        {% else %}
+                        <div class="guide-initial">
+                            {{ tour.guide.user.first_name.0|upper }}
+                        </div>
+                        {% endif %}
+                        {% if tour.guide.is_verified %}
+                        <span class="guide-verified-badge" title="Guide i verifikuar"><i class="fas fa-check-circle"></i></span>
+                        {% endif %}
                     </div>
-                    {% endif %}
-                </div>
+                </a>
                 <div class="guide-info">
                     <h3>
                         <i class="fas fa-user-shield"></i>
                         {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
+                        {% if tour.guide.is_verified %}
+                        <span class="guide-verified-tag"><i class="fas fa-badge-check"></i> Verifikuar</span>
+                        {% endif %}
                     </h3>
+
+                    <div class="guide-rating-line">
+                        <span class="guide-stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= tour.guide.average_rating|floor_stars %}
+                                <i class="fas fa-star"></i>
+                                {% else %}
+                                <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        <span class="guide-rating-value">{{ tour.guide.average_rating|floatformat:1 }}</span>
+                        <span class="guide-reviews-count">({{ tour.guide.reviews_count }} vlerësime)</span>
+                        {% if tour.guide.years_experience %}
+                        <span class="guide-years"><i class="fas fa-medal"></i> {{ tour.guide.years_experience }} vjet përvojë</span>
+                        {% endif %}
+                    </div>
+
                     <div class="guide-details">
                         <p>
                             <i class="fas fa-map-marker-alt"></i>
@@ -162,11 +189,15 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                         </p>
                         {% endif %}
                     </div>
+
+                    <a href="{% url 'users:guide_profile_public' username=tour.guide.user.username %}" class="guide-profile-link">
+                        <i class="fas fa-id-card"></i> Shiko profilin e plotë
+                    </a>
                 </div>
             </div>
 
             <!-- Description Section -->
-            <div class="description" data-aos="fade-up">
+            <div class="description">
                 <h2><i class="fas fa-align-left"></i> Përshkrimi i turit</h2>
                 <p>{{ tour.full_description|linebreaks }}</p>
                 <div class="location-info">
@@ -176,7 +207,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
             </div>
 
             <!-- Highlights / Included / What to bring -->
-            <div class="features-lists" data-aos="fade-up">
+            <div class="features-lists">
 
                 {# Single consolidated "price includes" block: list + flags, shown only once #}
                 {% if tour.included_list or tour.transportation_included or tour.meal_included or tour.accommodation_included or tour.equipment_provided %}
@@ -243,7 +274,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 
             <!-- Gallery -->
             {% if additional_images %}
-            <section class="gallery-section" data-aos="fade-up">
+            <section class="gallery-section">
                 <h2><i class="fas fa-images"></i> Galeri foto</h2>
                 <div class="gallery">
                     {% for img in additional_images %}
@@ -259,8 +290,91 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
             </section>
             {% endif %}
 
+            <!-- Itinerary / Daily Schedule -->
+            {% if schedules %}
+            <section class="itinerary-section">
+                <h2><i class="fas fa-route"></i> Itinerari ditor</h2>
+                <div class="itinerary-timeline">
+                    {% for s in schedules %}
+                    <div class="itinerary-item">
+                        <div class="itinerary-day">
+                            <span class="itinerary-day-num">Dita {{ s.day_number }}</span>
+                            {% if s.start_time or s.end_time %}
+                            <span class="itinerary-time">
+                                <i class="fas fa-clock"></i> {{ s.start_time|time:"H:i"|default:'' }}{% if s.start_time and s.end_time %} – {% endif %}{{ s.end_time|time:"H:i"|default:'' }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="itinerary-content">
+                            {% if s.title %}<h3>{{ s.title }}</h3>{% endif %}
+                            {% if s.description %}<p>{{ s.description }}</p>{% endif %}
+                            <div class="itinerary-meta">
+                                {% if s.meals_included %}
+                                <span><i class="fas fa-utensils"></i> {{ s.meals_included }}</span>
+                                {% endif %}
+                                {% if s.accommodation %}
+                                <span><i class="fas fa-bed"></i> {{ s.accommodation }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- FAQ -->
+            {% if faqs %}
+            <section class="faq-section">
+                <h2><i class="fas fa-circle-question"></i> Pyetje të shpeshta</h2>
+                <div class="faq-list">
+                    {% for faq in faqs %}
+                    <div class="faq-item">
+                        <button class="faq-question" type="button" aria-expanded="false">
+                            <span>{{ faq.question }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <p>{{ faq.answer }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Recommended Tours -->
+            {% if recommended_tours %}
+            <section class="recommended-section">
+                <h2><i class="fas fa-compass"></i> Ture të tjera që mund të të pëlqejnë</h2>
+                <div class="recommended-grid">
+                    {% for rt in recommended_tours %}
+                    <a href="{{ rt.get_absolute_url }}" class="recommended-card">
+                        {% if rt.main_image %}
+                        <div class="recommended-image-wrapper">
+                            <img src="{{ rt.main_image.url }}" alt="{{ rt.title }}" loading="lazy" class="recommended-image">
+                        </div>
+                        {% endif %}
+                        <div class="recommended-body">
+                            <h3>{{ rt.title }}</h3>
+                            <p class="recommended-meta">
+                                <span><i class="fas fa-calendar"></i> {{ rt.date|date:"d M Y" }}</span>
+                            </p>
+                            <div class="recommended-foot">
+                                <span class="recommended-price">{{ rt.current_price }} {{ rt.get_currency_display }}</span>
+                                {% if rt.reviews_count > 0 %}
+                                <span class="recommended-rating"><i class="fas fa-star"></i> {{ rt.average_rating|floatformat:1 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
             <!-- Reviews Section -->
-            <div class="reviews-section" data-aos="fade-up">
+            <div class="reviews-section" id="reviews">
                 <div class="reviews-header">
                     <h2><i class="fas fa-star"></i> Vlerësimet</h2>
                     {% if tour.reviews_count > 0 %}
@@ -271,38 +385,177 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                     {% endif %}
                 </div>
 
-                {# Detailed stats removed for public view. Guides can see full analytics on their Stats page. #}
+                {% if tour.reviews_count > 0 %}
+                <!-- Rating Summary -->
+                <div class="rating-summary">
+                    <div class="rating-overall">
+                        <span class="rating-number">{{ tour.average_rating|floatformat:1 }}</span>
+                        <span class="rating-stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= tour.average_rating|floor_stars %}<i class="fas fa-star"></i>
+                                {% elif forloop.counter == tour.average_rating|floor_stars|add:1 and tour.average_rating|has_half_star %}<i class="fas fa-star-half-alt"></i>
+                                {% else %}<i class="far fa-star"></i>{% endif %}
+                            {% endfor %}
+                        </span>
+                        <span class="rating-total">{{ tour.reviews_count }} vlerësime</span>
+                    </div>
+                    <div class="rating-bars">
+                        {% for d in rating_distribution %}
+                        <div class="rating-bar-row">
+                            <span class="rating-bar-label">{{ d.rating }} <i class="fas fa-star"></i></span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" style="width: {{ d.percentage }}%"></div>
+                            </div>
+                            <span class="rating-bar-count">{{ d.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if detail_ratings.guide %}
+                    <div class="rating-details">
+                        <span class="rating-detail-item" title="Vlerësimi i udhëzuesit">
+                            <i class="fas fa-user-tie"></i> Udhëzuesi: <strong>{{ detail_ratings.guide|floatformat:1 }}</strong>
+                        </span>
+                        <span class="rating-detail-item" title="Vlerë për para">
+                            <i class="fas fa-coins"></i> Vlera: <strong>{{ detail_ratings.value|floatformat:1 }}</strong>
+                        </span>
+                        <span class="rating-detail-item" title="Përvoja e përgjithshme">
+                            <i class="fas fa-hiking"></i> Përvoja: <strong>{{ detail_ratings.experience|floatformat:1 }}</strong>
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Featured Reviews -->
+                {% if featured_reviews %}
+                <div class="featured-reviews">
+                    {% for r in featured_reviews %}
+                    <div class="featured-review-item">
+                        <div class="featured-review-head">
+                            <span class="featured-review-quote"><i class="fas fa-quote-left"></i></span>
+                            <span class="featured-badge"><i class="fas fa-crown"></i> Vlerësim i veçantë</span>
+                        </div>
+                        <div class="review-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= r.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                            {% endfor %}
+                        </div>
+                        {% if r.comment %}
+                        <p class="review-text">{{ r.comment }}</p>
+                        {% endif %}
+                        <div class="reviewer-info">
+                            <span class="reviewer-name">{{ r.tourist.user.get_full_name|default:r.tourist.user.username }}</span>
+                            <span class="review-date">{{ r.created_at|date:"d M Y" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 <!-- Review Form -->
                 {% if user.is_authenticated and user.tourist_profile %}
-                <div class="review-form">
-                    <h3>Lër një vlerësim</h3>
-                    <form action="{% url 'tours:create_review' tour.slug %}" method="post" id="review-form">
-                        {% csrf_token %}
-
-                        <div class="form-group">
-                            <label>Vlerëso këtë tur</label>
-                            <div class="star-rating" id="star-rating">
-                                <span class="star" data-value="1" title="1 yll">★</span>
-                                <span class="star" data-value="2" title="2 ylla">★</span>
-                                <span class="star" data-value="3" title="3 ylla">★</span>
-                                <span class="star" data-value="4" title="4 ylla">★</span>
-                                <span class="star" data-value="5" title="5 ylla">★</span>
+                    {% if user_review %}
+                    <div class="own-review">
+                        <div class="own-review-head">
+                            <h3><i class="fas fa-pen-fancy"></i> Vlerësimi yt për këtë tur</h3>
+                            <div class="own-review-actions">
+                                <a href="{% url 'tours:edit_review' user_review.id %}" class="btn-edit-review">
+                                    <i class="fas fa-edit"></i> Ndrysho
+                                </a>
+                                <form method="post" action="{% url 'tours:delete_review' user_review.id %}"
+                                      onsubmit="return confirm('A je i sigurt që dëshiron ta fshish vlerësimin tënd?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete-review">
+                                        <i class="fas fa-trash-alt"></i> Fshi
+                                    </button>
+                                </form>
                             </div>
-                            <input type="hidden" name="rating" id="rating-value" value="0" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="comment">Komentari yt</label>
-                            <textarea name="comment" id="comment" rows="4"
-                                      placeholder="Shkruani komentin tuaj këtu..."></textarea>
+                        <div class="review-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= user_review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                            {% endfor %}
                         </div>
+                        {% if user_review.comment %}
+                        <p class="review-text">{{ user_review.comment }}</p>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="review-form">
+                        <h3>Lër një vlerësim</h3>
+                        <form action="{% url 'tours:create_review' tour.slug %}" method="post" id="review-form">
+                            {% csrf_token %}
 
-                        <button type="submit" class="btn-submit">
-                            <i class="fas fa-paper-plane"></i> Dërgo Vlerësimin
-                        </button>
-                    </form>
-                </div>
+                            <div class="form-group">
+                                <label>Vlerëso këtë tur</label>
+                                <div class="star-rating" id="star-rating" data-target="rating-value">
+                                    <span class="star" data-value="1" title="1 yll">★</span>
+                                    <span class="star" data-value="2" title="2 ylla">★</span>
+                                    <span class="star" data-value="3" title="3 ylla">★</span>
+                                    <span class="star" data-value="4" title="4 ylla">★</span>
+                                    <span class="star" data-value="5" title="5 ylla">★</span>
+                                </div>
+                                <input type="hidden" name="rating" id="rating-value" value="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="title">Titulli i vlerësimit <small>(opsionale)</small></label>
+                                <input type="text" name="title" id="title" class="review-title-input"
+                                       placeholder="P.sh. 'Përvojë fantastike në mal'">
+                            </div>
+
+                            <!-- Detailed ratings -->
+                            <div class="detail-ratings-group">
+                                <label class="detail-ratings-label"><i class="fas fa-sliders-h"></i> Vlerëso me detaje</label>
+                                <div class="detail-ratings-grid">
+                                    <div class="form-group detail-rating-item">
+                                        <label for="guide_rating">Udhëzuesi</label>
+                                        <div class="star-rating" id="star-rating-guide" data-target="guide_rating">
+                                            <span class="star" data-value="1" title="1">★</span>
+                                            <span class="star" data-value="2" title="2">★</span>
+                                            <span class="star" data-value="3" title="3">★</span>
+                                            <span class="star" data-value="4" title="4">★</span>
+                                            <span class="star" data-value="5" title="5">★</span>
+                                        </div>
+                                        <input type="hidden" name="guide_rating" id="guide_rating" value="0">
+                                    </div>
+                                    <div class="form-group detail-rating-item">
+                                        <label for="value_rating">Vlerë për para</label>
+                                        <div class="star-rating" id="star-rating-value" data-target="value_rating">
+                                            <span class="star" data-value="1" title="1">★</span>
+                                            <span class="star" data-value="2" title="2">★</span>
+                                            <span class="star" data-value="3" title="3">★</span>
+                                            <span class="star" data-value="4" title="4">★</span>
+                                            <span class="star" data-value="5" title="5">★</span>
+                                        </div>
+                                        <input type="hidden" name="value_rating" id="value_rating" value="0">
+                                    </div>
+                                    <div class="form-group detail-rating-item">
+                                        <label for="experience_rating">Përvoja e përgjithshme</label>
+                                        <div class="star-rating" id="star-rating-experience" data-target="experience_rating">
+                                            <span class="star" data-value="1" title="1">★</span>
+                                            <span class="star" data-value="2" title="2">★</span>
+                                            <span class="star" data-value="3" title="3">★</span>
+                                            <span class="star" data-value="4" title="4">★</span>
+                                            <span class="star" data-value="5" title="5">★</span>
+                                        </div>
+                                        <input type="hidden" name="experience_rating" id="experience_rating" value="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comment">Komentari yt</label>
+                                <textarea name="comment" id="comment" rows="4"
+                                          placeholder="Shkruani komentin tuaj këtu..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-paper-plane"></i> Dërgo Vlerësimin
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
                 {% else %}
                 <div class="review-prompt">
                     <p>
@@ -317,10 +570,15 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                 {% if reviews %}
                 <div class="reviews-list">
                     {% for r in reviews %}
-                    <div class="review-item">
+                    <div class="review-item{% if r.is_featured %} review-item-featured{% endif %}{% if user_review and r.id == user_review.id %} review-item-own{% endif %}">
                         <div class="review-header">
                             <div class="reviewer-info">
-                                <span class="reviewer-name">{{ r.tourist.user.get_full_name|default:r.tourist.user.username }}</span>
+                                <span class="reviewer-name">
+                                    {{ r.tourist.user.get_full_name|default:r.tourist.user.username }}
+                                    {% if r.is_verified %}
+                                    <span class="verified-badge" title="Vlerësim i verifikuar"><i class="fas fa-check-circle"></i></span>
+                                    {% endif %}
+                                </span>
                                 <span class="review-date">{{ r.created_at|date:"d M Y" }}</span>
                             </div>
                             <div class="review-rating">
@@ -329,8 +587,37 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
                                 {% endfor %}
                             </div>
                         </div>
+                        {% if r.title %}
+                        <h4 class="review-title-text">{{ r.title }}</h4>
+                        {% endif %}
                         {% if r.comment %}
                         <p class="review-text">{{ r.comment }}</p>
+                        {% endif %}
+
+                        {% if r.guide_rating or r.value_rating or r.experience_rating %}
+                        <div class="review-detail-tags">
+                            {% if r.guide_rating %}
+                            <span class="review-detail-tag"><i class="fas fa-user-tie"></i> Udhëzuesi
+                                <strong>{% for i in "12345" %}{% if forloop.counter <= r.guide_rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}</strong>
+                            </span>
+                            {% endif %}
+                            {% if r.value_rating %}
+                            <span class="review-detail-tag"><i class="fas fa-coins"></i> Vlera
+                                <strong>{% for i in "12345" %}{% if forloop.counter <= r.value_rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}</strong>
+                            </span>
+                            {% endif %}
+                            {% if r.experience_rating %}
+                            <span class="review-detail-tag"><i class="fas fa-hiking"></i> Përvoja
+                                <strong>{% for i in "12345" %}{% if forloop.counter <= r.experience_rating %}<i class="fas fa-star"></i>{% endif %}{% endfor %}</strong>
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if r.helpful_count %}
+                        <div class="review-helpful">
+                            <i class="far fa-thumbs-up"></i> {{ r.helpful_count }} persona e gjetën të dobishëm
+                        </div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -346,7 +633,7 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 
         <!-- ==================== STICKY BOOKING SIDEBAR ==================== -->
         <aside class="tour-sidebar">
-            <div class="booking-card" data-aos="zoom-in">
+            <div class="booking-card">
 
                 {# Price and booking CTA with discounts/early bird #}
                 {% with percentage=tour.confirmed_percentage %}
@@ -446,6 +733,5 @@ Guidë: {{ tour.guide.user.get_full_name }}. Rezervo tani!
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/home.js' %}"></script>
     <script src="{% static 'js/tour_detail.js' %}"></script>
 {% endblock %}

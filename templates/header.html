@@ -43,10 +43,12 @@
         <div class="user-actions">
             {% if user.is_authenticated %}
                 <div class="user-menu">
-                    <button class="user-menu-toggle" aria-label="User menu" aria-expanded="false">
+                    <button class="user-menu-toggle" aria-label="Menuja e përdoruesit" aria-expanded="false">
                         <div class="user-avatar">
-                            {% if user.profile.photo %}
-                                <img src="{{ user.profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                            {% if user.guide_profile.photo %}
+                                <img src="{{ user.guide_profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                            {% elif user.tourist_profile.photo %}
+                                <img src="{{ user.tourist_profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
                             {% else %}
                                 <i class="fas fa-user-circle"></i>
                             {% endif %}

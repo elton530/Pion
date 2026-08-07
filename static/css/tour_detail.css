@@ -1360,7 +1360,7 @@
 
 /* ==================== NOTIFICATION - MODERN TOAST ==================== */
 
-.tour-detail-wrapper .notification {
+.notification {
     position: fixed;
     top: 24px;
     right: 24px;
@@ -1369,31 +1369,31 @@
     border-radius: 16px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
     z-index: 10000;
-    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: notification-slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     backdrop-filter: blur(10px);
     border: 1px solid var(--detail-border);
 }
 
-.tour-detail-wrapper .notification-success {
+.notification-success {
     background: rgba(209, 250, 229, 0.9);
     color: #047857;
     border-color: rgba(110, 231, 183, 0.5);
 }
 
-.tour-detail-wrapper .notification-error {
+.notification-error {
     background: rgba(254, 226, 226, 0.9);
     color: #dc2626;
     border-color: rgba(252, 165, 165, 0.5);
 }
 
-.tour-detail-wrapper .notification-content {
+.notification-content {
     display: flex;
     align-items: center;
     gap: 14px;
     font-weight: 500;
 }
 
-.tour-detail-wrapper .notification-close {
+.notification-close {
     background: none;
     border: none;
     cursor: pointer;
@@ -1408,12 +1408,12 @@
     border-radius: 50%;
 }
 
-.tour-detail-wrapper .notification-close:hover {
+.notification-close:hover {
     opacity: 1;
     background: rgba(0, 0, 0, 0.05);
 }
 
-@keyframes slideInRight {
+@keyframes notification-slide-in {
     from {
         transform: translateX(420px);
         opacity: 0;
@@ -1424,7 +1424,7 @@
     }
 }
 
-@keyframes slideOutRight {
+@keyframes notification-slide-out {
     from {
         transform: translateX(0);
         opacity: 1;
@@ -1549,7 +1549,7 @@
         flex-direction: column;
     }
 
-    .tour-detail-wrapper .notification {
+    .notification {
         left: 20px;
         right: 20px;
         max-width: none;
@@ -1583,5 +1583,934 @@
 
     .tour-detail-wrapper .gallery {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== GUIDE SECTION - RATING & BADGE ==================== */
+
+.tour-detail-wrapper .guide-photo-link {
+    display: block;
+    flex-shrink: 0;
+    text-decoration: none;
+    line-height: 0;
+}
+
+.tour-detail-wrapper .guide-photo-wrapper {
+    position: relative;
+}
+
+.tour-detail-wrapper .guide-verified-badge {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--detail-primary) 0%, var(--detail-success) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    border: 3px solid var(--detail-card);
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+}
+
+.tour-detail-wrapper .guide-verified-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--detail-success);
+    background: rgba(16, 185, 129, 0.12);
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-left: 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.tour-detail-wrapper .guide-rating-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.06) 100%);
+    border-radius: 14px;
+    border: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.tour-detail-wrapper .guide-stars {
+    display: inline-flex;
+    gap: 2px;
+    color: #f59e0b;
+    font-size: 0.95rem;
+}
+
+.tour-detail-wrapper .guide-rating-value {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--detail-text);
+}
+
+.tour-detail-wrapper .guide-reviews-count {
+    font-size: 0.85rem;
+    color: var(--detail-text-light);
+}
+
+.tour-detail-wrapper .guide-years {
+    font-size: 0.85rem;
+    color: var(--detail-success);
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.tour-detail-wrapper .guide-years i {
+    margin-right: 4px;
+}
+
+.tour-detail-wrapper .guide-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--detail-primary);
+    color: var(--detail-primary-dark);
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: var(--detail-transition);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.tour-detail-wrapper .guide-profile-link:hover {
+    background: var(--detail-primary);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(14, 165, 233, 0.3);
+}
+
+/* ==================== ITINERARY / TIMELINE ==================== */
+
+.tour-detail-wrapper .itinerary-section {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+}
+
+.tour-detail-wrapper .itinerary-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--detail-text);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .itinerary-section h2 i {
+    font-size: 1.4em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.tour-detail-wrapper .itinerary-timeline {
+    display: grid;
+    gap: 0;
+    position: relative;
+}
+
+.tour-detail-wrapper .itinerary-timeline::before {
+    content: '';
+    position: absolute;
+    left: 90px;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    background: linear-gradient(180deg, var(--detail-primary) 0%, var(--detail-success) 100%);
+    border-radius: 3px;
+    opacity: 0.35;
+}
+
+.tour-detail-wrapper .itinerary-item {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 20px;
+    padding: 16px 0;
+    position: relative;
+}
+
+.tour-detail-wrapper .itinerary-item::before {
+    content: '';
+    position: absolute;
+    left: 84px;
+    top: 26px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--detail-card);
+    border: 4px solid var(--detail-primary);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    z-index: 2;
+}
+
+.tour-detail-wrapper .itinerary-day {
+    text-align: right;
+    padding-right: 8px;
+}
+
+.tour-detail-wrapper .itinerary-day-num {
+    display: block;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--detail-primary-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.tour-detail-wrapper .itinerary-time {
+    font-size: 0.85rem;
+    color: var(--detail-text-light);
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.tour-detail-wrapper .itinerary-time i {
+    margin-right: 4px;
+    color: var(--detail-primary);
+}
+
+.tour-detail-wrapper .itinerary-content {
+    background: var(--detail-bg);
+    border: 1px solid var(--detail-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+}
+
+.tour-detail-wrapper .itinerary-content h3 {
+    font-size: 1.15rem;
+    color: var(--detail-text);
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .itinerary-content p {
+    margin: 0 0 12px;
+    color: var(--detail-text-light);
+    line-height: 1.7;
+}
+
+.tour-detail-wrapper .itinerary-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tour-detail-wrapper .itinerary-meta span {
+    font-size: 0.85rem;
+    color: var(--detail-text-light);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--detail-border);
+    padding: 6px 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-detail-wrapper .itinerary-meta i {
+    color: var(--detail-success);
+}
+
+/* ==================== FAQ SECTION ==================== */
+
+.tour-detail-wrapper .faq-section {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+}
+
+.tour-detail-wrapper .faq-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--detail-text);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .faq-section h2 i {
+    font-size: 1.4em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.tour-detail-wrapper .faq-list {
+    display: grid;
+    gap: 14px;
+}
+
+.tour-detail-wrapper .faq-item {
+    border: 1px solid var(--detail-border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--detail-bg);
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .faq-item:hover {
+    border-color: rgba(14, 165, 233, 0.4);
+}
+
+.tour-detail-wrapper .faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--detail-text);
+    text-align: left;
+}
+
+.tour-detail-wrapper .faq-question i {
+    color: var(--detail-primary);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.tour-detail-wrapper .faq-item.open .faq-question i {
+    transform: rotate(180deg);
+}
+
+.tour-detail-wrapper .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+}
+
+.tour-detail-wrapper .faq-answer p {
+    padding: 0 22px 20px;
+    margin: 0;
+    color: var(--detail-text-light);
+    line-height: 1.8;
+}
+
+/* ==================== RECOMMENDED TOURS ==================== */
+
+.tour-detail-wrapper .recommended-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--detail-text);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+}
+
+.tour-detail-wrapper .recommended-section h2 i {
+    font-size: 1.4em;
+    color: var(--detail-primary);
+    background: rgba(14, 165, 233, 0.1);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.tour-detail-wrapper .recommended-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.tour-detail-wrapper .recommended-card {
+    background: var(--detail-card);
+    backdrop-filter: blur(10px);
+    border-radius: var(--detail-radius);
+    border: 1px solid var(--detail-border);
+    box-shadow: var(--detail-shadow);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .recommended-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--detail-shadow-lg);
+    border-color: rgba(14, 165, 233, 0.4);
+}
+
+.tour-detail-wrapper .recommended-image-wrapper {
+    overflow: hidden;
+    position: relative;
+}
+
+.tour-detail-wrapper .recommended-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    transition: var(--detail-transition);
+}
+
+.tour-detail-wrapper .recommended-card:hover .recommended-image {
+    transform: scale(1.08);
+}
+
+.tour-detail-wrapper .recommended-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.tour-detail-wrapper .recommended-body h3 {
+    font-size: 1.08rem;
+    color: var(--detail-text);
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tour-detail-wrapper .recommended-meta {
+    margin: 0;
+    color: var(--detail-text-light);
+    font-size: 0.85rem;
+}
+
+.tour-detail-wrapper .recommended-meta i {
+    color: var(--detail-primary);
+    margin-right: 4px;
+}
+
+.tour-detail-wrapper .recommended-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--detail-border);
+}
+
+.tour-detail-wrapper .recommended-price {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--detail-primary-dark);
+}
+
+.tour-detail-wrapper .recommended-rating {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--detail-text-light);
+    background: rgba(245, 158, 11, 0.12);
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.tour-detail-wrapper .recommended-rating i {
+    color: #f59e0b;
+    margin-right: 2px;
+}
+
+/* ==================== RATING SUMMARY ==================== */
+
+.tour-detail-wrapper .rating-summary {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 32px;
+    padding: 28px;
+    margin-bottom: 40px;
+    background: var(--detail-bg);
+    border: 1px solid var(--detail-border);
+    border-radius: var(--detail-radius);
+    align-items: center;
+}
+
+.tour-detail-wrapper .rating-overall {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.tour-detail-wrapper .rating-number {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--detail-text);
+    line-height: 1;
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tour-detail-wrapper .rating-stars {
+    color: #f59e0b;
+    font-size: 1.1rem;
+    display: inline-flex;
+    gap: 2px;
+}
+
+.tour-detail-wrapper .rating-total {
+    color: var(--detail-text-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.tour-detail-wrapper .rating-bars {
+    display: grid;
+    gap: 8px;
+}
+
+.tour-detail-wrapper .rating-bar-row {
+    display: grid;
+    grid-template-columns: 38px 1fr 32px;
+    align-items: center;
+    gap: 12px;
+}
+
+.tour-detail-wrapper .rating-bar-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--detail-text-light);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tour-detail-wrapper .rating-bar-label i {
+    color: #f59e0b;
+    font-size: 0.75rem;
+}
+
+.tour-detail-wrapper .rating-bar-track {
+    height: 9px;
+    background: rgba(100, 116, 139, 0.15);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.tour-detail-wrapper .rating-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+    border-radius: 6px;
+    transition: width 0.8s ease;
+}
+
+.tour-detail-wrapper .rating-bar-count {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--detail-text-light);
+    text-align: right;
+}
+
+.tour-detail-wrapper .rating-details {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--detail-border);
+    justify-content: center;
+}
+
+.tour-detail-wrapper .rating-detail-item {
+    font-size: 0.88rem;
+    color: var(--detail-text-light);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--detail-border);
+    padding: 8px 16px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-detail-wrapper .rating-detail-item i {
+    color: var(--detail-primary);
+}
+
+.tour-detail-wrapper .rating-detail-item strong {
+    color: var(--detail-text);
+}
+
+/* ==================== FEATURED REVIEWS ==================== */
+
+.tour-detail-wrapper .featured-reviews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.tour-detail-wrapper .featured-review-item {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.07) 0%, rgba(251, 191, 36, 0.05) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: var(--detail-radius);
+    padding: 24px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.08);
+}
+
+.tour-detail-wrapper .featured-review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tour-detail-wrapper .featured-review-quote {
+    color: rgba(245, 158, 11, 0.35);
+    font-size: 2rem;
+}
+
+.tour-detail-wrapper .featured-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.15);
+    padding: 5px 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-detail-wrapper .featured-review-item .review-text {
+    font-style: italic;
+    flex: 1;
+}
+
+.tour-detail-wrapper .featured-review-item .reviewer-info {
+    border-top: 1px dashed rgba(245, 158, 11, 0.3);
+    padding-top: 12px;
+}
+
+/* ==================== REVIEW TITLE / OWN REVIEW ==================== */
+
+.tour-detail-wrapper .review-title-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--detail-border);
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: var(--detail-transition);
+    background: white;
+}
+
+.tour-detail-wrapper .review-title-input:focus {
+    outline: none;
+    border-color: var(--detail-primary);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+
+.tour-detail-wrapper .form-group label small {
+    color: var(--detail-text-light);
+    font-weight: 400;
+}
+
+.tour-detail-wrapper .detail-ratings-group {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--detail-bg);
+    border: 1px dashed var(--detail-border);
+    border-radius: 16px;
+}
+
+.tour-detail-wrapper .detail-ratings-label {
+    display: block;
+    font-weight: 700;
+    color: var(--detail-text);
+    margin-bottom: 16px;
+    font-size: 0.98rem;
+}
+
+.tour-detail-wrapper .detail-ratings-label i {
+    color: var(--detail-primary);
+    margin-right: 6px;
+}
+
+.tour-detail-wrapper .detail-ratings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.tour-detail-wrapper .detail-rating-item {
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.tour-detail-wrapper .detail-rating-item label {
+    font-size: 0.9rem;
+    color: var(--detail-text-light);
+    margin-bottom: 8px;
+    display: block;
+    font-weight: 600;
+}
+
+.tour-detail-wrapper .detail-rating-item .star-rating {
+    font-size: 1.7rem;
+    gap: 4px;
+    margin: 0 auto;
+}
+
+.tour-detail-wrapper .own-review {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.06) 0%, rgba(16, 185, 129, 0.06) 100%);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    border-radius: var(--detail-radius);
+    padding: 28px;
+    margin-bottom: 40px;
+}
+
+.tour-detail-wrapper .own-review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.tour-detail-wrapper .own-review-head h3 {
+    font-size: 1.15rem;
+    color: var(--detail-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tour-detail-wrapper .own-review-head h3 i {
+    color: var(--detail-primary);
+}
+
+.tour-detail-wrapper .own-review-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tour-detail-wrapper .btn-edit-review,
+.tour-detail-wrapper .btn-delete-review {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--detail-transition);
+    border: 1px solid transparent;
+}
+
+.tour-detail-wrapper .btn-edit-review {
+    background: rgba(14, 165, 233, 0.12);
+    color: var(--detail-primary-dark);
+}
+
+.tour-detail-wrapper .btn-edit-review:hover {
+    background: var(--detail-primary);
+    color: #fff;
+}
+
+.tour-detail-wrapper .btn-delete-review {
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+}
+
+.tour-detail-wrapper .btn-delete-review:hover {
+    background: var(--detail-danger);
+    color: #fff;
+}
+
+.tour-detail-wrapper .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.tour-detail-wrapper .btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 28px;
+    border-radius: 50px;
+    border: 1.5px solid var(--detail-border);
+    color: var(--detail-text-light);
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--detail-transition);
+    font-family: inherit;
+}
+
+.tour-detail-wrapper .btn-cancel:hover {
+    border-color: var(--detail-danger);
+    color: var(--detail-danger);
+}
+
+/* ==================== REVIEW ITEM ENHANCEMENTS ==================== */
+
+.tour-detail-wrapper .review-title-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--detail-text);
+    margin: 0 0 8px;
+}
+
+.tour-detail-wrapper .verified-badge {
+    color: var(--detail-primary);
+    margin-left: 4px;
+}
+
+.tour-detail-wrapper .review-item-featured {
+    border-left: 4px solid #f59e0b;
+}
+
+.tour-detail-wrapper .review-item-own {
+    border-left: 4px solid var(--detail-primary);
+}
+
+.tour-detail-wrapper .review-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.tour-detail-wrapper .review-detail-tag {
+    font-size: 0.8rem;
+    color: var(--detail-text-light);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--detail-border);
+    padding: 5px 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-detail-wrapper .review-detail-tag i {
+    color: var(--detail-primary);
+}
+
+.tour-detail-wrapper .review-detail-tag strong {
+    color: #f59e0b;
+    font-size: 0.7rem;
+    display: inline-flex;
+    gap: 1px;
+    margin-left: 2px;
+}
+
+.tour-detail-wrapper .review-helpful {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--detail-text-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-detail-wrapper .review-helpful i {
+    color: var(--detail-success);
+}
+
+/* ==================== EDIT REVIEW LAYOUT ==================== */
+
+.tour-detail-wrapper .edit-review-layout {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.tour-detail-wrapper .edit-review-form {
+    margin-bottom: 60px;
+}
+
+/* ==================== RESPONSIVE ADDITIONS ==================== */
+
+@media (max-width: 992px) {
+    .tour-detail-wrapper .rating-summary {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .tour-detail-wrapper .detail-ratings-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .tour-detail-wrapper .itinerary-timeline::before {
+        left: 24px;
+    }
+
+    .tour-detail-wrapper .itinerary-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding-left: 48px;
+    }
+
+    .tour-detail-wrapper .itinerary-item::before {
+        left: 18px;
+    }
+
+    .tour-detail-wrapper .itinerary-day {
+        text-align: left;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .tour-detail-wrapper .itinerary-section,
+    .tour-detail-wrapper .faq-section {
+        padding: 28px 24px;
+    }
+
+    .tour-detail-wrapper .guide-rating-line {
+        justify-content: center;
+    }
+
+    .tour-detail-wrapper .own-review-head {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

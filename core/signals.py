@@ -154,7 +154,7 @@ def send_contact_confirmation_email(contact_msg):
 def send_newsletter_welcome_email(subscription):
     """Dërgoni email welcome te nënshkruesit e ri"""
     try:
-        subject = "✅ Mirëseerdhët në newsletter-in tonë!"
+        subject = "✅ Mirë se erdhët në newsletter-in tonë!"
         context = {
             'name': subscription.name or subscription.email,
             'email': subscription.email,

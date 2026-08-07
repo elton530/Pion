@@ -137,7 +137,8 @@
                     Merr njoftime për ture të reja, oferta speciale dhe këshilla për aventura në natyrë.
                 </p>
                 
-                <form class="newsletter-form" id="footerNewsletterForm">
+                <form class="newsletter-form" id="footerNewsletterForm" method="post" action="{% url 'core:newsletter_subscribe' %}">
+                    {% csrf_token %}
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
                         <input type="email" name="email" placeholder="Email-i juaj..." required aria-label="Email address">

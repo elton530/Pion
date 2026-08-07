@@ -34,7 +34,7 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
         {% for tour in tours %}
         <div class="tour-card" 
             data-tour-id="{{ tour.id }}"
-            data-tour-type="{{ tour.get_tour_type_display|lower }}"
+            data-tour-type="{{ tour.tour_type.name|lower|default:'' }}"
             data-tour-date="{{ tour.date|date:'Y-m-d' }}"
             data-tour-rating="{{ tour.average_rating|default:'0' }}"
             data-tour-price="{{ tour.price_per_person }}">
@@ -106,7 +106,7 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                         </span>
                         <span class="meta-item" title="Lloji i turit">
                             <i class="fas fa-hiking"></i>
-                            {{ tour.get_tour_type_display }}
+                            {{ tour.tour_type.name|default:"—" }}
                         </span>
                         <span class="meta-item" title="Kohëzgjatja">
                             <i class="fas fa-hourglass-end"></i>

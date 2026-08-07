@@ -155,7 +155,7 @@
                             <strong>{{ tour.title }}</strong>
                         </td>
                         <td>{{ tour.date|date:"d M Y" }}</td>
-                        <td>{{ tour.get_tour_type_display }}</td>
+                        <td>{{ tour.tour_type.name|default:"—" }}</td>
                         <td>
                             <span class="status-{% if tour.available_spots > 0 %}confirmed{% else %}cancelled{% endif %}">
                                 {{ tour.available_spots }} / {{ tour.max_participants }}

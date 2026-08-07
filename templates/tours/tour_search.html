@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kërko Ture Turistike - Open Map{% endblock %}
+
+{% block meta_description %}
+Kërko ture turistike në Shqipëri sipas lokacionit, llojit, çmimit dhe vështirësisë. Rezervo me guida profesioniste lokale.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tour-list-container">
+    <!-- Header Section -->
+    <section class="list-header">
+        <div class="header-content">
+            <span class="eyebrow">Eksploro Shqipërinë</span>
+            <h1 class="page-title">
+                <i class="fas fa-search"></i>
+                <span>Kërko Ture</span>
+            </h1>
+            <p class="page-subtitle">
+                Përdor filtrat për të gjetur aventurën e përsosur për ty.
+            </p>
+        </div>
+    </section>
+
+    <!-- Search Form -->
+    <section class="search-section" aria-label="Kërko ture">
+        <form method="get" action="{% url 'tours:tour_search' %}" class="search-form">
+            <div class="search-form-row">
+                <div class="form-group">
+                    <label for="{{ form.search.id_for_label }}">{{ form.search.label }}</label>
+                    {{ form.search }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+                    {{ form.location }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.sort_by.id_for_label }}">{{ form.sort_by.label }}</label>
+                    {{ form.sort_by }}
+                </div>
+            </div>
+
+            <div class="search-form-row">
+                <div class="form-group">
+                    <label for="{{ form.min_price.id_for_label }}">{{ form.min_price.label }}</label>
+                    {{ form.min_price }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.max_price.id_for_label }}">{{ form.max_price.label }}</label>
+                    {{ form.max_price }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.date_from.id_for_label }}">{{ form.date_from.label }}</label>
+                    {{ form.date_from }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.date_to.id_for_label }}">{{ form.date_to.label }}</label>
+                    {{ form.date_to }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.age_group.id_for_label }}">{{ form.age_group.label }}</label>
+                    {{ form.age_group }}
+                </div>
+            </div>
+
+            <div class="search-form-row">
+                <div class="form-group form-group-check">
+                    <span class="form-group-label">{{ form.tour_type.label }}</span>
+                    <div class="checkbox-grid">
+                        {% for checkbox in form.tour_type %}
+                            <label class="checkbox-item">
+                                {{ checkbox.tag }} {{ checkbox.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group form-group-check">
+                    <span class="form-group-label">{{ form.difficulty.label }}</span>
+                    <div class="checkbox-grid">
+                        {% for checkbox in form.difficulty %}
+                            <label class="checkbox-item">
+                                {{ checkbox.tag }} {{ checkbox.choice_label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="search-errors">
+                    {% for error in form.non_field_errors %}
+                        <p class="search-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="search-form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    <span>Kërko</span>
+                </button>
+                <a href="{% url 'tours:tour_search' %}" class="btn btn-outline">
+                    <i class="fas fa-undo"></i>
+                    <span>Pastro filtrat</span>
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Results -->
+    {% if tours %}
+        <p class="results-count">
+            <i class="fas fa-list"></i>
+            U gjetën {{ tours|length }} ture që përputhen me kërkimin
+        </p>
+
+        <div class="tour-grid" id="tour-grid">
+            {% for tour in tours %}
+            <div class="tour-card"
+                data-tour-id="{{ tour.id }}"
+                data-tour-type="{{ tour.tour_type.name|lower|default:'' }}"
+                data-tour-date="{{ tour.date|date:'Y-m-d' }}"
+                data-tour-rating="{{ tour.average_rating|default:'0' }}"
+                data-tour-price="{{ tour.price_per_person }}">
+                <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
+                    <div class="tour-image-wrapper">
+                        {% if tour.main_image %}
+                            <img src="{{ tour.main_image.url }}"
+                                 alt="{{ tour.title }}"
+                                 class="tour-image"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-mountain"></i>
+                                <span>Pa foto</span>
+                            </div>
+                        {% endif %}
+
+                        {% if tour.available_spots > 0 %}
+                        <div class="tour-badge available">
+                            <i class="fas fa-check-circle"></i>
+                            {{ tour.available_spots }} vende
+                        </div>
+                        {% else %}
+                        <div class="tour-badge sold-out">
+                            <i class="fas fa-times-circle"></i>
+                            Mbushur
+                        </div>
+                        {% endif %}
+
+                        <div class="difficulty-badge difficulty-{{ tour.difficulty }}">
+                            {{ tour.get_difficulty_display }}
+                        </div>
+                    </div>
+
+                    <div class="tour-info">
+                        <h3 class="tour-title">{{ tour.title }}</h3>
+
+                        <div class="tour-meta">
+                            <span class="meta-item" title="Data e turit">
+                                <i class="fas fa-calendar-alt"></i>
+                                {{ tour.date|date:"d M Y" }}
+                            </span>
+                            {% if tour.tour_type %}
+                            <span class="meta-item" title="Lloji i turit">
+                                <i class="fas fa-hiking"></i>
+                                {{ tour.tour_type.name }}
+                            </span>
+                            {% endif %}
+                            <span class="meta-item" title="Kohëzgjatja">
+                                <i class="fas fa-hourglass-end"></i>
+                                {{ tour.duration_hours }}h
+                            </span>
+                        </div>
+
+                        <div class="tour-guide">
+                            <i class="fas fa-user-shield"></i>
+                            <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
+                        </div>
+
+                        {% if tour.average_rating %}
+                        <div class="tour-rating">
+                            <div class="stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= tour.average_rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="rating-count">({{ tour.reviews_count }})</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="tour-footer">
+                            <div class="tour-price">
+                                <span class="price-amount">{{ tour.price_per_person }}</span>
+                                <span class="price-label">{{ tour.get_currency_display }}/person</span>
+                            </div>
+                            <button class="tour-action" aria-label="Shiko detajet e turit">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% elif form.is_bound %}
+        <div class="no-tours">
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h2>Nuk u gjetën ture</h2>
+                <p>Provoni të ndryshoni ose të hiqni disa nga filtrat.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/tour_list.js' %}"></script>
+{% endblock %}

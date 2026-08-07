@@ -6,11 +6,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const homePage = document.querySelector('.home-page');
-    const pageRoot = homePage || document.body;
 
-    if (!pageRoot) {
+    // This script only drives the homepage. On any other page it must be a no-op.
+    if (!homePage) {
         return;
     }
+
+    const pageRoot = homePage;
 
     // ==================== HERO SLIDER ====================
 
@@ -99,8 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
         slider.addEventListener('mouseenter', stopAutoPlay);
         slider.addEventListener('mouseleave', startAutoPlay);
 
-        // Keyboard navigation
+        // Keyboard navigation (only when not typing in a form field)
         document.addEventListener('keydown', (e) => {
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+                return;
+            }
             if (e.key === 'ArrowLeft') {
                 stopAutoPlay();
                 prevSlide();
@@ -187,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pageRoot.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            if (href !== '#' && href !== '#!') {
+            if (href !== '#' && href !== '#!' && href !== '#main-content') {
                 const target = document.querySelector(href);
                 if (target) {
                     e.preventDefault();
@@ -200,16 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ==================== PARALLAX EFFECT ====================
-    // Disabled for the hero slider to avoid overlapping and unstable placement.
-    // The layout now uses a fixed, modern two-column composition.
-    const hero = homePage.querySelector('.hero');
-    const heroSlider = homePage.querySelector('.hero-slider');
-
-    if (hero && heroSlider) {
-        heroSlider.style.transform = 'none';
-    }
-
     // ==================== TOUR CARD INTERACTIONS ====================
 
     /**
@@ -217,21 +213,32 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const tourCards = homePage.querySelectorAll('.tour-card');
 
+    function addRipple(card, x, y) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+
+        const rect = card.getBoundingClientRect();
+        const left = x - rect.left;
+        const top = y - rect.top;
+
+        ripple.style.left = `${left}px`;
+        ripple.style.top = `${top}px`;
+
+        card.appendChild(ripple);
+
+        setTimeout(() => ripple.remove(), 600);
+    }
+
     tourCards.forEach((card) => {
         card.addEventListener('click', function (e) {
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple');
+            addRipple(this, e.clientX, e.clientY);
+        });
 
-            const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            ripple.style.left = `${x}px`;
-            ripple.style.top = `${y}px`;
-
-            this.appendChild(ripple);
-
-            setTimeout(() => ripple.remove(), 600);
+        card.addEventListener('touchstart', function (e) {
+            const touch = e.touches && e.touches[0];
+            if (touch) {
+                addRipple(this, touch.clientX, touch.clientY);
+            }
         });
     });
 
