@@ -19,107 +19,82 @@
 
 <div class="home-page">
 
-    <!-- ================= HERO / COVER ================= -->
+    <!-- ==================== HERO ==================== -->
     <section class="hero" aria-label="Seksioni kryesor">
-
-        <div class="hero-cover" aria-hidden="true">
-            <img
-                src="{% static 'images/about-hero.png' %}"
-                alt="Peizazhe mahnitëse shqiptare"
-                class="hero-bg"
-                fetchpriority="high">
-            <div class="hero-overlay"></div>
-        </div>
+        <div class="hero-orbs" aria-hidden="true"></div>
 
         <div class="hero-shell">
-
             <div class="hero-content">
+                <span class="hero-kicker">Zbulo natyrën shqiptare</span>
 
-                <!-- Hero Actions -->
+                <h1>
+                    Eksploro <span class="gradient-text">natyrën shqiptare</span>
+                </h1>
+
+                <p class="hero-subtitle">
+                    Rezervo ture autentike me guida lokale profesioniste dhe
+                    zbulo peizazhet më të bukura të Shqipërisë.
+                </p>
+
                 <div class="hero-cta">
-
                     <a href="{% url 'tours:tour_list' %}"
                        class="btn btn-primary">
                         <i class="fas fa-compass" aria-hidden="true"></i>
-                        <span>
-                            Eksploro turet
-                        </span>
+                        <span>Eksploro turet</span>
                         <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </a>
 
                     <a href="{% url 'users:signup' %}"
                        class="btn btn-outline">
                         <i class="fas fa-user-plus" aria-hidden="true"></i>
-                        <span>
-                            Bashkohu falas
-                        </span>
+                        <span>Bashkohu falas</span>
                     </a>
-
                 </div>
-
             </div>
-
         </div>
 
-        <!-- Statistics (three badges over the cover) -->
-        <div class="stats-bar" aria-label="Statistikat e platformës">
-
-            <div class="stat-item">
-                <div class="stat-icon">
+        <!-- Statistics (three floating badges) -->
+        <div class="hero-stats" aria-label="Statistikat e platformës">
+            <div class="hero-stat">
+                <div class="hero-stat-icon">
                     <i class="fas fa-mountain"></i>
                 </div>
-
-                <div class="stat-info">
-                    <div class="stat-number"
-                         data-target="{{ tours_count|default:0 }}">
-                        0
-                    </div>
-                    <div class="stat-label">
-                        Ture aktive
-                    </div>
-                </div>
+                <div class="hero-stat-number"
+                     data-target="{{ tours_count|default:0 }}">0</div>
+                <div class="hero-stat-label">Ture aktive</div>
             </div>
 
-            <div class="stat-item">
-                <div class="stat-icon">
+            <div class="hero-stat">
+                <div class="hero-stat-icon">
                     <i class="fas fa-users"></i>
                 </div>
-
-                <div class="stat-info">
-                    <div class="stat-number"
-                         data-target="{{ guides_count|default:0 }}">
-                        0
-                    </div>
-                    <div class="stat-label">
-                        Guida lokale
-                    </div>
-                </div>
+                <div class="hero-stat-number"
+                     data-target="{{ guides_count|default:0 }}">0</div>
+                <div class="hero-stat-label">Guida lokale</div>
             </div>
 
-            <div class="stat-item">
-                <div class="stat-icon">
+            <div class="hero-stat">
+                <div class="hero-stat-icon">
                     <i class="fas fa-star"></i>
                 </div>
-
-                <div class="stat-info">
-                    <div class="stat-number">
-                        {{ site_avg_rating|floatformat:1|default:"0.0" }}
-                    </div>
-
-                    <div class="stat-label">
-                        Vlerësim mesatar
-                    </div>
+                <div class="hero-stat-number">
+                    {{ site_avg_rating|floatformat:1|default:"0.0" }}
                 </div>
+                <div class="hero-stat-label">Vlerësim mesatar</div>
             </div>
-
         </div>
 
+        <div class="hero-wave" aria-hidden="true">
+            <svg viewBox="0 0 1440 90" preserveAspectRatio="none">
+                <path d="M0,64 C240,96 480,16 720,32 C960,48 1200,88 1440,56 L1440,90 L0,90 Z" fill="currentColor"></path>
+            </svg>
+        </div>
     </section>
 
-    <!-- ==================== FEATURES SECTION ==================== -->
+    <!-- ==================== FEATURES ==================== -->
     <section class="features" aria-labelledby="features-title">
         <div class="features-intro">
-            <p class="section-eyebrow">Pse Open Map</p>
+            <span class="section-kicker">Pse Open Map</span>
             <h2 id="features-title">Eksperienca e udhëtimit e ndërtuar për të gjithë</h2>
         </div>
 
@@ -129,13 +104,9 @@
                 <div class="feature-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
-
-                <h3>
-                    Siguri e garantuar
-                </h3>
-
+                <h3>Siguri e garantuar</h3>
                 <p>
-                    Guida të licencuara dhe pajisje profesionale 
+                    Guida të licencuara dhe pajisje profesionale
                     për një eksperiencë të sigurt në çdo aventurë.
                 </p>
             </article>
@@ -144,13 +115,9 @@
                 <div class="feature-icon">
                     <i class="fas fa-map-marked-alt"></i>
                 </div>
-
-                <h3>
-                    Destinacione unike
-                </h3>
-
+                <h3>Destinacione unike</h3>
                 <p>
-                    Eksploro vende të fshehura dhe peizazhe 
+                    Eksploro vende të fshehura dhe peizazhe
                     që vetëm vendasit i njohin.
                 </p>
             </article>
@@ -159,13 +126,9 @@
                 <div class="feature-icon">
                     <i class="fas fa-headset"></i>
                 </div>
-
-                <h3>
-                    Mbështetje 24/7
-                </h3>
-
+                <h3>Mbështetje 24/7</h3>
                 <p>
-                    Ekipi ynë është gjithmonë pranë teje 
+                    Ekipi ynë është gjithmonë pranë teje
                     për çdo pyetje apo nevojë.
                 </p>
             </article>
@@ -173,18 +136,14 @@
         </div>
     </section>
 
-    <!-- ==================== UPCOMING TOURS SECTION ==================== -->
-    <section class="section tours-section"
-             aria-labelledby="tours-title">
-
+    <!-- ==================== UPCOMING TOURS ==================== -->
+    <section class="tours-section" aria-labelledby="tours-title">
         <header class="section-header">
-
             <div class="section-header-content">
+                <span class="section-kicker">Eksploro më shumë</span>
                 <h2 class="section-title" id="tours-title">
-                    <i class="fas fa-calendar-alt"></i>
                     Turet e ardhshme
                 </h2>
-
                 <p class="section-subtitle">
                     Rezervo vendin tënd në aventurën e radhës.
                 </p>
@@ -195,7 +154,6 @@
                 Shiko të gjitha
                 <i class="fas fa-arrow-right"></i>
             </a>
-
         </header>
 
         <div class="tour-grid">
@@ -211,25 +169,26 @@
                         <div class="tour-image">
 
                             {% if tour.main_image %}
-
                                 <img src="{{ tour.main_image.url }}"
                                      alt="{{ tour.title }}"
                                      loading="lazy">
-
                             {% else %}
-
                                 <div class="image-placeholder">
                                     <i class="fas fa-mountain"></i>
                                 </div>
-
                             {% endif %}
 
-                            <div class="tour-badge">
-                                <i class="fas fa-fire"></i>
-                                <span>
-                                    Popullore
-                                </span>
-                            </div>
+                            {% if tour.is_featured %}
+                                <div class="tour-badge">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Popullore</span>
+                                </div>
+                            {% elif tour.reviews_count > 0 %}
+                                <div class="tour-badge tour-badge-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>{{ tour.average_rating|floatformat:1 }}</span>
+                                </div>
+                            {% endif %}
 
                         </div>
 
@@ -248,16 +207,19 @@
 
                                 <div class="tour-date">
                                     <i class="far fa-calendar-alt"></i>
-                                    <span>
-                                        {{ tour.date|date:"d M Y" }}
-                                    </span>
+                                    <span>{{ tour.date|date:"d M Y" }}</span>
                                 </div>
+
+                                {% if tour.location_city %}
+                                <div class="tour-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ tour.location_city }}</span>
+                                </div>
+                                {% endif %}
 
                                 <div class="tour-difficulty">
                                     <i class="fas fa-signal"></i>
-                                    <span>
-                                        Mesatar
-                                    </span>
+                                    <span>{{ tour.get_difficulty_display|truncatechars:20 }}</span>
                                 </div>
 
                             </div>
@@ -265,23 +227,26 @@
                             <footer class="tour-footer">
 
                                 <div class="tour-price">
-                                    <span class="price-label">
-                                        Nga
-                                    </span>
-
+                                    <span class="price-label">Nga</span>
                                     <span class="price-amount">
-                                        {{ tour.price_per_person }}
+                                        {% if tour.has_discount and tour.discount_price %}
+                                            {{ tour.discount_price }}
+                                        {% else %}
+                                            {{ tour.price_per_person }}
+                                        {% endif %}
                                     </span>
-
                                     <span class="price-currency">
                                         {{ tour.get_currency_display }}
                                     </span>
+                                    {% if tour.has_discount and tour.discount_price %}
+                                        <span class="price-old">
+                                            {{ tour.price_per_person }}
+                                        </span>
+                                    {% endif %}
                                 </div>
 
                                 <div class="tour-action">
-                                    <span>
-                                        Rezervo
-                                    </span>
+                                    <span>Rezervo</span>
                                     <i class="fas fa-arrow-right"></i>
                                 </div>
 
@@ -292,7 +257,6 @@
                     </a>
 
                 </article>
-
                 {% endfor %}
 
             {% else %}
@@ -303,21 +267,17 @@
                         <i class="fas fa-calendar-times"></i>
                     </div>
 
-                    <h3>
-                        Aktualisht nuk ka ture të planifikuara
-                    </h3>
+                    <h3>Aktualisht nuk ka ture të planifikuara</h3>
 
                     <p>
-                        Kontrollo përsëri së shpejti 
+                        Kontrollo përsëri së shpejti
                         ose eksploro të gjitha turet tona.
                     </p>
 
                     <a href="{% url 'tours:tour_list' %}"
                        class="btn btn-primary">
                         <i class="fas fa-search"></i>
-                        <span>
-                            Shiko të gjitha turët
-                        </span>
+                        <span>Shiko të gjitha turët</span>
                     </a>
 
                 </div>
@@ -325,111 +285,34 @@
             {% endif %}
 
         </div>
-
-    </section>
-    <!-- Info Section -->
-    <section class="info-section">
-        <div class="info-container">
-
-            <article class="info-card">
-                <div class="info-card-icon">
-                    <i class="fas fa-info-circle"></i>
-                </div>
-
-                <h3>Rreth Nesh</h3>
-
-                <p>
-                    Zbulo më shumë rreth misionit, vizionit dhe vlerave të 
-                    Open Map për aventurat në natyrën shqiptare.
-                </p>
-
-                <a href="{% url 'core:about' %}" class="btn btn-text">
-                    Lexo më shumë
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </article>
-
-            <article class="info-card">
-                <div class="info-card-icon">
-                    <i class="fas fa-question-circle"></i>
-                </div>
-
-                <h3>Pyetje të Shpeshta</h3>
-
-                <p>
-                    Gjej përgjigje për pyetjet më të zakonshme rreth 
-                    rezervimeve, tureve dhe guidave lokale.
-                </p>
-
-                <a href="{% url 'core:faq_list' %}" class="btn btn-text">
-                    Shiko pyetjet
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </article>
-
-            <article class="info-card">
-                <div class="info-card-icon">
-                    <i class="fas fa-envelope"></i>
-                </div>
-
-                <h3>Kontakti</h3>
-
-                <p>
-                    Ke pyetje apo sugjerime? Kontakto ekipin tonë 
-                    dhe ne do të të ndihmojmë.
-                </p>
-
-                <a href="{% url 'core:contact' %}" class="btn btn-text">
-                    Na kontakto
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </article>
-
-        </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- ==================== CTA ==================== -->
     <section class="cta-section">
 
-        <div class="cta-container">
+        <div class="cta-card">
 
-            <div class="cta-content">
-                <h2>
-                    Gati për aventurën e radhës?
-                </h2>
+            <h2>Gati për aventurën e radhës?</h2>
 
-                <p>
-                    Bashkohu me aventurierë të tjerë dhe zbulo 
-                    peizazhet më të bukura të Shqipërisë me guida lokale.
-                </p>
+            <p>
+                Bashkohu me aventurierë të tjerë dhe zbulo
+                peizazhet më të bukura të Shqipërisë me guida lokale.
+            </p>
 
-                <div class="cta-buttons">
+            <div class="cta-buttons">
 
-                    <a href="{% url 'users:signup' %}" 
-                       class="btn btn-white">
-                        <i class="fas fa-rocket"></i>
-                        <span>
-                            Fillo tani
-                        </span>
-                    </a>
+                <a href="{% url 'users:signup' %}"
+                   class="btn btn-white">
+                    <i class="fas fa-rocket"></i>
+                    <span>Fillo tani</span>
+                </a>
 
-                    <a href="{% url 'tours:tour_list' %}" 
-                       class="btn btn-outline-white">
-                        <i class="fas fa-compass"></i>
-                        <span>
-                            Eksploro turet
-                        </span>
-                    </a>
+                <a href="{% url 'tours:tour_list' %}"
+                   class="btn btn-outline-white">
+                    <i class="fas fa-compass"></i>
+                    <span>Eksploro turet</span>
+                </a>
 
-                </div>
-
-            </div>
-
-            <div class="cta-image">
-                <div class="cta-shape"></div>
-                <img src="{% static 'images/cta-adventure.svg' %}"
-                     alt="Aventurë në natyrë"
-                     loading="lazy">
             </div>
 
         </div>

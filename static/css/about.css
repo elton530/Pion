@@ -94,13 +94,19 @@
 
 .about-page .hero-section {
     position: relative;
-    background: linear-gradient(135deg,
-        #0f3d3a 0%,
-        #0b4a45 40%,
-        #075e5a 70%,
-        #0a4f52 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    min-height: calc(100vh - 112px);
+    min-height: calc(100svh - 112px);
+    padding: 6rem 1.5rem 7rem;
+
+    background:
+        linear-gradient(150deg, rgba(6, 46, 44, .84) 0%, rgba(11, 74, 69, .74) 40%, rgba(7, 60, 62, .80) 100%),
+        url("../images/about-hero1.png") center / cover no-repeat;
     color: white;
-    padding: 7.5rem 1.5rem 8.5rem;
     text-align: center;
     overflow: hidden;
 }
@@ -181,7 +187,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
-    margin-top: 2.2rem;
+    margin-top: 1.75rem;
 }
 
 .about-page .hero-cta .btn-outline {
@@ -207,14 +213,14 @@
     justify-content: center;
     gap: 1rem;
     max-width: 860px;
-    margin: 3rem auto 0;
+    margin: 1.75rem auto 0;
 }
 
 .about-page .hero-stat {
     display: inline-flex;
     align-items: center;
-    gap: .8rem;
-    padding: .75rem 1.4rem .75rem .8rem;
+    gap: .7rem;
+    padding: .6rem 1.2rem .6rem .7rem;
     border-radius: var(--radius-full);
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.20);
@@ -228,22 +234,22 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 2.3rem;
-    height: 2.3rem;
+    width: 1.9rem;
+    height: 1.9rem;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.16);
     color: #99f6e4;
-    font-size: 1rem;
+    font-size: .9rem;
 }
 
 .about-page .hero-stat-number {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     font-weight: 800;
     line-height: 1;
 }
 
 .about-page .hero-stat-label {
-    font-size: .82rem;
+    font-size: .78rem;
     color: rgba(255, 255, 255, 0.82);
     white-space: nowrap;
 }
@@ -835,6 +841,7 @@
 @media (max-width: 768px) {
     .about-page .hero-section {
         padding: 6rem 1.25rem 7.5rem;
+        min-height: calc(100svh - 90px);
     }
 
     .about-page .hero-section h1 {

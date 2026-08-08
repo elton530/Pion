@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==================== SCROLL-TRIGGERED EFFECTS ====================
     // (stat counters + card fade-in share a single observer)
 
-    const statNumbers = pageRoot.querySelectorAll('.stat-number[data-target]');
-    const revealCards = pageRoot.querySelectorAll('.tour-card, .feature-card');
+    const statNumbers = pageRoot.querySelectorAll('.hero-stat-number[data-target]');
+    const revealCards = pageRoot.querySelectorAll('.tour-card, .feature-card, .cta-card');
 
     /**
      * Animate counter from 0 to target value using requestAnimationFrame
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             entry.target.dataset.animated = 'true';
 
-            if (entry.target.matches('.stat-number[data-target]')) {
+            if (entry.target.matches('.hero-stat-number[data-target]')) {
                 animateCounter(entry.target);
             } else {
                 setTimeout(() => {

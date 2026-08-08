@@ -1,13 +1,17 @@
 /* ==================== CONTACT PAGE ==================== */
 
 .contact-page {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    background: var(--bg);
     min-height: 100vh;
 }
 
 /* Hero Section */
 .contact-page .hero-section {
-    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    background: linear-gradient(135deg,
+        #0f3d3a 0%,
+        #0b4a45 40%,
+        #075e5a 70%,
+        #0a4f52 100%);
     color: white;
     padding: 6rem 2rem;
     text-align: center;

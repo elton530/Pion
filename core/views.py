@@ -329,7 +329,7 @@ def global_search(request):
     
     if form.is_valid():
         query = form.cleaned_data.get('query')
-        search_type = form.cleaned_data.get('search_type', 'all')
+        search_type = form.cleaned_data.get('search_type') or 'all'
         
         if query:
             if search_type in ['all', 'tours']:

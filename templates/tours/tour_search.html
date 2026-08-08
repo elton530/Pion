@@ -12,21 +12,27 @@ Kërko ture turistike në Shqipëri sipas lokacionit, llojit, çmimit dhe vësht
 {% endblock %}
 
 {% block content %}
-<div class="tour-list-container">
-    <!-- Header Section -->
-    <section class="list-header">
-        <div class="header-content">
-            <span class="eyebrow">Eksploro Shqipërinë</span>
-            <h1 class="page-title">
-                <i class="fas fa-search"></i>
-                <span>Kërko Ture</span>
-            </h1>
-            <p class="page-subtitle">
-                Përdor filtrat për të gjetur aventurën e përsosur për ty.
-            </p>
-        </div>
-    </section>
 
+<!-- Header Section (full-bleed) -->
+<section class="list-header">
+    <div class="header-content">
+        <span class="eyebrow">Eksploro Shqipërinë</span>
+        <h1 class="page-title">
+            <i class="fas fa-search"></i>
+            <span>Kërko Ture</span>
+        </h1>
+        <p class="page-subtitle">
+            Përdor filtrat për të gjetur aventurën e përsosur për ty.
+        </p>
+    </div>
+    <div class="list-header-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 90" preserveAspectRatio="none">
+            <path d="M0,64 C240,96 480,16 720,32 C960,48 1200,88 1440,56 L1440,90 L0,90 Z" fill="currentColor"></path>
+        </svg>
+    </div>
+</section>
+
+<div class="tour-list-container">
     <!-- Search Form -->
     <section class="search-section" aria-label="Kërko ture">
         <form method="get" action="{% url 'tours:tour_search' %}" class="search-form">
@@ -159,8 +165,6 @@ Kërko ture turistike në Shqipëri sipas lokacionit, llojit, çmimit dhe vësht
                     </div>
 
                     <div class="tour-info">
-                        <h3 class="tour-title">{{ tour.title }}</h3>
-
                         <div class="tour-meta">
                             <span class="meta-item" title="Data e turit">
                                 <i class="fas fa-calendar-alt"></i>
@@ -178,34 +182,31 @@ Kërko ture turistike në Shqipëri sipas lokacionit, llojit, çmimit dhe vësht
                             </span>
                         </div>
 
-                        <div class="tour-guide">
-                            <i class="fas fa-user-shield"></i>
-                            <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
-                        </div>
+                        <h3 class="tour-title">{{ tour.title }}</h3>
 
-                        {% if tour.average_rating %}
-                        <div class="tour-rating">
-                            <div class="stars">
-                                {% for i in "12345" %}
-                                    {% if forloop.counter <= tour.average_rating %}
-                                        <i class="fas fa-star"></i>
-                                    {% else %}
-                                        <i class="far fa-star"></i>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            <span class="rating-count">({{ tour.reviews_count }})</span>
+                        <div class="tour-attributes">
+                            <span class="tour-guide">
+                                <i class="fas fa-user-shield"></i>
+                                <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
+                            </span>
+
+                            {% if tour.reviews_count %}
+                            <span class="tour-rating">
+                                <i class="fas fa-star"></i>
+                                {{ tour.average_rating|floatformat:1 }}
+                                <span class="rating-count">({{ tour.reviews_count }})</span>
+                            </span>
+                            {% endif %}
                         </div>
-                        {% endif %}
 
                         <div class="tour-footer">
                             <div class="tour-price">
                                 <span class="price-amount">{{ tour.price_per_person }}</span>
                                 <span class="price-label">{{ tour.get_currency_display }}/person</span>
                             </div>
-                            <button class="tour-action" aria-label="Shiko detajet e turit">
+                            <span class="tour-action" aria-hidden="true">
                                 <i class="fas fa-arrow-right"></i>
-                            </button>
+                            </span>
                         </div>
                     </div>
                 </a>
