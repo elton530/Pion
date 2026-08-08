@@ -11,8 +11,15 @@
 <div class="admin-dashboard">
     <div class="admin-shell">
         <div class="admin-header">
-            <h1>🏛️ Dashboard Admin</h1>
-            <p>Monitoro statusin e platformës, mirato guide-t e reja dhe ndiq performancën e guide-ve të miratuar.</p>
+            <div class="admin-header-row">
+                <div>
+                    <h1>🏛️ Dashboard Admin</h1>
+                    <p>Monitoro statusin e platformës, mirato guide-t e reja dhe ndiq performancën e guide-ve të miratuar.</p>
+                </div>
+                <div class="admin-header-actions">
+                    <a href="{% url 'users:admin_guides' %}" class="btn-action view">🧭 Menaxho të gjithë guide-t</a>
+                </div>
+            </div>
         </div>
 
         <div class="admin-stats">
@@ -35,6 +42,11 @@
                 <div class="stat-icon">🚫</div>
                 <h3>{{ suspended_count }}</h3>
                 <p>Guide të pezulluar</p>
+            </a>
+            <a href="{% url 'users:admin_guides' %}?featured=1" class="stat-card accent-purple">
+                <div class="stat-icon">⭐</div>
+                <h3>{{ featured_count }}</h3>
+                <p>Guide të veçuar</p>
             </a>
             <div class="stat-card accent-gold">
                 <div class="stat-icon">💰</div>
@@ -117,6 +129,7 @@
                                 </div>
 
                                 <div class="guide-card-actions">
+                                    <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
                                     <form method="post" data-confirm="A je i sigurt që dëshiron ta miratosh këtë guide?">
                                         {% csrf_token %}
                                         <input type="hidden" name="guide_id" value="{{ guide.id }}">
@@ -211,7 +224,10 @@
                                                 {% endif %}
                                             </div>
                                             <div>
-                                                <strong class="user-name">{{ guide.full_name }}</strong>
+                                                <strong class="user-name">
+                                                    {{ guide.full_name }}
+                                                    {% if guide.is_featured %}<span class="badge-featured" title="I veçuar">⭐</span>{% endif %}
+                                                </strong>
                                                 <div class="user-meta">@{{ guide.user.username }}</div>
                                                 <div class="user-meta"><i class="fas fa-map-marker-alt"></i> {{ guide.location|default:'-' }}</div>
                                             </div>
@@ -239,7 +255,7 @@
                                     <td><strong class="cell-strong">{{ guide.admin_revenue|floatformat:0 }} Lekë</strong></td>
                                     <td><span class="user-meta">{{ guide.verified_at|date:"d M Y"|default:'-' }}</span></td>
                                     <td class="actions">
-                                        <a href="{% url 'users:guide_profile_public' guide.user.username %}" class="btn-action view" target="_blank" rel="noopener noreferrer">👁️ Shiko</a>
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
                                         <form method="post" data-confirm="A je i sigurt që dëshiron ta pezullosh këtë guide?">
                                             {% csrf_token %}
                                             <input type="hidden" name="guide_id" value="{{ guide.id }}">
@@ -289,6 +305,7 @@
                                     <td>{{ guide.get_specialty_display }}</td>
                                     <td><span class="status-tag status-rejected">Refuzuar</span></td>
                                     <td class="actions">
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
                                         <form method="post" data-confirm="A dëshiron ta miratosh përsëri këtë guide?">
                                             {% csrf_token %}
                                             <input type="hidden" name="guide_id" value="{{ guide.id }}">
@@ -308,6 +325,7 @@
                                     <td>{{ guide.get_specialty_display }}</td>
                                     <td><span class="status-tag status-suspended">Pezulluar</span></td>
                                     <td class="actions">
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
                                         <form method="post" data-confirm="A dëshiron ta riaktivizosh këtë guide?">
                                             {% csrf_token %}
                                             <input type="hidden" name="guide_id" value="{{ guide.id }}">

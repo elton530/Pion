@@ -691,7 +691,7 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
     .site-footer {
-        background: linear-gradient(135deg, #0a0f1c 0%, #111827 100%);
+        background: linear-gradient(135deg, #0a3d38 0%, #072b28 100%);
     }
 }
 

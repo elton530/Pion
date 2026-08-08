@@ -128,6 +128,11 @@ class TourListView(ListView):
         # Statistika
         # Use the same queryset as the list to keep filters consistent
         context['total_tours'] = self.get_queryset().count()
+
+        # Turet më të vlerësuar (carousel)
+        context['top_rated_tours'] = _published_tours_queryset().filter(
+            reviews_count__gt=0
+        ).order_by('-average_rating')[:6]
         
         return context
 

@@ -91,6 +91,218 @@
     font-weight: 500;
 }
 
+/* ==================== TOP RATED CAROUSEL ==================== */
+
+.top-rated-section {
+    margin-bottom: 4.5rem;
+}
+
+.top-rated-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.top-rated-eyebrow {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.top-rated-header h2 {
+    font-size: clamp(1.6rem, 3vw, 2.3rem);
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.top-rated-controls {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.top-rated-btn {
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+.top-rated-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+}
+
+.top-rated-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+.top-rated-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 0.5rem;
+    scroll-behavior: smooth;
+}
+
+.top-rated-track::-webkit-scrollbar {
+    display: none;
+}
+
+.top-rated-card {
+    flex: 0 0 340px;
+    scroll-snap-align: start;
+    background: var(--card);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.320, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.top-rated-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.top-rated-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.top-rated-media {
+    position: relative;
+    height: 210px;
+    overflow: hidden;
+}
+
+.top-rated-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.top-rated-card:hover .top-rated-media img {
+    transform: scale(1.1);
+}
+
+.top-rated-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg-dark) 100%);
+    color: var(--text-light);
+    font-size: 3rem;
+}
+
+.top-rated-rank {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: white;
+    font-weight: 900;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+    z-index: 2;
+}
+
+.top-rated-body {
+    padding: 1.4rem 1.5rem 1.5rem;
+}
+
+.top-rated-type {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.6rem;
+}
+
+.top-rated-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    margin: 0 0 1rem;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.top-rated-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.top-rated-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.top-rated-rating i {
+    color: var(--warning);
+}
+
+.top-rated-rating small {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.top-rated-price {
+    font-weight: 900;
+    font-size: 1.05rem;
+    color: var(--primary);
+    white-space: nowrap;
+}
+
 /* ==================== TOUR GRID ==================== */
 
 .tour-grid {
@@ -536,6 +748,10 @@
 @media (max-width: 480px) {
     .page-title {
         font-size: 1.8rem;
+    }
+
+    .top-rated-card {
+        flex-basis: 82%;
     }
     
     .tour-meta {

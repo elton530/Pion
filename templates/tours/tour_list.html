@@ -28,6 +28,66 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
         </div>
     </section>
 
+    <!-- Top Rated Carousel -->
+    {% if top_rated_tours %}
+    <section class="top-rated-section" aria-labelledby="top-rated-title">
+        <div class="top-rated-header">
+            <div class="top-rated-heading">
+                <span class="top-rated-eyebrow">Zgjedhja e vizitorëve</span>
+                <h2 id="top-rated-title">Turet më të vlerësuara</h2>
+            </div>
+
+            <div class="top-rated-controls">
+                <button type="button" class="top-rated-btn prev" aria-label="Kalo mbrapsht">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button type="button" class="top-rated-btn next" aria-label="Kalo përpara">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="top-rated-track" aria-label="Turet më të vlerësuara">
+            {% for tour in top_rated_tours %}
+            <article class="top-rated-card">
+                <a href="{% url 'tours:tour_detail' tour.slug %}" class="top-rated-link" aria-label="{{ tour.title }}">
+                    <div class="top-rated-media">
+                        {% if tour.main_image %}
+                            <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" loading="lazy">
+                        {% else %}
+                            <div class="top-rated-placeholder">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                        {% endif %}
+                        <span class="top-rated-rank">#{{ forloop.counter }}</span>
+                    </div>
+
+                    <div class="top-rated-body">
+                        <span class="top-rated-type">
+                            <i class="fas fa-hiking"></i>
+                            {{ tour.tour_type.name|default:"Aventurë në natyrë" }}
+                        </span>
+
+                        <h3 class="top-rated-name">{{ tour.title }}</h3>
+
+                        <div class="top-rated-meta">
+                            <span class="top-rated-rating" title="Vlerësimi mesatar">
+                                <i class="fas fa-star"></i>
+                                {{ tour.average_rating|floatformat:1|default:"5.0" }}
+                                <small>({{ tour.reviews_count }})</small>
+                            </span>
+                            <span class="top-rated-price">
+                                {{ tour.price_per_person }} {{ tour.get_currency_display }}
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
     <!-- Tours Grid -->
     {% if tours %}
     <div class="tour-grid" id="tour-grid">

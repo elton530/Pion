@@ -2,19 +2,19 @@
 
 /* Header Container */
 .site-header {
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(243, 250, 247, 0.9);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(15, 118, 110, 0.12);
+    border-bottom: 1px solid rgba(15, 118, 110, 0.14);
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
-    box-shadow: 0 6px 24px rgba(15, 118, 110, 0.05);
+    box-shadow: 0 6px 24px rgba(15, 118, 110, 0.07);
     transition: var(--transition);
 }
 
 .site-header.scrolled {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(15, 118, 110, 0.12);
 }
 
 .site-header .header-container {

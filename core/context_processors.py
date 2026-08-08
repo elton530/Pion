@@ -15,8 +15,8 @@ def site_stats(request):
         # Total active published tours
         tours_count = Tour.objects.filter(is_active=True, status='published').count()
 
-        # Total active verified guides
-        guides_count = GuideProfile.objects.filter(is_active=True, is_verified=True).count()
+        # Total registered guides
+        guides_count = GuideProfile.objects.count()
 
         # Weighted average rating across tours (weight by reviews_count)
         agg = Tour.objects.filter(reviews_count__gt=0).aggregate(
