@@ -1,129 +1,254 @@
-<!DOCTYPE html>
-<html lang="sq">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Krijo Tur të Ri</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
+{% block title %}Krijo Tur të Ri{% endblock %}
 
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
-        }
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/edit_tour.css' %}">
+{% endblock %}
 
-        h1 {
-            text-align: center;
-            color: #27ae60;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        button {
-            background: #27ae60;
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        button:hover {
-            background: #219a52;
-        }
-
-        .messages {
-            list-style: none;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-        }
-
-        .success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>🚀 Krijo një Tur të Ri</h1>
-        <p><strong>Mirëseerdhët, {{ request.user.first_name }}!</strong> Shto një tur të ri për t'ua ofruar turistëve.
-        </p>
+{% block content %}
+<div class="edit-tour container">
+    <div class="card">
+        <header class="card-header">
+            <div>
+                <h1 class="card-title">Krijo një Tur të Ri</h1>
+                <p class="card-subtitle">Mirë se erdhët, {{ request.user.first_name }}! Shto një tur të ri për t'ua ofruar turistëve.</p>
+            </div>
+            <a href="{% url 'users:guide_dashboard' %}" class="btn-outline">
+                <i class="fas fa-arrow-left"></i> Prapa
+            </a>
+        </header>
 
         {% if messages %}
-        <ul class="messages">
+        <div class="messages">
             {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
-        </ul>
+        </div>
         {% endif %}
 
         {% if form.non_field_errors %}
-        <ul class="messages error">
+        <div class="messages">
             {% for err in form.non_field_errors %}
-            <li>{{ err }}</li>
+            <div class="alert alert-error">{{ err }}</div>
             {% endfor %}
-        </ul>
+        </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" class="profile-form">
             {% csrf_token %}
-            {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-                {{ field }}
-                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-                {% if field.errors %}
-                <ul class="messages error">
-                    {% for ferr in field.errors %}
-                    <li>{{ ferr }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+
+            <div class="form-grid">
+                <section class="panel">
+                    <h2>Informacion Bazë</h2>
+                    <div class="form-row">
+                        <label for="{{ form.title.id_for_label }}">{{ form.title.label }} {% if form.title.field.required %}*{% endif %}</label>
+                        {{ form.title }}
+                        {% if form.title.help_text %}<small class="help">{{ form.title.help_text }}</small>{% endif %}
+                        {% for e in form.title.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.tour_type.id_for_label }}">{{ form.tour_type.label }} {% if form.tour_type.field.required %}*{% endif %}</label>
+                            {{ form.tour_type }}
+                            {% for e in form.tour_type.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }} {% if form.difficulty.field.required %}*{% endif %}</label>
+                            {{ form.difficulty }}
+                            {% for e in form.difficulty.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.age_group.id_for_label }}">{{ form.age_group.label }} {% if form.age_group.field.required %}*{% endif %}</label>
+                            {{ form.age_group }}
+                            {% for e in form.age_group.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.distance_km.id_for_label }}">{{ form.distance_km.label }}</label>
+                            {{ form.distance_km }}
+                            {% for e in form.distance_km.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.short_description.id_for_label }}">{{ form.short_description.label }} {% if form.short_description.field.required %}*{% endif %}</label>
+                        {{ form.short_description }}
+                        {% if form.short_description.help_text %}<small class="help">{{ form.short_description.help_text }}</small>{% endif %}
+                        {% for e in form.short_description.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.full_description.id_for_label }}">{{ form.full_description.label }} {% if form.full_description.field.required %}*{% endif %}</label>
+                        {{ form.full_description }}
+                        {% if form.full_description.help_text %}<small class="help">{{ form.full_description.help_text }}</small>{% endif %}
+                        {% for e in form.full_description.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                </section>
+
+                <aside class="panel sidebar">
+                    <h2>Media & Çmim</h2>
+
+                    <div class="media-block">
+                        <label>{{ form.main_image.label }} {% if form.main_image.field.required %}*{% endif %}</label>
+                        <div class="image-preview" id="main-image-preview">
+                            <div class="placeholder">
+                                <i class="fas fa-image"></i> Fotografia kryesore
+                            </div>
+                        </div>
+                        {{ form.main_image }}
+                        {% if form.main_image.help_text %}<small class="help">{{ form.main_image.help_text }}</small>{% endif %}
+                        {% for e in form.main_image.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="price-block">
+                        <div class="price-inline-card">
+                            <div>
+                                <label for="{{ form.price_per_person.id_for_label }}">{{ form.price_per_person.label }} {% if form.price_per_person.field.required %}*{% endif %}</label>
+                                {{ form.price_per_person }}
+                                {% for e in form.price_per_person.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
+                            <div>
+                                <label for="{{ form.currency.id_for_label }}">{{ form.currency.label }}</label>
+                                {{ form.currency }}
+                                {% for e in form.currency.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-links">
+                        <a href="{% url 'users:guide_dashboard' %}" class="quick-link">
+                            <i class="fas fa-th-large"></i> Paneli im
+                        </a>
+                    </div>
+                </aside>
             </div>
-            {% endfor %}
-            <button type="submit">Publiko Turin</button>
+
+            <div class="form-grid">
+                <section class="panel">
+                    <h2>Vendndodhja & Orari</h2>
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.location_city.id_for_label }}">{{ form.location_city.label }}</label>
+                            {{ form.location_city }}
+                            {% if form.location_city.help_text %}<small class="help">{{ form.location_city.help_text }}</small>{% endif %}
+                            {% for e in form.location_city.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_region.id_for_label }}">{{ form.location_region.label }}</label>
+                            {{ form.location_region }}
+                            {% if form.location_region.help_text %}<small class="help">{{ form.location_region.help_text }}</small>{% endif %}
+                            {% for e in form.location_region.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.meeting_point.id_for_label }}">{{ form.meeting_point.label }}</label>
+                        {{ form.meeting_point }}
+                        {% if form.meeting_point.help_text %}<small class="help">{{ form.meeting_point.help_text }}</small>{% endif %}
+                        {% for e in form.meeting_point.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.date.id_for_label }}">{{ form.date.label }} {% if form.date.field.required %}*{% endif %}</label>
+                            {{ form.date }}
+                            {% for e in form.date.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.time_start.id_for_label }}">{{ form.time_start.label }}</label>
+                            {{ form.time_start }}
+                            {% for e in form.time_start.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.time_end.id_for_label }}">{{ form.time_end.label }}</label>
+                            {{ form.time_end }}
+                            {% for e in form.time_end.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.duration_hours.id_for_label }}">{{ form.duration_hours.label }}</label>
+                            {{ form.duration_hours }}
+                            {% for e in form.duration_hours.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.duration_days.id_for_label }}">{{ form.duration_days.label }}</label>
+                            {{ form.duration_days }}
+                            {% if form.duration_days.help_text %}<small class="help">{{ form.duration_days.help_text }}</small>{% endif %}
+                            {% for e in form.duration_days.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.elevation_gain.id_for_label }}">{{ form.elevation_gain.label }}</label>
+                            {{ form.elevation_gain }}
+                            {% for e in form.elevation_gain.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.max_altitude.id_for_label }}">{{ form.max_altitude.label }}</label>
+                        {{ form.max_altitude }}
+                        {% for e in form.max_altitude.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>Kapacitet</h2>
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.min_participants.id_for_label }}">{{ form.min_participants.label }}</label>
+                            {{ form.min_participants }}
+                            {% for e in form.min_participants.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.max_participants.id_for_label }}">{{ form.max_participants.label }}</label>
+                            {{ form.max_participants }}
+                            {% for e in form.max_participants.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Pasi të krijohet turi, mund të shtosh orare, imazhe shtesë, pyetje të shpeshta (FAQ) dhe të menaxhosh çmimet.</span>
+                    </div>
+                </section>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary ripple">
+                    <i class="fas fa-paper-plane"></i> Publiko Turin
+                </button>
+                <a href="{% url 'users:guide_dashboard' %}" class="btn-outline">Anulo</a>
+            </div>
         </form>
     </div>
-</body>
+</div>
+{% endblock %}
 
-</html>
+{% block extra_js %}
+<script>
+(function () {
+    var fileInput = document.querySelector('input[type="file"]');
+    var preview = document.getElementById('main-image-preview');
+    if (fileInput && preview) {
+        fileInput.addEventListener('change', function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.innerHTML = '<img src="' + e.target.result + '" alt="Foto kryesore">';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+})();
+</script>
+{% endblock %}

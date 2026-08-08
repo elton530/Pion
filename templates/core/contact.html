@@ -69,15 +69,6 @@ Kontakto ekipin Open Map për pyetje, sugjerime ose probleme. Ne jemi këtu për
                 <form method="post" class="contact-form">
                     {% csrf_token %}
                     
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">
-                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
                     <div class="form-row">
                         <div class="form-group">
                             {{ form.name }}

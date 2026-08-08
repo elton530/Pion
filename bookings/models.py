@@ -277,10 +277,6 @@ class Booking(models.Model):
         if self.status == "completed":
             raise ValueError("Nuk mund të anulohet një tur i përfunduar.")
         
-        # Kthej vendet
-        self.tour.available_spots += self.num_people
-        self.tour.save(update_fields=['available_spots', 'updated_at'])
-        
         # Përditëso prenimin
         self.status = "cancelled"
         self.cancelled_at = timezone.now()

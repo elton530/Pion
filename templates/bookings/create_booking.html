@@ -3,7 +3,7 @@
 
 {% block title %}Rezervo: {{ tour.title }} - Open Map{% endblock %}
 
-{% block meta_description %}Rezervo turin: {{ tour.title }}. Çmimi: {{ tour.price_per_person }} Lekë per person.{% endblock %}
+{% block meta_description %}Rezervo turin: {{ tour.title }}. Çmimi: {{ tour.price_per_person }} {{ tour.get_currency_display }} per person.{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
@@ -91,7 +91,7 @@
                         
                         <p>
                             <strong><i class="fas fa-map-pin"></i> Vendi i Takimit:</strong><br>
-                            {{ tour.location_start }}
+                            {{ tour.meeting_point }}
                         </p>
                         
                         <p>
@@ -109,7 +109,7 @@
                         <p>
                             <strong><i class="fas fa-tag"></i> Çmimi:</strong><br>
                             <span style="font-size: 1.4rem; color: var(--primary); font-weight: 700;">
-                                {{ tour.price_per_person }} Lekë
+                                {{ tour.price_per_person }} {{ tour.get_currency_display }}
                             </span>
                             <span style="color: var(--text-light); font-size: 0.9rem;">per person</span>
                         </p>
@@ -134,7 +134,7 @@
                         <tr>
                             <th>Çmim per Person:</th>
                             <td colspan="2" class="text-right" style="color: var(--text); font-weight: 600;">
-                                {{ tour.price_per_person }} Lekë
+                                {{ tour.price_per_person }} {{ tour.get_currency_display }}
                             </td>
                         </tr>
                         <tr>

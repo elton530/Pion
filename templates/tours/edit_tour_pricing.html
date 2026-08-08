@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Çmimet dhe Zbritjet — {{ tour.title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/edit_tour.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-tour container">
+    <div class="card pricing-card">
+        <header class="card-header">
+            <div>
+                <h1 class="card-title">Çmimet dhe zbritjet</h1>
+                <p class="card-subtitle">{{ tour.title }}</p>
+            </div>
+            <a href="{% url 'tours:edit_tour' tour.slug %}" class="btn-outline">Kthe te turu</a>
+        </header>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="pricing-summary">
+            <div class="pricing-pill">
+                <span>Çmimi aktual</span>
+                <strong>{{ tour.current_price|floatformat:2 }} {{ tour.get_currency_display }}</strong>
+            </div>
+            <div class="pricing-pill">
+                <span>Vende të lira</span>
+                <strong>{{ tour.available_spots }}</strong>
+            </div>
+            <div class="pricing-pill">
+                <span>Statusi</span>
+                <strong>{% if tour.has_discount %}Zbritje aktive{% else %}Pa zbritje{% endif %}</strong>
+            </div>
+        </div>
+
+        <form method="post" class="profile-form">
+            {% csrf_token %}
+            <div class="form-grid pricing-grid">
+                <section class="panel">
+                    <h2>Çmimi bazë</h2>
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.price_per_person.id_for_label }}">{{ form.price_per_person.label }}</label>
+                            {{ form.price_per_person }}
+                            {% for e in form.price_per_person.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.currency.id_for_label }}">{{ form.currency.label }}</label>
+                            {{ form.currency }}
+                            {% for e in form.currency.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.max_participants.id_for_label }}">{{ form.max_participants.label }}</label>
+                            {{ form.max_participants }}
+                            {% for e in form.max_participants.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.min_participants.id_for_label }}">{{ form.min_participants.label }}</label>
+                            {{ form.min_participants }}
+                            {% for e in form.min_participants.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>Zbritjet</h2>
+                    <div class="form-row checkbox-row">
+                        <label>
+                            {{ form.has_discount }}
+                            <span>{{ form.has_discount.label }}</span>
+                        </label>
+                        {% for e in form.has_discount.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.discount_price.id_for_label }}">{{ form.discount_price.label }}</label>
+                            {{ form.discount_price }}
+                            {% for e in form.discount_price.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.discount_until.id_for_label }}">{{ form.discount_until.label }}</label>
+                            {{ form.discount_until }}
+                            {% for e in form.discount_until.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div>
+                            <label for="{{ form.early_bird_days.id_for_label }}">{{ form.early_bird_days.label }}</label>
+                            {{ form.early_bird_days }}
+                            {% for e in form.early_bird_days.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.early_bird_discount.id_for_label }}">{{ form.early_bird_discount.label }}</label>
+                            {{ form.early_bird_discount }}
+                            {% for e in form.early_bird_discount.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary ripple">Ruaj Çmimet</button>
+                <a href="{% url 'tours:tour_statistics' tour.slug %}" class="btn-outline">Shiko Statistikat</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

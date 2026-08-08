@@ -7,7 +7,7 @@ Keni një rezervim të ri për turin:
 Detajet:
 - Tourist: {{ tourist_name }} ({{ tourist_phone|default:"pa telefon" }})
 - Numri i personave: {{ num_people }}
-- Çmim total: {{ total_price }} Lekë
+- Çmim total: {{ total_price }} {{ currency }}
 - Shënime nga turisti: 
 {{ notes|default:"Pa shënime" }}
 

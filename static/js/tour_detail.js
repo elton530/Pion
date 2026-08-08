@@ -15,49 +15,130 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ==================== GALLERY LIGHTBOX ====================
     initGalleryLightbox();
+    
+    // ==================== FAQ ACCORDION ====================
+    initFaqAccordion();
 });
 
 /**
- * Initialize interactive star rating
+ * Initialize FAQ accordion
  */
-function initStarRating() {
-    const starRating = document.getElementById('star-rating');
-    const ratingInput = document.getElementById('rating-value');
-    
-    if (!starRating) return;
-    
-    const stars = starRating.querySelectorAll('.star');
-    
-    stars.forEach(star => {
-        // Click event
-        star.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            ratingInput.value = value;
-            updateStars(stars, value);
-        });
-        
-        // Hover event
-        star.addEventListener('mouseover', function() {
-            const value = this.getAttribute('data-value');
-            updateStars(stars, value);
-        });
-        
-        // Mouse out event
-        star.addEventListener('mouseout', function() {
-            const current = ratingInput.value;
-            updateStars(stars, current);
+function initFaqAccordion() {
+    const questions = document.querySelectorAll('.faq-question');
+    if (!questions.length) return;
+
+    questions.forEach(question => {
+        question.addEventListener('click', function() {
+            const item = this.closest('.faq-item');
+            const answer = item.querySelector('.faq-answer');
+            const isOpen = item.classList.contains('open');
+
+            // Close all others
+            document.querySelectorAll('.faq-item.open').forEach(openItem => {
+                if (openItem !== item) {
+                    openItem.classList.remove('open');
+                    openItem.querySelector('.faq-answer').style.maxHeight = null;
+                    openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Toggle current
+            if (isOpen) {
+                item.classList.remove('open');
+                answer.style.maxHeight = null;
+                this.setAttribute('aria-expanded', 'false');
+            } else {
+                item.classList.add('open');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                this.setAttribute('aria-expanded', 'true');
+            }
         });
     });
-    
+}
+
+/**
+ * Initialize interactive star rating (supports multiple widgets)
+ */
+function initStarRating() {
+    const starRatings = document.querySelectorAll('.star-rating');
+    if (!starRatings.length) return;
+
+    starRatings.forEach((starRating) => {
+        const targetId = starRating.dataset.target || 'rating-value';
+        const ratingInput = document.getElementById(targetId);
+        const preset = starRating.dataset.value || (ratingInput ? ratingInput.value : '0');
+
+        const stars = Array.from(starRating.querySelectorAll('.star'));
+
+        if (preset && ratingInput && ratingInput.value === '0') {
+            ratingInput.value = preset;
+        }
+        if (preset) {
+            updateStars(stars, preset);
+        }
+
+        stars.forEach((star, index) => {
+            star.setAttribute('role', 'radio');
+            star.setAttribute('aria-label', `${index + 1} yll`);
+            star.tabIndex = -1;
+
+            // Click event
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                setRating(ratingInput, stars, value);
+            });
+
+            // Hover event
+            star.addEventListener('mouseover', function() {
+                const value = this.getAttribute('data-value');
+                updateStars(stars, value);
+            });
+
+            // Mouse out event
+            star.addEventListener('mouseout', function() {
+                const current = ratingInput ? ratingInput.value : '0';
+                updateStars(stars, current);
+            });
+
+            // Keyboard activation
+            star.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setRating(ratingInput, stars, this.getAttribute('data-value'));
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const next = stars[index + 1] || stars[stars.length - 1];
+                    setRating(ratingInput, stars, next.getAttribute('data-value'));
+                    next.focus();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const prev = stars[index - 1] || stars[0];
+                    setRating(ratingInput, stars, prev.getAttribute('data-value'));
+                    prev.focus();
+                }
+            });
+        });
+    });
+
+    function setRating(input, stars, value) {
+        if (input) input.value = value;
+        updateStars(stars, value);
+        stars.forEach(s => {
+            s.tabIndex = s.getAttribute('data-value') === value ? 0 : -1;
+        });
+    }
+
     /**
      * Update star display based on rating value
      */
     function updateStars(starsNodeList, value) {
         starsNodeList.forEach(s => {
-            if (parseInt(s.getAttribute('data-value')) <= value) {
+            if (parseInt(s.getAttribute('data-value')) <= parseInt(value)) {
                 s.classList.add('active');
+                s.setAttribute('aria-checked', 'true');
             } else {
                 s.classList.remove('active');
+                s.setAttribute('aria-checked', 'false');
             }
         });
     }
@@ -65,17 +146,20 @@ function initStarRating() {
 
 /**
  * Initialize gallery lightbox (simple, no-dependency)
+ * Handles both the bottom gallery (.gallery-item) and hero media grid (.media-link)
  */
 function initGalleryLightbox() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
+    const galleryItems = document.querySelectorAll('.gallery-item, .media-link');
     if (!galleryItems || galleryItems.length === 0) return;
 
     // Create modal element
     const modal = document.createElement('div');
     modal.className = 'tl-lightbox';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.innerHTML = `
         <div class="tl-lightbox-inner">
-            <button class="tl-close" aria-label="Close">×</button>
+            <button class="tl-close" aria-label="Mbyll">×</button>
             <img class="tl-img" src="" alt="" />
             <div class="tl-caption"></div>
         </div>
@@ -85,17 +169,23 @@ function initGalleryLightbox() {
     const tlImg = modal.querySelector('.tl-img');
     const tlCaption = modal.querySelector('.tl-caption');
     const tlClose = modal.querySelector('.tl-close');
+    let lastFocused = null;
 
     galleryItems.forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
             const img = item.querySelector('img');
-            const src = img.getAttribute('src') || img.dataset.src || '';
-            const caption = item.querySelector('.gallery-caption')?.innerText || '';
+            const src = item.getAttribute('data-src') || (img ? (img.getAttribute('src') || img.dataset.src || '') : '');
+            const caption = item.getAttribute('data-caption')
+                || (item.querySelector('.gallery-caption') ? item.querySelector('.gallery-caption').innerText : '')
+                || (img ? img.alt : '');
             tlImg.src = src;
-            tlImg.alt = img.alt || '';
+            tlImg.alt = (img ? img.alt : '') || '';
             tlCaption.textContent = caption;
+            lastFocused = document.activeElement;
             modal.classList.add('open');
             document.body.style.overflow = 'hidden';
+            tlClose.focus();
         });
     });
 
@@ -104,11 +194,22 @@ function initGalleryLightbox() {
         if (e.target === modal) closeLightbox();
     });
 
+    // Close on Escape and restore focus
+    document.addEventListener('keydown', function onKeydown(e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) {
+            closeLightbox();
+        }
+    });
+
     function closeLightbox() {
         modal.classList.remove('open');
         document.body.style.overflow = '';
         tlImg.src = '';
         tlCaption.textContent = '';
+        if (lastFocused && lastFocused.focus) {
+            lastFocused.focus();
+        }
+        lastFocused = null;
     }
 
     // Inject minimal styles
@@ -134,9 +235,11 @@ function initGalleryLightbox() {
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const href = this.getAttribute('href');
+            if (href === '#' || href === '#!' || href === '#main-content') return;
+            const target = document.querySelector(href);
             if (target) {
+                e.preventDefault();
                 target.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
@@ -202,32 +305,45 @@ function submitReview(form) {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => {
-        if (response.ok) {
-            // Success
-            showNotification('Vlerësimi u dërgua me sukses! 🎉', 'success');
-            
-            // Reset form
-            form.reset();
-            document.getElementById('rating-value').value = '0';
-            document.querySelectorAll('#star-rating .star').forEach(star => {
-                star.classList.remove('active');
-            });
-            
-            // Redirect after 2 seconds
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            showNotification('Ndodhi një gabim. Ju lutemi provoni përsëri.', 'error');
+    .then(response => response.text().then(text => ({ ok: response.ok, text })))
+    .then(({ ok, text }) => {
+        if (!ok) {
+            let message = 'Ndodhi një gabim. Ju lutemi provoni përsëri.';
+            try {
+                const data = JSON.parse(text);
+                if (data && data.message) message = data.message;
+            } catch (e) {
+                // Server may have returned an HTML error page; keep default message
+            }
+            showNotification(message, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHTML;
+            return;
         }
+
+        // Success
+        showNotification('Vlerësimi u dërgua me sukses! 🎉', 'success');
+
+        // Reset form
+        form.reset();
+        document.querySelectorAll('.star-rating').forEach(ratingWidget => {
+            const targetId = ratingWidget.dataset.target || 'rating-value';
+            const input = document.getElementById(targetId);
+            if (input) input.value = '0';
+            ratingWidget.querySelectorAll('.star').forEach(star => {
+                star.classList.remove('active');
+                star.setAttribute('aria-checked', 'false');
+            });
+        });
+
+        // Redirect after 2 seconds
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     })
     .catch(error => {
         console.error('Error:', error);
         showNotification('Ndodhi një gabim në lidhje. Kontrolloni internetin tuaj.', 'error');
-    })
-    .finally(() => {
-        // Re-enable button
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalHTML;
     });
@@ -239,123 +355,42 @@ function submitReview(form) {
 function showNotification(message, type) {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            <span>${message}</span>
-        </div>
-        <button class="notification-close" aria-label="Mbyll">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
+    notification.setAttribute('role', 'status');
+
+    const content = document.createElement('div');
+    content.className = 'notification-content';
+
+    const icon = document.createElement('i');
+    icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    icon.setAttribute('aria-hidden', 'true');
+
+    const span = document.createElement('span');
+    span.textContent = message;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'notification-close';
+    closeBtn.setAttribute('aria-label', 'Mbyll');
+    closeBtn.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
+
+    content.appendChild(icon);
+    content.appendChild(span);
+    notification.appendChild(content);
+    notification.appendChild(closeBtn);
+
     document.body.appendChild(notification);
     
-    // Add styles if not already present
-    if (!document.getElementById('notification-styles')) {
-        const style = document.createElement('style');
-        style.id = 'notification-styles';
-        style.textContent = `
-            .notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                max-width: 400px;
-                padding: 16px 20px;
-                border-radius: 12px;
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-                z-index: 10000;
-                animation: slideInRight 0.3s ease-out;
-            }
-            
-            .notification-success {
-                background: #d1fae5;
-                border: 1px solid #6ee7b7;
-                color: #047857;
-            }
-            
-            .notification-error {
-                background: #fee2e2;
-                border: 1px solid #fca5a5;
-                color: #dc2626;
-            }
-            
-            .notification-content {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-            
-            .notification-close {
-                background: none;
-                border: none;
-                cursor: pointer;
-                opacity: 0.7;
-                transition: opacity 0.2s;
-            }
-            
-            .notification-close:hover {
-                opacity: 1;
-            }
-            
-            @keyframes slideInRight {
-                from {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @media (max-width: 576px) {
-                .notification {
-                    left: 20px;
-                    right: 20px;
-                    max-width: none;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
     // Close notification
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.addEventListener('click', () => {
-        notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
+    const closeBtnRef = notification.querySelector('.notification-close');
+    closeBtnRef.addEventListener('click', () => {
+        notification.style.animation = 'notification-slide-out 0.3s ease-out forwards';
         setTimeout(() => notification.remove(), 300);
     });
     
     // Auto close after 5 seconds
     setTimeout(() => {
         if (document.body.contains(notification)) {
-            notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
+            notification.style.animation = 'notification-slide-out 0.3s ease-out forwards';
             setTimeout(() => notification.remove(), 300);
         }
     }, 5000);
 }
-
-/**
- * Lazy load images on scroll
- */
-function initLazyLoading() {
-    if ('IntersectionObserver' in window) {
-        const images = document.querySelectorAll('img[loading="lazy"]');
-        
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    // Image is already in src, just observe
-                    observer.unobserve(img);
-                }
-            });
-        });
-        
-        images.forEach(img => imageObserver.observe(img));
-    }
-}
-
-// Initialize lazy loading
-initLazyLoading();

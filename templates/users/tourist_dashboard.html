@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Paneli im — Pion{% endblock %}
+{% block title %}Paneli im — Open Map{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/turist_dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container tourist-dashboard">
 
     <header>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -48,7 +48,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ total_spent|floatformat:0 }}</div>
-            <div class="stat-label">Shpenzime (Lekë)</div>
+            <div class="stat-label">Shpenzime</div>
         </div>
     </div>
 
@@ -89,23 +89,23 @@
                     {% else %}status-pending{% endif %}">
                     {% if booking.is_confirmed_24h %}Konfirmuar 24h
                     {% elif booking.status == 'confirmed' %}Konfirmuar
-                    {% elif booking.status == 'cancelled' %}Anulluar
+                    {% elif booking.status == 'cancelled' %}Anuluar
                     {% else %}Në Pritje{% endif %}
                 </span>
             </div>
 
             <div class="booking-info">
                 <span><i class="fa-solid fa-user-tie"></i> {{ booking.tour.guide.user.get_full_name|default:booking.tour.guide.user.username }}</span>
-                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.location_start }}</span>
+                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.meeting_point }}</span>
             </div>
 
             <div class="booking-info" style="border-top:1px solid var(--border); padding-top:1.2rem;">
-                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
+                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
                 <span><i class="fa-regular fa-clock"></i> {{ booking.tour.time_start|time:"H:i" }}</span>
                 <span><i class="fa-solid fa-users"></i> {{ booking.num_people }} persona</span>
             </div>
 
-            <div class="price-big">{{ booking.total_price }} Lekë</div>
+            <div class="price-big">{{ booking.total_price }} {{ booking.tour.get_currency_display }}</div>
 
             <div class="action-buttons">
                 {% if booking.status == 'confirmed' and not booking.is_confirmed_24h %}
@@ -116,6 +116,7 @@
                 {% endif %}
 
                 <a href="{% url 'tours:tour_detail' booking.tour.slug %}" class="btn btn-primary">Shiko Detajet</a>
+                <a href="{% url 'users:tourist_booking_detail' booking.id %}" class="btn btn-outline-primary">Rezervimi</a>
 
                                 {% if booking.status != 'cancelled' %}
                                 <form action="{% url 'users:tourist_booking_cancel' booking.id %}" method="post" style="display:inline;"
@@ -145,11 +146,17 @@
         <div class="booking-content" style="grid-column: 1 / -1;">
             <div class="booking-header">
                 <h3 class="booking-title" style="font-size:1.28rem;">{{ booking.tour.title }}</h3>
+                {% if booking.status == 'cancelled' %}
+                <span class="status-badge" style="background:#fee2e2; color:#b91c1c;">Anuluar</span>
+                {% elif booking.status == 'no_show' %}
+                <span class="status-badge" style="background:#f3f4f6; color:#6b7280;">Nuk u paraqit</span>
+                {% else %}
                 <span class="status-badge" style="background:#e5e7eb; color:#4b5563;">Përfunduar</span>
+                {% endif %}
             </div>
             <div class="booking-info" style="margin-top:0.8rem;">
-                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
-                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} Lekë</span>
+                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
+                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} {{ booking.tour.get_currency_display }}</span>
             </div>
             <div style="margin-top:1.4rem;">
                 <a href="{% url 'tours:create_review' booking.tour.slug %}" class="btn btn-primary" 

@@ -8,9 +8,15 @@
         const wave = document.createElement('span');
         wave.className = 'ripple__wave';
         const size = Math.max(rect.width, rect.height) * 0.6;
+
+        const clientX = event.type === 'touchstart' && event.touches && event.touches[0]
+            ? event.touches[0].clientX : event.clientX;
+        const clientY = event.type === 'touchstart' && event.touches && event.touches[0]
+            ? event.touches[0].clientY : event.clientY;
+
         wave.style.width = wave.style.height = size + 'px';
-        wave.style.left = (event.clientX - rect.left - size/2) + 'px';
-        wave.style.top = (event.clientY - rect.top - size/2) + 'px';
+        wave.style.left = (clientX - rect.left - size/2) + 'px';
+        wave.style.top = (clientY - rect.top - size/2) + 'px';
         button.appendChild(wave);
         setTimeout(() => wave.remove(), 700);
     }
@@ -20,32 +26,8 @@
         buttons.forEach(btn => {
             btn.classList.add('ripple');
 
-            if (btn.tagName.toLowerCase() !== 'a' && !btn.hasAttribute('tabindex')) {
-                btn.setAttribute('tabindex', '0');
-            }
-
             btn.addEventListener('mousedown', createRipple);
             btn.addEventListener('touchstart', createRipple, {passive: true});
-
-            btn.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    btn.click();
-                }
-            });
-        });
-    }
-
-    function addTooltip() {
-        const fields = document.querySelectorAll('.edit-tour input, .edit-tour textarea, .edit-tour select');
-        fields.forEach(field => {
-            field.addEventListener('focus', () => {
-                const tooltip = document.createElement('div');
-                tooltip.className = 'tooltip';
-                tooltip.textContent = field.getAttribute('placeholder') || 'Plotëso këtë fushë';
-                field.parentElement.appendChild(tooltip);
-                setTimeout(() => tooltip.remove(), 2000);
-            });
         });
     }
 
@@ -63,7 +45,14 @@
             input.addEventListener('change', (e) => {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
-                if (!file.type.startsWith('image/')) return;
+                if (!file.type.startsWith('image/')) {
+                    alert('Zgjidh një skedar imazhi të vlefshëm.');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Skedari është shumë i madh (max 5MB).');
+                    return;
+                }
 
                 const reader = new FileReader();
                 reader.onload = function(ev) {
@@ -79,7 +68,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         enhanceButtons();
-        addTooltip();
         addImagePreviews();
     });
 })();

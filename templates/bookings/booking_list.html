@@ -41,8 +41,7 @@
             <h3>Kërkim dhe Filtrim</h3>
             <form method="get" class="booking-form">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    {% csrf_token %}
-                    
+
                     <div class="form-group">
                         <label for="id_search">Kërko</label>
                         {{ form.search }}
@@ -101,7 +100,7 @@
                     </div>
                     <div class="booking-meta-item">
                         <strong>Çmimi Total</strong>
-                        <span style="color: var(--primary); font-weight: 700;">{{ booking.total_price }} {{ booking.tour.currency }}</span>
+                        <span style="color: var(--primary); font-weight: 700;">{{ booking.total_price }} {{ booking.tour.get_currency_display }}</span>
                     </div>
                     <div class="booking-meta-item">
                         <strong>Data e Prenotimit</strong>
@@ -132,7 +131,7 @@
                     </a>
                     {% endif %}
 
-                    {% if booking.status == 'completed' and not booking.review %}
+                    {% if booking.status == 'completed' and not booking.booking_review %}
                     <a href="{% url 'bookings:create_booking_review' booking.id %}" class="btn btn-primary">
                         <i class="fas fa-star"></i> Vlerëso
                     </a>

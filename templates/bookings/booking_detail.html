@@ -52,7 +52,7 @@
                     <div class="booking-meta-item">
                         <strong>Çmimi Total</strong>
                         <span style="font-size: 1.2rem; color: var(--primary); font-weight: 700;">
-                            {{ booking.total_price }} {{ tour.currency }}
+                            {{ booking.total_price }} {{ tour.get_currency_display }}
                         </span>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                         </tr>
                         <tr>
                             <th>Lloji i Turit</th>
-                            <td>{{ tour.get_tour_type_display }}</td>
+                            <td>{{ tour.tour_type.name|default:"—" }}</td>
                         </tr>
                         <tr>
                             <th>Vështirësia</th>
@@ -122,7 +122,7 @@
                     </a>
                     {% endif %}
 
-                    {% if booking.status == 'completed' and not booking.review %}
+                    {% if booking.status == 'completed' and not booking.booking_review %}
                     <a href="{% url 'bookings:create_booking_review' booking_id=booking.id %}" class="btn btn-primary">
                         <i class="fas fa-star"></i> Lër Vlerësim
                     </a>
@@ -148,7 +148,7 @@
                     <h3>Informacioni i Turit</h3>
                     <p>
                         <strong>Çmimi per Person:</strong><br>
-                        {{ tour.price_per_person }} Lekë
+                        {{ tour.price_per_person }} {{ tour.get_currency_display }}
                     </p>
                     <p>
                         <strong>Kapaciteti:</strong><br>
@@ -198,9 +198,15 @@
 
         <!-- Back Button -->
         <div style="margin-top: 2rem;">
+            {% if is_guide %}
+            <a href="{% url 'users:guide_dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kthehu në Dashboard
+            </a>
+            {% else %}
             <a href="{% url 'users:tourist_dashboard' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kthehu në Dashboard
             </a>
+            {% endif %}
         </div>
     </div>
 </div>

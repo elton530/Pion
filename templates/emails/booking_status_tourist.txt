@@ -7,7 +7,7 @@ Statusi i ri: {{ status_display }}
 Detajet e rezervimit:
 - Data: {{ tour_date|date:"d M Y" }} në {{ tour_time }}
 - Numri i personave: {{ num_people }}
-- Çmim total: {{ total_price }} Lekë
+- Çmim total: {{ total_price }} {{ currency }}
 - Guida: {{ guide_name }} ({{ guide_phone }})
 
 {% if status == 'confirmed' %}

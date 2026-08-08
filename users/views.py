@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.generic import DetailView, UpdateView
 from django.urls import reverse_lazy
@@ -33,29 +34,37 @@ def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
             role = form.cleaned_data.get("role")
-            
-            # Profile creation is handled by the form's `save()` method.
-            # Keep this view simple and avoid duplicating profile creation.
-            
-            # Login automatik
+
+            if role == "guide":
+                user.is_active = False
+                user.save()
+                form.save_m2m() if hasattr(form, 'save_m2m') else None
+
+                GuideProfile.objects.get_or_create(user=user)
+                guide_profile = GuideProfile.objects.get(user=user)
+                guide_profile.status = "pending"
+                guide_profile.is_verified = False
+                guide_profile.is_active = False
+                guide_profile.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
+
+                messages.success(
+                    request,
+                    "🎉 Regjistrimi u krye me sukses. Llogaria juaj si guide do të aktivizohet pas miratimit të administratorit."
+                )
+                return redirect("users:login")
+
+            user.save()
+            if role == "tourist":
+                TouristProfile.objects.get_or_create(user=user)
             login(request, user)
-            
             messages.success(
                 request,
                 f"🎉 Mirëseerdhët {user.first_name}! Llogaria u krijua me sukses."
             )
-            
-            if role == "guide":
-                messages.info(
-                    request,
-                    "📋 Tani plotëso profilin tënd si Guide për të filluar të ofrosh ture!"
-                )
-                return redirect("users:guide_profile_edit")
-            else:
-                messages.info(request, "✅ Paneli juaj është gati.")
-                return redirect("core:home")
+            messages.info(request, "✅ Paneli juaj është gati.")
+            return redirect("users:tourist_dashboard")
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -103,7 +112,10 @@ class CustomLoginView(LoginView):
     def get_success_url(self):
         """Redirect bazuar në rolin e përdoruesit"""
         user = self.request.user
-        
+
+        if user.is_staff or user.is_superuser:
+            return reverse_lazy("users:admin_dashboard")
+
         try:
             if GuideProfile.objects.filter(user=user).exists():
                 return reverse_lazy("users:guide_dashboard")
@@ -139,6 +151,126 @@ class CustomPasswordChangeView(PasswordChangeView):
     def form_valid(self, form):
         messages.success(self.request, "✅ Fjalëkalimi u ndryshua me sukses.")
         return super().form_valid(form)
+
+
+@user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser))
+def admin_dashboard(request):
+    """Dashboard i administratorit për miratimin e guide-ve dhe monitorimin e platformës."""
+    pending_guides = GuideProfile.objects.filter(status="pending").select_related("user").order_by("-created_at")
+    verified_guides = GuideProfile.objects.filter(status="verified").select_related("user").order_by("-verified_at", "-updated_at")
+    rejected_guides = GuideProfile.objects.filter(status="rejected").select_related("user").order_by("-updated_at")
+    suspended_guides = GuideProfile.objects.filter(status="suspended").select_related("user").order_by("-updated_at")
+
+    # ===== Statistika të pasuruara për guide-t e miratuar =====
+    verified_ids = [g.id for g in verified_guides]
+    if verified_ids:
+        booking_stats = (
+            Booking.objects.filter(tour__guide_id__in=verified_ids)
+            .values("tour__guide_id")
+            .annotate(
+                booking_count=Count("id"),
+                tourist_count=Count("tourist", distinct=True),
+                revenue=Sum(
+                    "final_price",
+                    filter=Q(status__in=["confirmed", "completed"]),
+                ),
+            )
+        )
+        guide_booking_stats = {row["tour__guide_id"]: row for row in booking_stats}
+
+        tour_counts = dict(
+            Tour.objects.filter(guide_id__in=verified_ids, is_active=True)
+            .values_list("guide_id")
+            .annotate(c=Count("id"))
+            .order_by()
+        )
+    else:
+        guide_booking_stats = {}
+        tour_counts = {}
+
+    for guide in verified_guides:
+        stats = guide_booking_stats.get(guide.id, {})
+        guide.admin_tour_count = tour_counts.get(guide.id, 0)
+        guide.admin_booking_count = stats.get("booking_count", 0)
+        guide.admin_tourist_count = stats.get("tourist_count", 0)
+        guide.admin_revenue = stats.get("revenue") or 0
+
+    verified_count = verified_guides.count()
+    total_tourists = TouristProfile.objects.count()
+    total_tours = Tour.objects.count()
+    active_tours = Tour.objects.filter(is_active=True, status="published").count()
+    total_bookings = Booking.objects.count()
+    pending_bookings = Booking.objects.filter(status="pending").count()
+    confirmed_bookings = Booking.objects.filter(status="confirmed").count()
+    completed_bookings = Booking.objects.filter(status="completed").count()
+    platform_revenue = Booking.objects.filter(status__in=["confirmed", "completed"]).aggregate(
+        total=Sum("final_price")
+    )["total"] or 0
+
+    recent_bookings = Booking.objects.select_related("tour", "tourist__user").order_by("-created_at")[:5]
+
+    if request.method == "POST":
+        guide_id = request.POST.get("guide_id")
+        action = request.POST.get("action")
+        if guide_id and action in {"approve", "reject", "suspend", "reactivate"}:
+            guide = get_object_or_404(GuideProfile, id=guide_id)
+            name = guide.user.get_full_name() or guide.user.username
+
+            if action == "approve":
+                guide.status = "verified"
+                guide.is_verified = True
+                guide.is_active = True
+                guide.verified_at = timezone.now()
+                guide.user.is_active = True
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_verified", "is_active", "verified_at", "updated_at"])
+                messages.success(request, f"✅ Guide '{name}' u miratua.")
+            elif action == "reject":
+                guide.status = "rejected"
+                guide.is_verified = False
+                guide.is_active = False
+                guide.user.is_active = False
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
+                messages.warning(request, f"⚠️ Guide '{name}' u refuzua.")
+            elif action == "suspend":
+                guide.status = "suspended"
+                guide.is_active = False
+                guide.user.is_active = False
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_active", "updated_at"])
+                messages.warning(request, f"🚫 Guide '{name}' u pezullua.")
+            elif action == "reactivate":
+                guide.status = "verified"
+                guide.is_active = True
+                guide.user.is_active = True
+                guide.user.save(update_fields=["is_active"])
+                guide.save(update_fields=["status", "is_active", "updated_at"])
+                messages.success(request, f"✅ Guide '{name}' u riaktivizua.")
+            return redirect("users:admin_dashboard")
+
+    context = {
+        "pending_guides": pending_guides,
+        "pending_count": pending_guides.count(),
+        "verified_guides": verified_guides,
+        "verified_count": verified_count,
+        "rejected_count": rejected_guides.count(),
+        "rejected_guides": rejected_guides,
+        "suspended_count": suspended_guides.count(),
+        "suspended_guides": suspended_guides,
+        "total_guides": GuideProfile.objects.count(),
+        "total_users": User.objects.count(),
+        "total_tourists": total_tourists,
+        "total_tours": total_tours,
+        "active_tours": active_tours,
+        "total_bookings": total_bookings,
+        "pending_bookings": pending_bookings,
+        "confirmed_bookings": confirmed_bookings,
+        "completed_bookings": completed_bookings,
+        "platform_revenue": platform_revenue,
+        "recent_bookings": recent_bookings,
+    }
+    return render(request, "users/admin_dashboard.html", context)
 
 
 # ==================== GUIDE VIEWS ====================
@@ -206,7 +338,17 @@ def guide_dashboard(request):
         return redirect("core:home")
     
     # Merr turet
-    tours = Tour.objects.filter(guide=guide_profile).order_by("-date")
+    tours = Tour.objects.filter(guide=guide_profile).select_related("tour_type").order_by("-date")
+    
+    today = timezone.now().date()
+    upcoming_tours = tours.filter(
+        is_active=True,
+        status__in=["published", "draft"],
+        date__gte=today,
+    ).order_by("date")
+    past_tours = tours.filter(
+        Q(date__lt=today) | Q(status="completed")
+    ).order_by("-date")
     
     # Merr reservimet
     bookings = Booking.objects.filter(tour__guide=guide_profile).select_related(
@@ -222,33 +364,54 @@ def guide_dashboard(request):
     total_bookings = bookings.count()
     pending_bookings = bookings.filter(status="pending").count()
     confirmed_bookings = bookings.filter(status="confirmed").count()
+    completed_bookings = bookings.filter(status="completed").count()
     cancelled_bookings = bookings.filter(status="cancelled").count()
     
-    # Të ardhura
-    revenue = bookings.filter(status="confirmed").aggregate(
-        total=Sum("total_price")
-    )["total"] or 0
+    # Të ardhura (të konfirmuara e të përfunduara), të ndara sipas valutës
+    revenue_bookings = bookings.filter(status__in=["confirmed", "completed"]).select_related("tour")
+    revenue_by_currency = {}
+    for b in revenue_bookings:
+        cur = b.tour.currency or "ALL"
+        revenue_by_currency[cur] = revenue_by_currency.get(cur, 0) + b.total_price
+    revenue_by_currency = [
+        {"currency": cur, "total": total, "label": cur}
+        for cur, total in sorted(revenue_by_currency.items())
+    ]
+    revenue = revenue_bookings.aggregate(total=Sum("total_price"))["total"] or 0
     
     # Vlerësime
     reviews = TourReview.objects.filter(
         tour__guide=guide_profile,
         is_approved=True
-    )
+    ).select_related("tourist__user", "tour")
+    recent_reviews = reviews.order_by("-created_at")[:5]
     
     avg_rating = reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+    
+    # Shpërndarja e notave
+    rating_distribution = {}
+    for d in reviews.values('rating').annotate(count=Count('id')):
+        rating_distribution[d['rating']] = d['count']
     
     context = {
         'guide_profile': guide_profile,
         'tours': tours,
+        'upcoming_tours': upcoming_tours[:5],
+        'upcoming_tours_count': upcoming_tours.count(),
+        'past_tours': past_tours[:5],
         'page_obj': page_obj,
         'bookings': page_obj.object_list,
         'total_bookings': total_bookings,
         'pending_bookings': pending_bookings,
         'confirmed_bookings': confirmed_bookings,
+        'completed_bookings': completed_bookings,
         'cancelled_bookings': cancelled_bookings,
         'revenue': revenue,
+        'revenue_by_currency': revenue_by_currency,
         'reviews_count': reviews.count(),
         'avg_rating': round(avg_rating, 1),
+        'recent_reviews': recent_reviews,
+        'rating_distribution': rating_distribution,
         'total_tourists': bookings.values('tourist').distinct().count(),
     }
     
@@ -281,9 +444,7 @@ def guide_booking_action(request, booking_id, action):
     
     if action == "confirm":
         if booking.status == "pending":
-            booking.status = "confirmed"
-            booking.confirmed_at = timezone.now()
-            booking.save(update_fields=['status', 'confirmed_at'])
+            booking.confirm()
             messages.success(
                 request,
                 f"✅ Rezervimi nga {booking.tourist.user.get_full_name()} u konfirmua!"
@@ -363,11 +524,25 @@ def tourist_dashboard(request):
     total_spent = bookings.filter(status="confirmed").aggregate(
         total=Sum("total_price")
     )["total"] or 0
-    
+
+    needs_confirmation = []
+    for booking in bookings:
+        tour_datetime = timezone.make_aware(
+            timezone.datetime.combine(booking.tour.date, booking.tour.time_start)
+        )
+        hours_until = (tour_datetime - now).total_seconds() / 3600
+        if (
+            0 <= hours_until <= 24
+            and booking.status == "confirmed"
+            and not booking.is_confirmed_24h
+        ):
+            needs_confirmation.append(booking)
+
     context = {
         'tourist_profile': tourist_profile,
         'upcoming_bookings': upcoming_bookings,
         'past_bookings': past_bookings,
+        'needs_confirmation': needs_confirmation,
         'total_bookings': total_bookings,
         'confirmed_bookings': confirmed_bookings,
         'pending_bookings': pending_bookings,
@@ -558,19 +733,51 @@ class UserProfileDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         guide = self.object
-        
+
         # Tours
         context['tours'] = Tour.objects.filter(guide=guide, is_active=True).order_by('-date')[:6]
-        
+
         # Reviews
-        context['reviews'] = TourReview.objects.filter(
+        approved_reviews = TourReview.objects.filter(
             tour__guide=guide,
             is_approved=True
-        ).order_by('-created_at')[:5]
-        
-        context['avg_rating'] = TourReview.objects.filter(
-            tour__guide=guide,
-            is_approved=True
-        ).aggregate(avg=Avg('rating'))['avg'] or 0
-        
+        )
+        context['reviews'] = approved_reviews.select_related(
+            'tourist__user', 'tour'
+        ).order_by('-created_at')[:6]
+
+        context['featured_reviews'] = approved_reviews.filter(
+            is_featured=True
+        ).select_related('tourist__user', 'tour').order_by('-created_at')[:3]
+
+        context['avg_rating'] = approved_reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+        context['reviews_count'] = approved_reviews.count()
+
+        # Shpërndarja e notave (5 -> 1) me përqindje për grafikun
+        dist_raw = {
+            d['rating']: d['count']
+            for d in approved_reviews.values('rating').annotate(count=Count('id'))
+        }
+        total_ratings = sum(dist_raw.values()) or 1
+        context['rating_distribution'] = [
+            {
+                'rating': star,
+                'count': dist_raw.get(star, 0),
+                'percentage': round((dist_raw.get(star, 0) / total_ratings) * 100, 1),
+            }
+            for star in range(5, 0, -1)
+        ]
+
+        # Detajet e vlerësimeve
+        detail_agg = approved_reviews.aggregate(
+            avg_guide=Avg('guide_rating'),
+            avg_value=Avg('value_rating'),
+            avg_experience=Avg('experience_rating'),
+        )
+        context['detail_ratings'] = {
+            'guide': detail_agg['avg_guide'],
+            'value': detail_agg['avg_value'],
+            'experience': detail_agg['avg_experience'],
+        }
+
         return context

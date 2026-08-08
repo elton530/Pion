@@ -8,59 +8,65 @@
 {% endblock %}
 
 {% block content %}
-<div class="tour-detail-wrapper">
+<div class="tour-detail-wrapper tour-statistics-page">
     <div class="header">
         <h1>Statistika për: {{ tour.title }}</h1>
-        <p class="tour-meta">Urdhëruar nga: {{ tour.guide.user.get_full_name }}</p>
+        <p class="tour-meta">
+            <span><i class="fas fa-user-check"></i> Udhëzues: {{ tour.guide.user.get_full_name }}</span>
+            <span><i class="fas fa-map-marker-alt"></i> {{ tour.location_city }}, {{ tour.location_region }}</span>
+        </p>
     </div>
 
-    <div class="stats-bar">
-        <div class="stat-item">
+    <div class="stats-grid">
+        <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-eye"></i></div>
-            <div class="stat-info">
-                <div class="stat-number" data-target="{{ stats.views|default:0 }}">0</div>
+            <div class="stat-content">
+                <div class="stat-number" data-target="{{ stats.views|default:0 }}">{{ stats.views|default:0 }}</div>
                 <div class="stat-label">Pamje</div>
             </div>
         </div>
-        <div class="stat-item">
+        <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-book-open"></i></div>
-            <div class="stat-info">
-                <div class="stat-number" data-target="{{ tour.booking_count|default:0 }}">0</div>
-                <div class="stat-label">Totale prenotime</div>
+            <div class="stat-content">
+                <div class="stat-number" data-target="{{ confirmed_bookings_count|default:0 }}">0</div>
+                <div class="stat-label">Prenotime të konfirmuara</div>
             </div>
         </div>
-        <div class="stat-item">
-            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
-            <div class="stat-info">
-                <div class="stat-number" data-target="{{ booking_percentage|floatformat:0|default:0 }}">0</div>
-                <div class="stat-label">% e prenotimeve</div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-content">
+                <div class="stat-number" data-target="{{ confirmed_spots|default:0 }}">0</div>
+                <div class="stat-label">Vende të zëna</div>
             </div>
         </div>
-        <div class="stat-item">
+        <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-star"></i></div>
-            <div class="stat-info">
+            <div class="stat-content">
                 <div class="stat-number">{{ average_rating|floatformat:1 }}</div>
                 <div class="stat-label">Vlerësim mesatar</div>
             </div>
         </div>
     </div>
 
-    <div class="content-block" style="max-width:900px;margin:40px auto;">
-        <h2>Detaje shtesë</h2>
-        <ul>
-            <li><strong>Vlerësime të miratuara:</strong> {{ reviews_count }}</li>
-            <li><strong>Shikime totale:</strong> {{ stats.views|default:0 }}</li>
-            <li><strong>Vende maksimale:</strong> {{ tour.max_participants }}</li>
-            <li><strong>Vende të lira:</strong> {{ tour.available_spots }}</li>
-        </ul>
+    <div class="stats-panels">
+        <div class="detail-card">
+            <h2>Detaje shtesë</h2>
+            <div class="detail-list">
+                <div class="detail-row"><span>Vlerësime të miratuara</span><strong>{{ reviews_count }}</strong></div>
+                <div class="detail-row"><span>Shikime totale</span><strong>{{ stats.views|default:0 }}</strong></div>
+                <div class="detail-row"><span>Vende maksimale</span><strong>{{ tour.max_participants }}</strong></div>
+                <div class="detail-row"><span>Vende të lira</span><strong>{{ tour.available_spots }}</strong></div>
+                <div class="detail-row"><span>Përqindja e zënies</span><strong>{{ booking_percentage|floatformat:1 }}%</strong></div>
+            </div>
+        </div>
+
+        <div class="detail-card">
+            <h2>Shpërndarja e vlerësimeve</h2>
+            <canvas id="ratingChart" width="600" height="280"></canvas>
+        </div>
     </div>
 
-    <div class="content-block" style="max-width:900px;margin:20px auto;">
-        <h2>Shpërndarja e vlerësimeve</h2>
-        <canvas id="ratingChart" width="600" height="280"></canvas>
-    </div>
-
-    <div style="text-align:center; margin-top:30px;">
+    <div class="stats-actions">
         <a href="{% url 'tours:edit_tour' tour.slug %}" class="btn btn-primary">Redakto Turin</a>
         <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-outline">Shiko Turin</a>
     </div>
@@ -68,7 +74,6 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/home.js' %}"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>

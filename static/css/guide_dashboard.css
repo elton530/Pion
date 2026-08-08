@@ -1,36 +1,37 @@
 /* static/css/guide_dashboard.css */
 .guide-dashboard {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e4edf5 50%, #eef5ee 100%);
     margin: 0;
-    padding: 20px;
-    color: #333;
+    padding: 20px 0 60px;
+    color: #1f2937;
     min-height: 100vh;
 }
 
 .guide-dashboard .container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 24px;
 }
 
-/* Stilizim i ri për welcome section */
+/* Stilizim për welcome section */
 .guide-dashboard .welcome-container {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 40px;
     position: relative;
 }
 
 .guide-dashboard .welcome-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
     color: white;
-    padding: 25px 40px;
+    padding: 28px 44px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(39, 174, 96, 0.25);
+    box-shadow: 0 12px 36px rgba(14, 165, 233, 0.3);
     position: relative;
     overflow: hidden;
     margin-bottom: 20px;
-    animation: fadeInUp 0.8s ease-out;
+    animation: gd-fade-in-up 0.8s ease-out;
 }
 
 .guide-dashboard .welcome-badge::before {
@@ -40,15 +41,15 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
     background-size: 20px 20px;
-    opacity: 0.3;
-    animation: float 20s linear infinite;
+    opacity: 0.35;
+    animation: gd-float 20s linear infinite;
 }
 
 .guide-dashboard .welcome-badge h2 {
     margin: 0 0 10px 0;
-    font-size: 1.8em;
+    font-size: 1.7em;
     color: white;
     position: relative;
     z-index: 1;
@@ -56,76 +57,115 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-}
-
-.guide-dashboard .welcome-badge h2::before {
-    content: '👋';
-    font-size: 1.3em;
+    font-weight: 800;
 }
 
 .guide-dashboard .welcome-badge .username {
-    font-size: 1.4em;
+    font-size: 1.35em;
     font-weight: 700;
     color: #fff;
     text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: relative;
     z-index: 1;
     background: rgba(255, 255, 255, 0.15);
-    padding: 5px 15px;
+    padding: 6px 18px;
     border-radius: 50px;
     display: inline-block;
     margin-top: 5px;
 }
 
+.guide-dashboard .welcome-verified {
+    color: #fbbf24;
+    margin-left: 6px;
+}
+
 .guide-dashboard .welcome-message {
-    font-size: 1.1em;
+    font-size: 1.05em;
     color: #5a6c7d;
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.7;
     padding: 0 20px;
 }
 
 .guide-dashboard .welcome-stats {
     display: inline-flex;
-    gap: 15px;
-    margin-top: 15px;
+    gap: 12px;
+    margin-top: 16px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .guide-dashboard .welcome-stat {
-    background: rgba(255, 255, 255, 0.9);
-    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 8px 18px;
     border-radius: 50px;
-    font-size: 0.9em;
-    color: #2c3e50;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid rgba(39, 174, 96, 0.1);
+    font-size: 0.88em;
+    color: #1f2937;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border: 1px solid rgba(14, 165, 233, 0.1);
+    font-weight: 600;
 }
 
+.guide-dashboard .welcome-stat i {
+    color: #0ea5e9;
+    margin-right: 5px;
+}
+
+/* Messages */
+.guide-dashboard .messages {
+    margin-bottom: 24px;
+}
+
+.guide-dashboard .messages .alert {
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.guide-dashboard .messages .alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.guide-dashboard .messages .alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.guide-dashboard .messages .alert-info {
+    background: #e0f2fe;
+    color: #075985;
+    border: 1px solid #bae6fd;
+}
+
+/* Stats */
 .guide-dashboard .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 25px;
-    margin-bottom: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+    margin-bottom: 26px;
 }
 
 .guide-dashboard .stat-card {
     background: white;
-    padding: 30px 25px;
-    border-radius: 16px;
+    padding: 26px 22px;
+    border-radius: 18px;
     text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
     transition: all 0.3s ease;
-    border: 1px solid rgba(0,0,0,0.05);
+    border: 1px solid rgba(226, 232, 240, 0.7);
     position: relative;
     overflow: hidden;
 }
 
 .guide-dashboard .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
 }
 
 .guide-dashboard .stat-card::before {
@@ -135,58 +175,286 @@
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, #27ae60, #2ecc71);
+    background: linear-gradient(90deg, #0ea5e9, #10b981);
 }
 
 .guide-dashboard .stat-card h3 {
-    margin: 15px 0;
-    font-size: 2.8em;
-    color: #2c3e50;
-    font-weight: 700;
+    margin: 12px 0 6px;
+    font-size: 2.4em;
+    color: #0f172a;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.guide-dashboard .stat-card h3 small {
+    font-size: 0.45em;
+    color: #94a3b8;
+    font-weight: 600;
 }
 
 .guide-dashboard .stat-card p {
-    margin: 10px 0 0;
-    font-size: 1.1em;
-    color: #666;
+    margin: 0;
+    font-size: 0.98em;
+    color: #64748b;
     font-weight: 500;
 }
 
 .guide-dashboard .stat-card .stat-icon {
-    font-size: 2em;
-    color: #27ae60;
-    margin-bottom: 10px;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    background: rgba(14, 165, 233, 0.12);
+    color: #0284c7;
 }
 
+.guide-dashboard .stat-card:nth-child(2) .stat-icon {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+}
+
+.guide-dashboard .stat-card:nth-child(3) .stat-icon {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+}
+
+.guide-dashboard .stat-card:nth-child(4) .stat-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+/* Revenue row */
+.guide-dashboard .revenue-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.guide-dashboard .revenue-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.7);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.guide-dashboard .revenue-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
+}
+
+.guide-dashboard .revenue-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25em;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.guide-dashboard .revenue-card:nth-child(2) .revenue-icon {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+}
+
+.guide-dashboard .revenue-card:nth-child(3) .revenue-icon {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+.guide-dashboard .revenue-label {
+    display: block;
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.guide-dashboard .revenue-value {
+    font-size: 1.15rem;
+    color: #0f172a;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.guide-dashboard .revenue-sep {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+/* Quick actions */
+.guide-dashboard .quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.guide-dashboard .btn-create {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 26px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+    color: white;
+    text-align: center;
+    font-size: 1.05em;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.3);
+    transition: all 0.3s ease;
+    font-weight: 700;
+    flex: 1;
+    min-width: 220px;
+    border: none;
+}
+
+.guide-dashboard .btn-create:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.4);
+    color: #fff;
+}
+
+.guide-dashboard .btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 12px;
+    background: white;
+    color: #1f2937;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.98em;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 200px;
+}
+
+.guide-dashboard .btn-edit-profile i {
+    color: #0ea5e9;
+}
+
+.guide-dashboard .btn-edit-profile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
+    color: #0284c7;
+}
+
+/* Sections */
 .guide-dashboard .section {
     background: white;
-    padding: 35px;
-    border-radius: 16px;
-    margin-bottom: 35px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0,0,0,0.05);
+    padding: 30px;
+    border-radius: 18px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
+    border: 1px solid rgba(226, 232, 240, 0.7);
 }
 
-.guide-dashboard .section h2 {
-    color: #2c3e50;
-    border-bottom: 3px solid #27ae60;
-    padding-bottom: 15px;
-    margin-top: 0;
-    font-size: 1.8em;
+.guide-dashboard .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+}
+
+.guide-dashboard .section-header h2 {
+    color: #0f172a;
+    margin: 0;
+    font-size: 1.35em;
+    font-weight: 800;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.guide-dashboard .section h2::before {
-    font-size: 1.2em;
+.guide-dashboard .section-header h2 i {
+    color: #0ea5e9;
+    background: rgba(14, 165, 233, 0.1);
+    padding: 9px;
+    border-radius: 50%;
+    font-size: 0.85em;
+}
+
+.guide-dashboard .view-all {
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.guide-dashboard .view-all:hover {
+    color: #075985;
+}
+
+/* Booking filters */
+.guide-dashboard .booking-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.guide-dashboard .filter-chip {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.guide-dashboard .filter-chip.chip-pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+}
+
+.guide-dashboard .filter-chip.chip-done {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0369a1;
+}
+
+.guide-dashboard .filter-chip.chip-cancelled {
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+}
+
+/* Tables */
+.guide-dashboard .table-wrap {
+    overflow-x: auto;
 }
 
 .guide-dashboard table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-top: 20px;
+    margin-top: 8px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -194,16 +462,16 @@
 
 .guide-dashboard th,
 .guide-dashboard td {
-    padding: 18px 20px;
+    padding: 16px 18px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .guide-dashboard th {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 0.95em;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    font-weight: 700;
+    color: #334155;
+    font-size: 0.82em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -213,144 +481,390 @@
 }
 
 .guide-dashboard tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
 }
 
-.guide-dashboard .status-pending {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-    color: #856404;
-    padding: 8px 16px;
-    border-radius: 20px;
+.guide-dashboard tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.guide-dashboard .muted {
+    color: #94a3b8;
+    font-weight: 400;
     font-size: 0.85em;
+}
+
+/* Statuses */
+.guide-dashboard .status-pending {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.82em;
     font-weight: 600;
-    border: 1px solid rgba(133, 100, 4, 0.1);
+    border: 1px solid rgba(146, 64, 14, 0.12);
+    white-space: nowrap;
 }
 
 .guide-dashboard .status-confirmed {
-    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-    color: #155724;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85em;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.82em;
     font-weight: 600;
-    border: 1px solid rgba(21, 87, 36, 0.1);
+    border: 1px solid rgba(6, 95, 70, 0.12);
+    white-space: nowrap;
 }
 
 .guide-dashboard .status-cancelled {
-    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-    color: #721c24;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85em;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.82em;
     font-weight: 600;
-    border: 1px solid rgba(114, 28, 36, 0.1);
+    border: 1px solid rgba(153, 27, 27, 0.12);
+    white-space: nowrap;
 }
 
+.guide-dashboard .status-completed {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #075985;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.82em;
+    font-weight: 600;
+    border: 1px solid rgba(7, 89, 133, 0.12);
+    white-space: nowrap;
+}
+
+.guide-dashboard .status-no_show {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #334155;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.82em;
+    font-weight: 600;
+    border: 1px solid rgba(51, 65, 85, 0.12);
+    white-space: nowrap;
+}
+
+/* Buttons */
 .guide-dashboard .btn {
-    padding: 10px 18px;
+    padding: 10px 16px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.88em;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-right: 8px;
+    margin-right: 6px;
     font-weight: 600;
     transition: all 0.2s ease;
 }
 
 .guide-dashboard .btn-confirm {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: white;
 }
 
 .guide-dashboard .btn-confirm:hover {
-    background: linear-gradient(135deg, #218838 0%, #1ba87e 100%);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
 }
 
 .guide-dashboard .btn-cancel {
-    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
     color: white;
 }
 
 .guide-dashboard .btn-cancel:hover {
-    background: linear-gradient(135deg, #c82333 0%, #d63384 100%);
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
 }
 
-.guide-dashboard .btn-create {
+.guide-dashboard .booking-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.guide-dashboard .inline-form {
+    display: inline;
+}
+
+/* Pagination */
+.guide-dashboard .pagination {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 320px;
-    margin: 40px auto;
-    padding: 18px 25px;
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    color: white;
-    text-align: center;
-    font-size: 1.3em;
-    border-radius: 12px;
+    gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.guide-dashboard .page-link {
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #1f2937;
     text-decoration: none;
-    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
-    transition: all 0.3s ease;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.guide-dashboard .page-link:hover {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0284c7;
+}
+
+.guide-dashboard .page-current {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.92em;
+}
+
+/* Upcoming tours */
+.guide-dashboard .upcoming-list {
+    display: grid;
     gap: 12px;
 }
 
-.guide-dashboard .btn-create:hover {
-    background: linear-gradient(135deg, #219a52 0%, #27ae60 100%);
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(39, 174, 96, 0.35);
-    text-decoration: none;
+.guide-dashboard .upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #f1f5f9;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    flex-wrap: wrap;
 }
 
-/* Modern small action buttons shown per tour */
+.guide-dashboard .upcoming-item:hover {
+    border-color: #bae6fd;
+    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.08);
+}
+
+.guide-dashboard .upcoming-date {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0ea5e9, #10b981);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.guide-dashboard .upcoming-day {
+    font-size: 1.25em;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.guide-dashboard .upcoming-month {
+    font-size: 0.72em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.guide-dashboard .upcoming-info {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.guide-dashboard .upcoming-info strong {
+    color: #0f172a;
+    font-size: 0.98em;
+}
+
+.guide-dashboard .upcoming-info .muted {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.guide-dashboard .upcoming-meta {
+    display: flex;
+    align-items: center;
+}
+
+.guide-dashboard .spots {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82em;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+
+.guide-dashboard .spots.open {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.guide-dashboard .spots.closed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+}
+
+.guide-dashboard .upcoming-actions {
+    display: flex;
+    gap: 6px;
+}
+
+/* Small action buttons */
 .guide-dashboard .btn-small {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
+    gap: 6px;
+    padding: 8px 12px;
     border-radius: 10px;
-    background: rgba(44, 62, 80, 0.05);
-    color: #2c3e50;
-    border: 1px solid rgba(44,62,80,0.06);
+    background: rgba(15, 23, 42, 0.04);
+    color: #1f2937;
+    border: 1px solid rgba(15, 23, 42, 0.06);
     font-weight: 600;
-    font-size: 0.85em;
+    font-size: 0.82em;
     text-decoration: none;
     transition: all 0.18s ease;
-    margin-right: 6px;
 }
 
 .guide-dashboard .btn-small:hover {
-    background: linear-gradient(90deg, rgba(39,174,96,0.12), rgba(39,174,96,0.06));
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(39,174,96,0.08);
+    background: rgba(14, 165, 233, 0.1);
+    color: #0284c7;
+    transform: translateY(-2px);
 }
 
-.guide-dashboard .btn-edit-profile {
+/* Reviews */
+.guide-dashboard .rating-summary {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    background: white;
-    color: #2c3e50;
-    border: 1px solid rgba(44,62,80,0.06);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-    text-decoration: none;
+    gap: 6px;
+    font-size: 0.88rem;
     font-weight: 700;
-    transition: all 0.18s ease;
+    color: #d97706;
+    background: rgba(245, 158, 11, 0.1);
+    padding: 7px 14px;
+    border-radius: 999px;
 }
 
-.guide-dashboard .btn-edit-profile:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(39,174,96,0.12);
+.guide-dashboard .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+.guide-dashboard .review-card {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 18px;
+    transition: all 0.2s ease;
+}
+
+.guide-dashboard .review-card:hover {
+    border-color: #bae6fd;
+    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.08);
+}
+
+.guide-dashboard .review-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.guide-dashboard .reviewer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #10b981);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.guide-dashboard .review-card-header > div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.guide-dashboard .review-card-header strong {
+    font-size: 0.92em;
+    color: #0f172a;
+}
+
+.guide-dashboard .review-tour {
+    font-size: 0.8em;
+    margin-top: 2px;
+}
+
+.guide-dashboard .review-stars {
+    color: #f59e0b;
+    font-size: 0.82em;
+    white-space: nowrap;
+}
+
+.guide-dashboard .review-comment {
+    font-size: 0.9em;
+    color: #475569;
+    line-height: 1.7;
+    margin: 0 0 10px;
+}
+
+.guide-dashboard .review-date {
+    font-size: 0.78em;
+}
+
+/* No data */
+.guide-dashboard .no-data {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 1em;
+    padding: 50px 30px;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 2px dashed #e2e8f0;
+    margin: 10px 0 0;
+}
+
+.guide-dashboard .no-data i {
+    font-size: 2.4em;
+    display: block;
+    margin-bottom: 14px;
+    color: #cbd5e1;
+}
+
+.guide-dashboard .no-data p {
+    margin: 0;
+}
+
+.guide-dashboard .no-data.small {
+    padding: 36px 24px;
+    font-size: 0.95em;
 }
 
 /* Tooltip */
@@ -374,7 +888,7 @@
     box-shadow: 0 8px 20px rgba(2,6,23,0.3);
 }
 
-/* Ripple effect container */
+/* Ripple */
 .guide-dashboard .ripple {
     position: relative;
     overflow: hidden;
@@ -385,35 +899,16 @@
     border-radius: 50%;
     transform: scale(0);
     background: rgba(255,255,255,0.4);
-    animation: ripple 0.6s linear;
+    animation: gd-ripple 0.6s linear;
     pointer-events: none;
 }
 
-@keyframes ripple {
+@keyframes gd-ripple {
     to { transform: scale(4); opacity: 0; }
 }
 
-.guide-dashboard .no-data {
-    text-align: center;
-    color: #95a5a6;
-    font-size: 1.2em;
-    padding: 60px 40px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 2px dashed #dee2e6;
-    margin: 20px 0;
-}
-
-.guide-dashboard .no-data::before {
-    content: '📊';
-    font-size: 3em;
-    display: block;
-    margin-bottom: 15px;
-    opacity: 0.5;
-}
-
 /* Animations */
-@keyframes fadeInUp {
+@keyframes gd-fade-in-up {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -424,53 +919,61 @@
     }
 }
 
-@keyframes float {
-    0% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    100% {
-        transform: translate(-10px, -10px) rotate(1deg);
-    }
+@keyframes gd-float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-10px, -10px) rotate(1deg); }
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
     .guide-dashboard {
-        padding: 15px;
+        padding: 15px 0 40px;
     }
-    
+
+    .guide-dashboard .container {
+        padding: 0 14px;
+    }
+
     .guide-dashboard .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
     }
-    
+
     .guide-dashboard .welcome-badge {
         padding: 20px;
-        width: 90%;
+        width: 92%;
     }
-    
+
     .guide-dashboard .welcome-badge h2 {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
-    
+
     .guide-dashboard .welcome-badge .username {
-        font-size: 1.2em;
+        font-size: 1.1em;
     }
-    
+
     .guide-dashboard .section {
-        padding: 25px 20px;
+        padding: 22px 16px;
     }
-    
-    .guide-dashboard .btn-create {
-        width: 90%;
-        padding: 15px;
-        font-size: 1.2em;
+
+    .guide-dashboard .btn-create,
+    .guide-dashboard .btn-edit-profile {
+        min-width: 100%;
     }
-    
+
     .guide-dashboard th,
     .guide-dashboard td {
-        padding: 12px 15px;
-        font-size: 0.9em;
+        padding: 12px 14px;
+        font-size: 0.88em;
+    }
+
+    .guide-dashboard .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-dashboard .upcoming-item {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
@@ -485,10 +988,10 @@
 }
 
 .guide-dashboard ::-webkit-scrollbar-thumb {
-    background: #27ae60;
+    background: #0ea5e9;
     border-radius: 4px;
 }
 
 .guide-dashboard ::-webkit-scrollbar-thumb:hover {
-    background: #219a52;
+    background: #0284c7;
 }

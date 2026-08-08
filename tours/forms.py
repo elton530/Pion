@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from .models import (
     Tour, TourImage, TourReview, TourSchedule, 
-    TourFAQ, TOUR_TYPES,
+    TourFAQ, TourType, TOUR_TYPES,
     DIFFICULTY_LEVELS, AGE_GROUP_CHOICES
 )
 
@@ -99,10 +99,10 @@ class TourReviewForm(forms.ModelForm):
 
 class TourImageForm(forms.ModelForm):
     """Forma për imazhet shtesë të turit"""
-    
+
     class Meta:
         model = TourImage
-        fields = ['image', 'caption', 'order', 'is_primary']
+        fields = ['image', 'caption']
         widgets = {
             'image': forms.FileInput(
                 attrs={
@@ -116,22 +116,10 @@ class TourImageForm(forms.ModelForm):
                     'maxlength': '200'
                 }
             ),
-            'order': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'min': '0',
-                    'placeholder': 'Rendi i shfaqjes'
-                }
-            ),
-            'is_primary': forms.CheckboxInput(
-                attrs={'class': 'form-check-input'}
-            ),
         }
         labels = {
             'image': 'Imazhi',
             'caption': 'Përshkrimi',
-            'order': 'Rendi',
-            'is_primary': 'Vendose si foto kryesore',
         }
 
 
@@ -162,7 +150,12 @@ class TourImageFormSet(forms.BaseInlineFormSet):
 
 class TourCreateForm(forms.ModelForm):
     """Forma për krijimin e një turi (forma themelore)"""
-    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        active_tour_types = TourType.objects.filter(is_active=True).order_by('order', 'name')
+        self.fields['tour_type'].queryset = active_tour_types
+
     class Meta:
         model = Tour
         fields = [
@@ -298,7 +291,17 @@ class TourCreateForm(forms.ModelForm):
 
 class TourEditForm(forms.ModelForm):
     """Forma për redaktimin e një turi (forma e plotë)"""
-    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        active_tour_types = TourType.objects.filter(is_active=True).order_by('order', 'name')
+        self.fields['tour_type'].queryset = active_tour_types
+
+        if self.instance and self.instance.tour_type_id:
+            current_type = self.instance.tour_type
+            if current_type and current_type not in active_tour_types:
+                self.fields['tour_type'].queryset = active_tour_types | TourType.objects.filter(pk=current_type.pk)
+
     class Meta:
         model = Tour
         fields = [
