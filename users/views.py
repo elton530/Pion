@@ -56,13 +56,15 @@ def signup(request):
                 return redirect("users:login")
 
             user.save()
+            if role == "tourist":
+                TouristProfile.objects.get_or_create(user=user)
             login(request, user)
             messages.success(
                 request,
                 f"🎉 Mirëseerdhët {user.first_name}! Llogaria u krijua me sukses."
             )
             messages.info(request, "✅ Paneli juaj është gati.")
-            return redirect("core:home")
+            return redirect("users:tourist_dashboard")
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -522,11 +524,25 @@ def tourist_dashboard(request):
     total_spent = bookings.filter(status="confirmed").aggregate(
         total=Sum("total_price")
     )["total"] or 0
-    
+
+    needs_confirmation = []
+    for booking in bookings:
+        tour_datetime = timezone.make_aware(
+            timezone.datetime.combine(booking.tour.date, booking.tour.time_start)
+        )
+        hours_until = (tour_datetime - now).total_seconds() / 3600
+        if (
+            0 <= hours_until <= 24
+            and booking.status == "confirmed"
+            and not booking.is_confirmed_24h
+        ):
+            needs_confirmation.append(booking)
+
     context = {
         'tourist_profile': tourist_profile,
         'upcoming_bookings': upcoming_bookings,
         'past_bookings': past_bookings,
+        'needs_confirmation': needs_confirmation,
         'total_bookings': total_bookings,
         'confirmed_bookings': confirmed_bookings,
         'pending_bookings': pending_bookings,

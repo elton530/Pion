@@ -116,6 +116,7 @@
                 {% endif %}
 
                 <a href="{% url 'tours:tour_detail' booking.tour.slug %}" class="btn btn-primary">Shiko Detajet</a>
+                <a href="{% url 'users:tourist_booking_detail' booking.id %}" class="btn btn-outline-primary">Rezervimi</a>
 
                                 {% if booking.status != 'cancelled' %}
                                 <form action="{% url 'users:tourist_booking_cancel' booking.id %}" method="post" style="display:inline;"
@@ -145,7 +146,13 @@
         <div class="booking-content" style="grid-column: 1 / -1;">
             <div class="booking-header">
                 <h3 class="booking-title" style="font-size:1.28rem;">{{ booking.tour.title }}</h3>
+                {% if booking.status == 'cancelled' %}
+                <span class="status-badge" style="background:#fee2e2; color:#b91c1c;">Anuluar</span>
+                {% elif booking.status == 'no_show' %}
+                <span class="status-badge" style="background:#f3f4f6; color:#6b7280;">Nuk u paraqit</span>
+                {% else %}
                 <span class="status-badge" style="background:#e5e7eb; color:#4b5563;">Përfunduar</span>
+                {% endif %}
             </div>
             <div class="booking-info" style="margin-top:0.8rem;">
                 <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
