@@ -2,9 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import admin
 from django.utils.html import format_html
-from django.db.models import Count, Avg
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
 from .models import GuideProfile, TouristProfile
 
@@ -92,7 +90,6 @@ class GuideProfileAdmin(admin.ModelAdmin):
     
     def user_link(self, obj):
         """Link drejt përdoruesit"""
-        from django.contrib.auth.models import User
         url = reverse('admin:auth_user_change', args=[obj.user.id])
         return format_html('<a href="{}">{}</a>', url, obj.user.username)
     user_link.short_description = 'Përdoruesi'
@@ -285,7 +282,6 @@ class TouristProfileAdmin(admin.ModelAdmin):
     
     def user_link(self, obj):
         """Link drejt përdoruesit"""
-        from django.contrib.auth.models import User
         url = reverse('admin:auth_user_change', args=[obj.user.id])
         return format_html('<a href="{}">{}</a>', url, obj.user.username)
     user_link.short_description = 'Përdoruesi'

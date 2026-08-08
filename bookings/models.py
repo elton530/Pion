@@ -1,15 +1,42 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from decimal import Decimal, InvalidOperation
 import re
-from datetime import timedelta
 import uuid
 
 from tours.models import Tour
-from users.models import TouristProfile, GuideProfile
+from users.models import TouristProfile
+
+
+def _to_decimal(value, field_name=None):
+    """Konverto në mënyrë të sigurt vlerën në Decimal.
+
+    Nëse konvertimi dështon, ngre ValueError me emrin e fushës për lehtësi debugging.
+    """
+    if isinstance(value, Decimal):
+        return value
+    if value is None:
+        fname = field_name or 'value'
+        raise ValueError(f"{fname} is None; expected a numeric value.")
+
+    s = str(value).strip()
+    # Fast path
+    try:
+        return Decimal(s)
+    except InvalidOperation:
+        # Try removing spaces and thousands separators
+        cleaned = s.replace(' ', '')
+        # Extract first numeric-looking substring (handles currency symbols)
+        m = re.search(r'[-+]?[0-9]+(?:[\.,][0-9]+)?', cleaned)
+        if m:
+            num = m.group(0).replace(',', '.')
+            try:
+                return Decimal(num)
+            except InvalidOperation:
+                pass
+        fname = field_name or 'value'
+        raise ValueError(f"{fname} could not be converted to Decimal: {value!r}")
 
 
 # ==================== CHOICES ====================
@@ -193,38 +220,9 @@ class Booking(models.Model):
     
     def save(self, *args, **kwargs):
         """Llogarit çmimet dhe menaxhon vendet"""
-        def _to_decimal(value, field_name=None):
-            """Safely convert value to Decimal, extracting numeric substring when needed.
-
-            If conversion fails, raise ValueError with the field name for easier debugging.
-            """
-            if isinstance(value, Decimal):
-                return value
-            if value is None:
-                fname = field_name or 'value'
-                raise ValueError(f"{fname} is None; expected a numeric value.")
-
-            s = str(value).strip()
-            # Fast path
-            try:
-                return Decimal(s)
-            except InvalidOperation:
-                # Try removing spaces and thousands separators
-                cleaned = s.replace(' ', '')
-                # Extract first numeric-looking substring (handles currency symbols)
-                m = re.search(r'[-+]?[0-9]+(?:[\.,][0-9]+)?', cleaned)
-                if m:
-                    num = m.group(0).replace(',', '.')
-                    try:
-                        return Decimal(num)
-                    except InvalidOperation:
-                        pass
-                fname = field_name or 'value'
-                raise ValueError(f"{fname} could not be converted to Decimal: {value!r}")
+        created = getattr(self, '_state', None) and getattr(self._state, 'adding', False)
         
-        # Nëse krijohet për herë të parë
-        # Use self._state.adding because UUIDField may set a default PK on instantiation
-        if getattr(self, '_state', None) and getattr(self._state, 'adding', False):
+        if created:
             # Kontrollo vende të lira
             if self.tour.available_spots < self.num_people:
                 raise ValueError(
@@ -254,7 +252,6 @@ class Booking(models.Model):
             self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
             self.final_price = self.total_price - _to_decimal(self.discount_applied, 'discount_applied')
         
-        created = getattr(self, '_state', None) and getattr(self._state, 'adding', False)
         super().save(*args, **kwargs)
 
         if created:
@@ -436,8 +433,6 @@ class Payment(models.Model):
         # Konfirmo prenimin automatikisht
         if self.booking.status == "pending":
             self.booking.confirm()
-
-        self.save(update_fields=['status', 'paid_at', 'transaction_id'])
     
     def mark_as_failed(self):
         """Marko si dështoi"""

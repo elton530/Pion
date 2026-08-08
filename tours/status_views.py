@@ -6,9 +6,15 @@ Real-time tour status tracking and updates
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from tours.models import Tour
+from django.db.models import Q, Sum
+from django.db.models.functions import Coalesce
+from tours.models import Tour, TOUR_STATUS
 import json
+
+
+def _owned_tour_or_404(tour_id, user):
+    """Merr turin e një guide-i, ose ngre Tour.DoesNotExist."""
+    return Tour.objects.get(id=tour_id, guide__user=user)
 
 
 @login_required
@@ -16,7 +22,7 @@ import json
 def get_tour_status(request, tour_id):
     """Get current status of a tour (AJAX endpoint)"""
     try:
-        tour = Tour.objects.get(id=tour_id, guide=request.user)
+        tour = _owned_tour_or_404(tour_id, request.user)
         return JsonResponse({
             'success': True,
             'status': tour.status,
@@ -41,11 +47,11 @@ def update_tour_status(request):
         tour_id = data.get('tour_id')
         new_status = data.get('status')
         
-        tour = Tour.objects.get(id=tour_id, guide=request.user)
+        tour = _owned_tour_or_404(tour_id, request.user)
         old_status = tour.status
         
         # Validate status
-        valid_statuses = ['draft', 'published', 'hidden', 'cancelled', 'completed']
+        valid_statuses = [s[0] for s in TOUR_STATUS]
         if new_status not in valid_statuses:
             return JsonResponse({
                 'success': False,
@@ -84,7 +90,19 @@ def update_tour_status(request):
 def get_guide_tours_status(request):
     """Get all tours status for guide (AJAX endpoint for bulk updates)"""
     try:
-        tours = Tour.objects.filter(guide=request.user).values('id', 'status', 'confirmed_booked_spots', 'max_participants')
+        tours = (
+            Tour.objects.filter(guide__user=request.user)
+            .annotate(
+                confirmed_spots=Coalesce(
+                    Sum(
+                        'bookings__num_people',
+                        filter=Q(bookings__status__in=['confirmed', 'completed']),
+                    ),
+                    0,
+                )
+            )
+            .values('id', 'status', 'confirmed_spots', 'max_participants')
+        )
         return JsonResponse({
             'success': True,
             'tours': list(tours)

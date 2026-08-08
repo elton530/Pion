@@ -1,21 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
-from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.views.generic import DetailView, UpdateView
+from django.views.generic import DetailView
 from django.urls import reverse_lazy
 from django.db.models import Sum, Count, Avg, Q
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import default_storage
+
+from core.utils import file_exists
 
 from .forms import (
     SignupForm, GuideProfileForm, GuideEditProfileForm,
-    TouristProfileForm, TouristEditProfileForm,
+    TouristEditProfileForm,
     UserAuthenticationForm, CustomPasswordChangeForm
 )
 from .models import GuideProfile, TouristProfile
@@ -40,10 +41,8 @@ def signup(request):
             if role == "guide":
                 user.is_active = False
                 user.save()
-                form.save_m2m() if hasattr(form, 'save_m2m') else None
 
-                GuideProfile.objects.get_or_create(user=user)
-                guide_profile = GuideProfile.objects.get(user=user)
+                guide_profile, _ = GuideProfile.objects.get_or_create(user=user)
                 guide_profile.status = "pending"
                 guide_profile.is_verified = False
                 guide_profile.is_active = False
@@ -88,11 +87,10 @@ class CustomLoginView(LoginView):
         password = form.cleaned_data.get('password')
         
         # Provo login me username ose email
-        from django.contrib.auth.models import User
         user = None
         
         try:
-            user_obj = User.objects.get(username=username)
+            User.objects.get(username=username)
             user = authenticate(request=self.request, username=username, password=password)
         except User.DoesNotExist:
             try:
@@ -116,18 +114,12 @@ class CustomLoginView(LoginView):
         if user.is_staff or user.is_superuser:
             return reverse_lazy("users:admin_dashboard")
 
-        try:
-            if GuideProfile.objects.filter(user=user).exists():
-                return reverse_lazy("users:guide_dashboard")
-        except:
-            pass
-        
-        try:
-            if TouristProfile.objects.filter(user=user).exists():
-                return reverse_lazy("users:tourist_dashboard")
-        except:
-            pass
-        
+        if GuideProfile.objects.filter(user=user).exists():
+            return reverse_lazy("users:guide_dashboard")
+
+        if TouristProfile.objects.filter(user=user).exists():
+            return reverse_lazy("users:tourist_dashboard")
+
         return reverse_lazy("core:home")
 
 
@@ -306,19 +298,8 @@ def guide_profile_edit(request):
         form = form_class(instance=profile)
     
     # Check media existence to avoid rendering broken URLs
-    photo_exists = False
-    cert_exists = False
-    try:
-        if profile.photo and default_storage.exists(profile.photo.name):
-            photo_exists = True
-    except Exception:
-        photo_exists = False
-
-    try:
-        if profile.certification_document and default_storage.exists(profile.certification_document.name):
-            cert_exists = True
-    except Exception:
-        cert_exists = False
+    photo_exists = file_exists(profile.photo)
+    cert_exists = file_exists(profile.certification_document)
 
     return render(
         request,

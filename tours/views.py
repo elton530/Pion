@@ -2,19 +2,40 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import DetailView, ListView
-from django.urls import reverse_lazy
 from django.db.models import Q, Count, Sum, Avg
 from django.http import JsonResponse
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import default_storage
 
 from users.models import GuideProfile
+from core.utils import file_exists
 from .models import Tour, TourReview, TourImage, TourSchedule, TourFAQ, TourStatistic
 from .forms import (
     TourCreateForm, TourEditForm, TourReviewForm, TourImageForm,
     TourScheduleForm, TourFAQForm, TourSearchForm, TourPricingForm
 )
+
+
+# ==================== HELPERS ====================
+
+def _published_tours_queryset():
+    """Baza e përbashkët e tureve të publikuar."""
+    return Tour.objects.filter(
+        is_active=True,
+        status="published",
+    ).select_related("guide__user").prefetch_related("images", "reviews")
+
+
+def _ensure_owner(request, tour):
+    """Kontrollo që përdoruesi të jetë pronari i turit, përndryshe PermissionDenied."""
+    if tour.guide.user != request.user:
+        raise PermissionDenied("Nuk mund ta modifikosh turin e një guide tjetër.")
+    return tour
+
+
+def _existing_images(tour):
+    """Imazhet shtesë që ekzistojnë realisht në storage."""
+    return [img for img in tour.images.all() if file_exists(img.image)]
 
 
 # ==================== TOUR LIST VIEWS ====================
@@ -28,11 +49,9 @@ class TourListView(ListView):
     paginate_by = 12
     
     def get_queryset(self):
-        queryset = Tour.objects.filter(
-            is_active=True,
-            status="published",
+        queryset = _published_tours_queryset().filter(
             date__gte=timezone.now().date()
-        ).select_related("guide__user").prefetch_related("images", "reviews")
+        )
         # Precompute approved reviews average to avoid per-item queries
         # Note: do NOT annotate `reviews_count` because it's a real model field
         # on `Tour` (conflicts with annotations). Use the stored field instead.
@@ -95,8 +114,8 @@ class TourListView(ListView):
         
         # Rendimi i rezultateve
         sort_by = self.request.GET.get('sort_by', '-date')
-        if sort_by in ['-date', 'date', 'price_per_person', '-price_per_person', 
-                       '-average_rating', '-created_at', 'booking_percentage']:
+        if sort_by in ['-date', 'date', 'price_per_person', '-price_per_person',
+                       '-average_rating', '-created_at']:
             queryset = queryset.order_by(sort_by)
         
         return queryset
@@ -122,11 +141,8 @@ class TourSearchView(ListView):
     paginate_by = 12
     
     def get_queryset(self):
-        queryset = Tour.objects.filter(
-            is_active=True,
-            status="published"
-        ).select_related("guide__user")
-        
+        queryset = _published_tours_queryset()
+
         form = TourSearchForm(self.request.GET)
         if form.is_valid():
             # Kërkimi
@@ -228,24 +244,10 @@ class TourDetailView(DetailView):
         tour = self.object
         
         # Imazhet - filter out media files that are missing from storage
-        valid_images = []
-        for img in tour.images.all():
-            try:
-                if img.image and default_storage.exists(img.image.name):
-                    valid_images.append(img)
-            except Exception:
-                # skip images that cause storage errors
-                continue
-        context["additional_images"] = valid_images
+        context["additional_images"] = _existing_images(tour)
 
         # Check main image exists before rendering to avoid 404s
-        main_image_exists = False
-        try:
-            if tour.main_image and default_storage.exists(tour.main_image.name):
-                main_image_exists = True
-        except Exception:
-            main_image_exists = False
-        context["main_image_exists"] = main_image_exists
+        context["main_image_exists"] = file_exists(tour.main_image)
         
         # Vlerësimet
         context["reviews"] = tour.reviews.filter(
@@ -366,11 +368,7 @@ def create_tour(request):
 def edit_tour(request, slug):
     """Redaktimi i një turi"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    # Kontrollo nëse përdoruesi është owner i turit
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta redaktosh turin e një guide tjetër.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     if request.method == "POST":
         form = TourEditForm(request.POST, request.FILES, instance=tour)
@@ -391,28 +389,11 @@ def edit_tour(request, slug):
         form = TourEditForm(instance=tour)
     
     # Check that media files actually exist before rendering URLs to avoid 404s
-    main_image_exists = False
-    thumbnail_exists = False
-    try:
-        if tour.main_image and default_storage.exists(tour.main_image.name):
-            main_image_exists = True
-    except Exception:
-        main_image_exists = False
-
-    try:
-        if tour.thumbnail and default_storage.exists(tour.thumbnail.name):
-            thumbnail_exists = True
-    except Exception:
-        thumbnail_exists = False
+    main_image_exists = file_exists(tour.main_image)
+    thumbnail_exists = file_exists(tour.thumbnail)
 
     # Imazhet shtesë - filtro skedarët që mungojnë në storage
-    valid_images = []
-    for img in tour.images.all():
-        try:
-            if img.image and default_storage.exists(img.image.name):
-                valid_images.append(img)
-        except Exception:
-            continue
+    valid_images = _existing_images(tour)
 
     return render(request, "tours/edit_tour.html", {
         "form": form,
@@ -427,11 +408,7 @@ def edit_tour(request, slug):
 def delete_tour(request, slug):
     """Fshirja e një turi"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    # Kontrollo nëse përdoruesi është owner
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta fshish turin e një guide tjetër.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     if request.method == "POST":
         title = tour.title
@@ -488,11 +465,7 @@ def my_tours(request):
 def edit_tour_pricing(request, slug):
     """Redaktimi i çmimeve dhe zbritjeve"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    # Kontrollo nëse përdoruesi është owner
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta redaktosh çmimin e një turi të tjerë.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     if request.method == "POST":
         form = TourPricingForm(request.POST, instance=tour)
@@ -515,10 +488,7 @@ def edit_tour_pricing(request, slug):
 def add_tour_image(request, slug):
     """Shtim i fotos shtesë"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund t'i shtosh foto turit të një guide tjetër.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     if request.method == "POST":
         form = TourImageForm(request.POST, request.FILES)
@@ -546,10 +516,7 @@ def delete_tour_image(request, image_id):
     """Fshirja e fotos"""
     
     image = get_object_or_404(TourImage, id=image_id)
-    tour = image.tour
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta fshish foton e turit të një guide tjetër.")
+    tour = _ensure_owner(request, image.tour)
     
     image.delete()
     messages.success(request, "Foto u fshi me sukses!")
@@ -566,10 +533,7 @@ def delete_tour_image(request, image_id):
 def add_tour_schedule(request, slug):
     """Shtim i programit ditor"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund t'i shtosh programa turit të një guide tjetër.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     if request.method == "POST":
         form = TourScheduleForm(request.POST)
@@ -593,10 +557,7 @@ def edit_tour_schedule(request, schedule_id):
     """Redaktimi i programit ditor"""
     
     schedule = get_object_or_404(TourSchedule, id=schedule_id)
-    tour = schedule.tour
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta redaktosh programin e turit të një guide tjetër.")
+    tour = _ensure_owner(request, schedule.tour)
     
     if request.method == "POST":
         form = TourScheduleForm(request.POST, instance=schedule)
@@ -618,10 +579,7 @@ def delete_tour_schedule(request, schedule_id):
     """Fshirja e programit ditor"""
     
     schedule = get_object_or_404(TourSchedule, id=schedule_id)
-    tour = schedule.tour
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta fshish programin e turit të një guide tjetër.")
+    tour = _ensure_owner(request, schedule.tour)
     
     schedule.delete()
     messages.success(request, "Programi u fshi me sukses!")
@@ -634,10 +592,7 @@ def delete_tour_schedule(request, schedule_id):
 def add_tour_faq(request, slug):
     """Shtim i pyetjeve të shpeshta"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund t'i shtosh FAQ turit të një guide tjetër.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     if request.method == "POST":
         form = TourFAQForm(request.POST)
@@ -661,10 +616,7 @@ def edit_tour_faq(request, faq_id):
     """Redaktimi i pyetjeve të shpeshta"""
     
     faq = get_object_or_404(TourFAQ, id=faq_id)
-    tour = faq.tour
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta redaktosh FAQ-in e turit të një guide tjetër.")
+    tour = _ensure_owner(request, faq.tour)
     
     if request.method == "POST":
         form = TourFAQForm(request.POST, instance=faq)
@@ -686,10 +638,7 @@ def delete_tour_faq(request, faq_id):
     """Fshirja e pyetjeve të shpeshta"""
     
     faq = get_object_or_404(TourFAQ, id=faq_id)
-    tour = faq.tour
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund ta fshish FAQ-in e turit të një guide tjetër.")
+    tour = _ensure_owner(request, faq.tour)
     
     faq.delete()
     messages.success(request, "Pyetja u fshi me sukses!")
@@ -811,10 +760,7 @@ def tour_by_location(request, location):
 def tour_statistics(request, slug):
     """Statistika e turit (për guide-in)"""
     
-    tour = get_object_or_404(Tour, slug=slug)
-    
-    if tour.guide.user != request.user:
-        raise PermissionDenied("Nuk mund të shikosh statistikat e turit të një guide tjetër.")
+    tour = _ensure_owner(request, get_object_or_404(Tour, slug=slug))
     
     try:
         stats = tour.statistics

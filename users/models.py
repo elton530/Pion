@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg, Count
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 
 # ==================== CHOICES ====================
@@ -249,7 +249,6 @@ class GuideProfile(models.Model):
     
     def update_rating(self):
         """Përditëso vlerësimin e guide-it bazuar në reviews"""
-        from django.db.models import Avg, Count
         from tours.models import TourReview
         
         reviews = TourReview.objects.filter(
@@ -278,7 +277,6 @@ class GuideProfile(models.Model):
     def update_earnings(self):
         """Përditëso fitimin total"""
         from bookings.models import Booking
-        from decimal import Decimal
         
         bookings = Booking.objects.filter(
             tour__guide=self,
@@ -453,18 +451,6 @@ class TouristProfile(models.Model):
 
 
 # ==================== SIGNALS ====================
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """Krijo profile për User të ri"""
-    if created:
-        try:
-            # Në të ardhmen mund ta përmirësojmë këtë
-            # për të përcaktuar nëse është guide apo turist
-            pass
-        except Exception as e:
-            print(f"Error creating profile: {e}")
-
 
 @receiver(post_save, sender=GuideProfile)
 def update_guide_on_status_change(sender, instance, created, **kwargs):

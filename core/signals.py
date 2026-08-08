@@ -1,12 +1,10 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.conf import settings
-from django.utils import timezone
 import logging
 
 from .models import ContactMessage, NewsletterSubscription, FAQ
+from core.utils import send_notification_email
 
 logger = logging.getLogger(__name__)
 
@@ -30,34 +28,17 @@ def on_contact_message_create(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ContactMessage)
 def notify_admin_on_new_contact(sender, instance, created, **kwargs):
     """Njoftim te admin kur ka mesazh të ri"""
-    try:
-        if created:
-            admin_emails = [admin[1] for admin in settings.ADMINS]
-            
-            if admin_emails:
-                subject = f"📬 Mesazh i ri kontakti: {instance.subject}"
-                context = {
-                    'name': instance.name,
-                    'email': instance.email,
-                    'phone': instance.phone or 'Nuk u sigurua',
-                    'subject': instance.subject,
-                    'message': instance.message,
-                }
-                # message = render_to_string('emails/admin_new_contact.html', context)
-                message = f"Mesazh i ri nga {instance.name}: {instance.subject}"
-                
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    admin_emails,
-                    fail_silently=True
-                )
-                
-                logger.info(f"Email notifikimi u dërgua te admin për: {instance.email}")
-    
-    except Exception as e:
-        logger.error(f"Gabim në notify_admin_on_new_contact: {e}")
+    if not created:
+        return
+
+    admin_emails = [admin[1] for admin in settings.ADMINS]
+
+    if admin_emails:
+        subject = f"📬 Mesazh i ri kontakti: {instance.subject}"
+        message = f"Mesazh i ri nga {instance.name}: {instance.subject}"
+
+        send_notification_email(admin_emails, subject, message=message)
+        logger.info(f"Email notifikimi u dërgua te admin për: {instance.email}")
 
 
 # ==================== NEWSLETTER SIGNALS ====================
@@ -103,21 +84,24 @@ def on_faq_create(sender, instance, created, **kwargs):
         logger.error(f"Gabim në on_faq_create: {e}")
 
 
-@receiver(post_save, sender=FAQ)
-def on_faq_status_change(sender, instance, created, **kwargs):
-    """Ndjek ndryshimin e statusit të FAQ"""
+@receiver(pre_save, sender=FAQ)
+def on_faq_status_change(sender, instance, **kwargs):
+    """Ndjek ndryshimin e statusit të FAQ (pre-save, se DB ka ende vlerën e vjetër)"""
+    if not instance.pk:
+        return
     try:
-        if not created:
-            old_instance = FAQ.objects.get(pk=instance.pk)
-            
-            # Nëse FAQ u aktivizua
-            if not old_instance.is_active and instance.is_active:
-                logger.info(f"FAQ u aktivizua: {instance.question[:50]}...")
-            
-            # Nëse FAQ u deaktivizua
-            elif old_instance.is_active and not instance.is_active:
-                logger.info(f"FAQ u deaktivizua: {instance.question[:50]}...")
-    
+        old_is_active = FAQ.objects.filter(pk=instance.pk).values_list('is_active', flat=True).first()
+        if old_is_active is None:
+            return
+
+        # Nëse FAQ u aktivizua
+        if not old_is_active and instance.is_active:
+            logger.info(f"FAQ u aktivizua: {instance.question[:50]}...")
+
+        # Nëse FAQ u deaktivizua
+        elif old_is_active and not instance.is_active:
+            logger.info(f"FAQ u deaktivizua: {instance.question[:50]}...")
+
     except FAQ.DoesNotExist:
         pass
     except Exception as e:
@@ -128,95 +112,37 @@ def on_faq_status_change(sender, instance, created, **kwargs):
 
 def send_contact_confirmation_email(contact_msg):
     """Dërgoni email confirmimi te përdoruesi"""
-    try:
-        subject = f"✅ Mesazhi juaj u pranua - {contact_msg.subject}"
-        context = {
-            'name': contact_msg.name,
-            'subject': contact_msg.subject,
-        }
-        # message = render_to_string('emails/contact_confirmation.html', context)
-        message = f"Faleminderit për kontaktin! Do t'ju përgjigjen në brëndësi të 24 orëve."
-        
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [contact_msg.email],
-            fail_silently=True
-        )
-        
-        logger.info(f"Confirmation email i dërgua: {contact_msg.email}")
-    
-    except Exception as e:
-        logger.error(f"Gabim në send_contact_confirmation_email: {e}")
+    subject = f"✅ Mesazhi juaj u pranua - {contact_msg.subject}"
+    message = "Faleminderit për kontaktin! Do t'ju përgjigjen në brëndësi të 24 orëve."
+    send_notification_email(contact_msg.email, subject, message=message)
+    logger.info(f"Confirmation email i dërgua: {contact_msg.email}")
 
 
 def send_newsletter_welcome_email(subscription):
     """Dërgoni email welcome te nënshkruesit e ri"""
-    try:
-        subject = "✅ Mirë se erdhët në newsletter-in tonë!"
-        context = {
-            'name': subscription.name or subscription.email,
-            'email': subscription.email,
-        }
-        # message = render_to_string('emails/newsletter_welcome.html', context)
-        message = "Faleminderit për nënshkrimin! Pritet të marr lajme të reja nga ne."
-        
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [subscription.email],
-            fail_silently=True
-        )
-        
-        logger.info(f"Welcome email i dërgua: {subscription.email}")
-    
-    except Exception as e:
-        logger.error(f"Gabim në send_newsletter_welcome_email: {e}")
+    subject = "✅ Mirë se erdhët në newsletter-in tonë!"
+    message = "Faleminderit për nënshkrimin! Pritet të marr lajme të reja nga ne."
+    send_notification_email(subscription.email, subject, message=message)
+    logger.info(f"Welcome email i dërgua: {subscription.email}")
 
 
 def send_newsletter_unsubscribe_confirmation(subscription):
     """Dërgoni email confirmimi anulimi"""
-    try:
-        subject = "❌ Nënshkrimi u anullua"
-        message = "Nënshkrimi juaj u anullua me sukses. Nuk do t'ju dërgojmë më email-a."
-        
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [subscription.email],
-            fail_silently=True
-        )
-        
-        logger.info(f"Unsubscribe confirmation email i dërgua: {subscription.email}")
-    
-    except Exception as e:
-        logger.error(f"Gabim në send_newsletter_unsubscribe_confirmation: {e}")
+    subject = "❌ Nënshkrimi u anullua"
+    message = "Nënshkrimi juaj u anullua me sukses. Nuk do t'ju dërgojmë më email-a."
+    send_notification_email(subscription.email, subject, message=message)
+    logger.info(f"Unsubscribe confirmation email i dërgua: {subscription.email}")
 
 
 def notify_admin_bulk_newsletter(count, subject):
     """Njoftim te admin kur dërgohet bulk newsletter"""
-    try:
-        admin_emails = [admin[1] for admin in settings.ADMINS]
-        
-        if admin_emails:
-            subject_line = f"📬 Bulk newsletter u dërgua - {subject}"
-            message = f"Bulk newsletter u dërgua me sukses te {count} nënshkruesit."
-            
-            send_mail(
-                subject_line,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                admin_emails,
-                fail_silently=True
-            )
-            
-            logger.info(f"Admin notification: Bulk newsletter u dërgua te {count} adresa")
-    
-    except Exception as e:
-        logger.error(f"Gabim në notify_admin_bulk_newsletter: {e}")
+    admin_emails = [admin[1] for admin in settings.ADMINS]
+
+    if admin_emails:
+        subject_line = f"📬 Bulk newsletter u dërgua - {subject}"
+        message = f"Bulk newsletter u dërgua me sukses te {count} nënshkruesit."
+        send_notification_email(admin_emails, subject_line, message=message)
+        logger.info(f"Admin notification: Bulk newsletter u dërgua te {count} adresa")
 
 
 # ==================== UTILITY FUNCTIONS ====================
@@ -229,30 +155,20 @@ def send_bulk_newsletter(subject, message, recipients=None):
             recipients = NewsletterSubscription.objects.filter(
                 is_active=True
             ).values_list('email', flat=True)
-        
+
         count = 0
-        
+
         for email in recipients:
-            try:
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False
-                )
+            if send_notification_email(email, subject, message=message):
                 count += 1
-            except Exception as e:
-                logger.error(f"Gabim në dërgimin e email për {email}: {e}")
-                continue
-        
+
         logger.info(f"Bulk newsletter u dërgua te {count} adresa")
-        
+
         # Njoftim te admin
         notify_admin_bulk_newsletter(count, subject)
-        
+
         return count
-    
+
     except Exception as e:
         logger.error(f"Gabim në send_bulk_newsletter: {e}")
         return 0

@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.db.models import Sum
 from users.models import GuideProfile, TouristProfile
 from django.utils.text import slugify
@@ -147,46 +146,6 @@ class TourQuerySet(models.QuerySet):
             status="published",
             reviews_count__gt=0
         ).order_by('-average_rating', '-reviews_count')[:limit]
-
-
-class TourManager(models.Manager):
-    """Custom manager për Tour model"""
-    
-    def get_queryset(self):
-        """Kthe custom TourQuerySet"""
-        return TourQuerySet(self.model, using=self._db)
-    
-    def active(self):
-        """Kthe turet aktive dhe të publikuara"""
-        return self.get_queryset().active()
-    
-    def upcoming(self):
-        """Kthe turet e ardhshëm"""
-        return self.get_queryset().upcoming()
-    
-    def past(self):
-        """Kthe turet e kaluar"""
-        return self.get_queryset().past()
-    
-    def by_guide(self, guide):
-        """Kthe turet e një udhëzuesi specifik"""
-        return self.get_queryset().by_guide(guide)
-    
-    def by_type(self, tour_type):
-        """Kthe turet sipas llojit"""
-        return self.get_queryset().by_type(tour_type)
-    
-    def by_location(self, location):
-        """Kthe turet sipas lokacionit"""
-        return self.get_queryset().by_location(location)
-    
-    def featured(self):
-        """Kthe turet e veçuar"""
-        return self.get_queryset().featured()
-    
-    def available(self):
-        """Kthe turet me vende të lira"""
-        return self.get_queryset().available()
 
 
 # ==================== TOUR TYPE MODEL ====================
@@ -506,7 +465,7 @@ class Tour(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_booking_at = models.DateTimeField(null=True, blank=True, editable=False)
     
-    objects = TourManager()
+    objects = TourQuerySet.as_manager()
     
     class Meta:
         ordering = ["-date", "-created_at"]
@@ -602,8 +561,6 @@ class Tour(models.Model):
     @property
     def current_price(self):
         """Merr çmimin aktual (me zbritje nëse zbatohet)"""
-        from decimal import Decimal
-
         # Prefer discount price when applicable
         if (self.has_discount and self.discount_until and
                 self.discount_until >= timezone.now().date()):
@@ -691,7 +648,6 @@ class Tour(models.Model):
     
     def update_available_spots(self):
         """Përditëso numrin e vendeve të lira bazuar në prenotimet e konfirmuara"""
-        from django.db.models import Sum
         try:
             confirmed_count = self.bookings.filter(
                 status='confirmed'

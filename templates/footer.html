@@ -139,6 +139,7 @@
                 
                 <form class="newsletter-form" id="footerNewsletterForm" method="post" action="{% url 'core:newsletter_subscribe' %}">
                     {% csrf_token %}
+                    <input type="hidden" name="agree_privacy" value="1">
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
                         <input type="email" name="email" placeholder="Email-i juaj..." required aria-label="Email address">

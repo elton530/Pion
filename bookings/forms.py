@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from .models import Booking, Payment, BookingReview, CANCELLATION_REASON
+from .models import Booking, BookingReview, CANCELLATION_REASON
 
 
 # ==================== BOOKING FORMS ====================
@@ -187,70 +187,6 @@ class BookingConfirmationForm(forms.Form):
         return confirm
 
 
-# ==================== PAYMENT FORMS ====================
-
-class PaymentForm(forms.ModelForm):
-    """Forma për pagesa"""
-    
-    class Meta:
-        model = Payment
-        fields = ['payment_method', 'notes']
-        widgets = {
-            'payment_method': forms.RadioSelect(
-                attrs={'class': 'form-check-input'}
-            ),
-            'notes': forms.Textarea(
-                attrs={
-                    'class': 'form-control',
-                    'rows': 3,
-                    'placeholder': 'Shënime shtesë (opsionale)',
-                }
-            ),
-        }
-        labels = {
-            'payment_method': 'Metoda e pagesës',
-            'notes': 'Shënime',
-        }
-    
-    def __init__(self, *args, booking=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.booking = booking
-        
-        if booking:
-            self.fields['amount'].initial = booking.final_price
-            self.fields['amount'].disabled = True
-
-
-class PaymentMethodForm(forms.Form):
-    """Zgjedhja e metodës së pagesës"""
-    
-    PAYMENT_METHODS = [
-        ('card', '💳 Kartë krediti/debit'),
-        ('paypal', '🅿️ PayPal'),
-        ('bank_transfer', '🏦 Transferim bankare'),
-        ('cash', '💵 Në vend'),
-    ]
-    
-    payment_method = forms.ChoiceField(
-        choices=PAYMENT_METHODS,
-        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
-        label='Zgjedh metodën e pagesës'
-    )
-    
-    agree_terms = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        label='Pajtohem me kushtet dhe politikën e anulimit',
-        help_text='Lexo kushtet përpara se të vazhdo'
-    )
-    
-    def clean_agree_terms(self):
-        """Valido pajtimin"""
-        agree = self.cleaned_data.get('agree_terms')
-        if not agree:
-            raise ValidationError(_("Duhet të pajtohen me kushtet për të vazhduar."))
-        return agree
-
-
 # ==================== REVIEW FORMS ====================
 
 class BookingReviewForm(forms.ModelForm):
@@ -288,47 +224,6 @@ class BookingReviewForm(forms.ModelForm):
             )
         
         return comment
-
-
-# ==================== ADMIN FORMS ====================
-
-class GuideBookingManagementForm(forms.Form):
-    """Forma për menaxhimin e prenimeve nga guide-i"""
-    
-    ACTION_CHOICES = [
-        ('confirm', '✅ Konfirmoje'),
-        ('cancel', '❌ Anuloje'),
-        ('mark_completed', '✔️ Marko si të përfunduar'),
-        ('mark_no_show', '⚠️ Marko si nuk u paraqit'),
-    ]
-    
-    action = forms.ChoiceField(
-        choices=ACTION_CHOICES,
-        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
-        label='Zgjidh veprimin'
-    )
-    
-    guide_notes = forms.CharField(
-        widget=forms.Textarea(
-            attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Shënime për turisti (opsionale)',
-            }
-        ),
-        required=False,
-        label='Shënime',
-        max_length=500
-    )
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        action = cleaned_data.get('action')
-        
-        if not action:
-            raise ValidationError(_("Zgjidh një veprim."))
-        
-        return cleaned_data
 
 
 # ==================== SEARCH & FILTER FORMS ====================

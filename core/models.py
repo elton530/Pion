@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import URLValidator, EmailValidator
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-import json
+from django.core.cache import cache
 
 # ==================== CHOICES ====================
 
@@ -181,11 +179,22 @@ class SiteSettings(models.Model):
         if not self.pk and SiteSettings.objects.exists():
             self.pk = SiteSettings.objects.first().pk
         super().save(*args, **kwargs)
-    
+        # Pastro cache-in që get_settings të kthejë të dhëna të reja
+        cache.delete(self._cache_key())
+
+    @classmethod
+    def _cache_key(cls):
+        return 'core:sitesettings'
+
     @classmethod
     def get_settings(cls):
-        """Merr settings globale"""
-        return cls.objects.first() or cls.objects.create()
+        """Merr settings globale (me cache 5 minuta)"""
+        key = cls._cache_key()
+        settings = cache.get(key)
+        if settings is None:
+            settings = cls.objects.first() or cls.objects.create()
+            cache.set(key, settings, 300)
+        return settings
 
 
 # ==================== CONTACT MESSAGE MODEL ====================
@@ -372,9 +381,8 @@ class FAQ(models.Model):
         return self.question[:100]
     
     def increment_views(self):
-        """Shto në numrin e shikimeve"""
-        self.views += 1
-        self.save(update_fields=['views'])
+        """Shto në numrin e shikimeve (update atomik, pa race condition)"""
+        FAQ.objects.filter(pk=self.pk).update(views=models.F('views') + 1)
 
 
 # ==================== SOCIAL LINK MODEL ====================
