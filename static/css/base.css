@@ -29,11 +29,11 @@
     --text-muted: #cbd5e1;
 
     /* Footer */
-    --footer-bg: #0f172a;
-    --footer-bg-dark: #1e293b;
-    --footer-text: #e2e8f0;
-    --footer-text-light: #94a3b8;
-    --footer-text-lighter: #64748b;
+    --footer-bg: #0b3d38;
+    --footer-bg-dark: #062a27;
+    --footer-text: #e8f2ee;
+    --footer-text-light: #a8c2bb;
+    --footer-text-lighter: #7f9a93;
     --footer-border: rgba(255, 255, 255, .1);
 
     /* Borders */

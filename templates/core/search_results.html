@@ -87,8 +87,8 @@ Kërko tur, guide dhe lokacione në platformën Open Map.
                 <div class="tour-grid">
                     {% for tour in results.tours %}
                     <article class="tour-card">
-                        <a href="{% url 'tours:tour_detail' tour.slug %}">
-                            <div class="tour-image">
+                        <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
+                            <div class="tour-image-wrapper">
                                 {% if tour.main_image %}
                                     <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" loading="lazy">
                                 {% else %}

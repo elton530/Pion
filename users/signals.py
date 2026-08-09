@@ -1,11 +1,10 @@
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
 from django.utils import timezone
 import logging
+
+from core.utils import send_notification_email
 
 from .models import GuideProfile, TouristProfile
 
@@ -38,11 +37,8 @@ def send_verification_email(sender, instance, created, **kwargs):
                     'guide_name': instance.user.get_full_name() or instance.user.username,
                     'username': instance.user.username,
                 }
-                # Këtu mund të përdorësh template për email
-                # html_message = render_to_string('users/emails/guide_welcome.html', context)
                 message = f"Mirëseerdhët {context['guide_name']}! Plotëso profilin tënd për të filluar të ofrosh ture."
-                
-                # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [guide_email])
+                send_notification_email(guide_email, subject, message=message)
                 logger.info(f"Welcome email i dërgua për guide: {instance.user.username}")
         except Exception as e:
             logger.error(f"Gabim në dërgimin e welcome email për guide: {e}")
@@ -50,15 +46,15 @@ def send_verification_email(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=GuideProfile)
 def notify_on_verification_status_change(sender, instance, created, **kwargs):
-    """Dërgoni email kur guide-i verifikohet ose refuzohet"""
-    if not created and instance.is_verified:
+    """Dërgoni email kur guide-i verifikohet (vetëm në kalimin e statusit)"""
+    old_verified = getattr(instance, '_old_is_verified', None)
+    if not created and instance.is_verified and old_verified is False:
         try:
             guide_email = instance.user.email
             if guide_email:
                 subject = "🎉 Profili juaj u verifikua!"
                 message = f"Përshëndetje {instance.user.get_full_name()}! Profili juaj si guide u verifikua. Tani mund të krijoni ture!"
-                
-                # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [guide_email])
+                send_notification_email(guide_email, subject, message=message)
                 logger.info(f"Verification email i dërgua për guide: {instance.user.username}")
         except Exception as e:
             logger.error(f"Gabim në dërgimin e verification email: {e}")
@@ -70,7 +66,8 @@ def track_verification_status_change(sender, instance, **kwargs):
     if instance.pk:
         try:
             old_instance = GuideProfile.objects.get(pk=instance.pk)
-            
+            instance._old_is_verified = old_instance.is_verified
+
             # Nëse statusi ndryshon në "verified"
             if old_instance.status != instance.status and instance.status == "verified":
                 instance.is_verified = True
@@ -114,8 +111,7 @@ def send_tourist_welcome_email(sender, instance, created, **kwargs):
                     'tourist_name': instance.user.get_full_name() or instance.user.username,
                 }
                 message = f"Mirëseerdhët {context['tourist_name']}! Filloni të kërkoni turet tuaj të favorizuar."
-                
-                # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [tourist_email])
+                send_notification_email(tourist_email, subject, message=message)
                 logger.info(f"Welcome email i dërgua për turist: {instance.user.username}")
         except Exception as e:
             logger.error(f"Gabim në dërgimin e welcome email për turist: {e}")
@@ -123,65 +119,23 @@ def send_tourist_welcome_email(sender, instance, created, **kwargs):
 
 # ==================== USER SIGNALS ====================
 
-@receiver(post_save, sender=User)
-def on_user_email_change(sender, instance, created, **kwargs):
-    """Veprimet kur user ndryshon email-in"""
-    if not created:
+@receiver(pre_save, sender=User)
+def reset_email_verified_on_email_change(sender, instance, **kwargs):
+    """Rivlerëso email_verified kur user ndryshon email-in.
+
+    Pre-save: baza e të dhënave ka ende email-in e vjetër, kështu që
+    ndryshimi zbulohet saktë. QuerySet.update() shmang rekursion.
+    """
+    if instance.pk:
         try:
-            old_user = User.objects.get(pk=instance.pk)
-            
+            old_email = User.objects.filter(pk=instance.pk).values_list('email', flat=True).first()
+
             # Nëse email u ndryshua
-            if old_user.email != instance.email:
-                # Marko emailin si neverifikuar
-                if hasattr(instance, 'guide_profile'):
-                    instance.guide_profile.email_verified = False
-                    instance.guide_profile.save(update_fields=['email_verified'])
-                
-                if hasattr(instance, 'tourist_profile'):
-                    instance.tourist_profile.email_verified = False
-                    instance.tourist_profile.save(update_fields=['email_verified'])
-                
+            if old_email != instance.email:
+                GuideProfile.objects.filter(user_id=instance.pk).update(email_verified=False)
+                TouristProfile.objects.filter(user_id=instance.pk).update(email_verified=False)
                 logger.info(f"Email u ndryshua për user: {instance.username}")
         except User.DoesNotExist:
             pass
         except Exception as e:
-            logger.error(f"Gabim në on_user_email_change: {e}")
-
-
-# ==================== UTILITY FUNCTIONS ====================
-
-def send_notification_email(email, subject, template_name, context):
-    """Funksion ndihmës për dërgimin e email-eve"""
-    try:
-        html_message = render_to_string(template_name, context)
-        send_mail(
-            subject=subject,
-            message="",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        logger.info(f"Email u dërgua në: {email}")
-        return True
-    except Exception as e:
-        logger.error(f"Gabim në dërgimin e email-it: {e}")
-        return False
-
-
-def send_bulk_notification(users, subject, template_name, context):
-    """Dërgoni bulk emails"""
-    emails = [user.email for user in users if user.email]
-    
-    if not emails:
-        logger.warning("Nuk ka email-e për dërgim")
-        return False
-    
-    try:
-        for email in emails:
-            send_notification_email(email, subject, template_name, context)
-        logger.info(f"Bulk email u dërgua në {len(emails)} adresa")
-        return True
-    except Exception as e:
-        logger.error(f"Gabim në dërgimin e bulk email: {e}")
-        return False
+            logger.error(f"Gabim në reset_email_verified_on_email_change: {e}")

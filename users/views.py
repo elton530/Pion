@@ -5,23 +5,33 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.generic import DetailView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db.models import Sum, Count, Avg, Q
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
 
-from core.utils import file_exists
+from decimal import Decimal, InvalidOperation
+
+from core.utils import file_exists, send_notification_email
 
 from .forms import (
     SignupForm, GuideProfileForm, GuideEditProfileForm,
     TouristEditProfileForm,
     UserAuthenticationForm, CustomPasswordChangeForm
 )
-from .models import GuideProfile, TouristProfile
+from .models import (
+    GuideProfile, GuideModerationLog, TouristProfile,
+    GUIDE_STATUS, TOUR_TYPES, EXPERIENCE_LEVELS,
+)
 from tours.models import Tour, TourReview
 from bookings.models import Booking
+
+
+def _is_admin(user):
+    """A është user-i administrator aktiv?"""
+    return bool(user.is_active and (user.is_staff or user.is_superuser))
 
 
 # ==================== AUTHENTICATION VIEWS ====================
@@ -145,7 +155,7 @@ class CustomPasswordChangeView(PasswordChangeView):
         return super().form_valid(form)
 
 
-@user_passes_test(lambda u: u.is_active and (u.is_staff or u.is_superuser))
+@user_passes_test(_is_admin)
 def admin_dashboard(request):
     """Dashboard i administratorit për miratimin e guide-ve dhe monitorimin e platformës."""
     pending_guides = GuideProfile.objects.filter(status="pending").select_related("user").order_by("-created_at")
@@ -204,41 +214,10 @@ def admin_dashboard(request):
     if request.method == "POST":
         guide_id = request.POST.get("guide_id")
         action = request.POST.get("action")
-        if guide_id and action in {"approve", "reject", "suspend", "reactivate"}:
+        if guide_id and action in {"approve", "reject", "suspend", "reactivate", "feature", "unfeature"}:
             guide = get_object_or_404(GuideProfile, id=guide_id)
-            name = guide.user.get_full_name() or guide.user.username
-
-            if action == "approve":
-                guide.status = "verified"
-                guide.is_verified = True
-                guide.is_active = True
-                guide.verified_at = timezone.now()
-                guide.user.is_active = True
-                guide.user.save(update_fields=["is_active"])
-                guide.save(update_fields=["status", "is_verified", "is_active", "verified_at", "updated_at"])
-                messages.success(request, f"✅ Guide '{name}' u miratua.")
-            elif action == "reject":
-                guide.status = "rejected"
-                guide.is_verified = False
-                guide.is_active = False
-                guide.user.is_active = False
-                guide.user.save(update_fields=["is_active"])
-                guide.save(update_fields=["status", "is_verified", "is_active", "updated_at"])
-                messages.warning(request, f"⚠️ Guide '{name}' u refuzua.")
-            elif action == "suspend":
-                guide.status = "suspended"
-                guide.is_active = False
-                guide.user.is_active = False
-                guide.user.save(update_fields=["is_active"])
-                guide.save(update_fields=["status", "is_active", "updated_at"])
-                messages.warning(request, f"🚫 Guide '{name}' u pezullua.")
-            elif action == "reactivate":
-                guide.status = "verified"
-                guide.is_active = True
-                guide.user.is_active = True
-                guide.user.save(update_fields=["is_active"])
-                guide.save(update_fields=["status", "is_active", "updated_at"])
-                messages.success(request, f"✅ Guide '{name}' u riaktivizua.")
+            reason = request.POST.get("reason", "")
+            _apply_guide_moderation(request, guide, action, reason)
             return redirect("users:admin_dashboard")
 
     context = {
@@ -251,6 +230,7 @@ def admin_dashboard(request):
         "suspended_count": suspended_guides.count(),
         "suspended_guides": suspended_guides,
         "total_guides": GuideProfile.objects.count(),
+        "featured_count": GuideProfile.objects.filter(is_featured=True).count(),
         "total_users": User.objects.count(),
         "total_tourists": total_tourists,
         "total_tours": total_tours,
@@ -263,6 +243,264 @@ def admin_dashboard(request):
         "recent_bookings": recent_bookings,
     }
     return render(request, "users/admin_dashboard.html", context)
+
+
+# ==================== GUIDE MODERATION HELPERS ====================
+
+def _apply_guide_moderation(request, guide, action, reason=""):
+    """Aplikon një veprim moderimi mbi një guide dhe regjistron historikun + email.
+
+    Kthen True nëse veprimi u krye, përndryshe False.
+    """
+    admin = request.user
+    name = guide.full_name
+    reason = (reason or "").strip()
+
+    # Ndalon moderatorin që të ndryshojë statusin e profilit të tij si guide,
+    # përndryshe do të çaktivizonte llogarinë e vet (p.sh. kur refuzon veten).
+    if action in {"approve", "reject", "suspend", "reactivate"} and guide.user_id == request.user.id:
+        messages.error(
+            request,
+            "⛔ Nuk mund të ndryshosh statusin e profilit tënd si guide. "
+            "Kërkoje një administrator tjetër për ta moderuar këtë profil.",
+        )
+        return False
+
+    # --- Veprimet mbi statusin ---
+    status_actions = {
+        "approve": {
+            "status": "verified", "log": "approved",
+            "msg": f"✅ Guide '{name}' u miratua.",
+            "level": messages.SUCCESS,
+            "subject": "🎉 Profili juaj u miratua!",
+            "body": (
+                f"Përshëndetje {name},\n\n"
+                "profili juaj si guide u miratua nga administratori i platformës. "
+                "Tani mund të hyni në llogarinë tuaj dhe të filloni të ofroni ture."
+            ),
+        },
+        "reject": {
+            "status": "rejected", "log": "rejected",
+            "msg": f"❌ Guide '{name}' u refuzua.",
+            "level": messages.WARNING,
+            "subject": "ℹ️ Përditësim i profilit tuaj si guide",
+            "body": (
+                f"Përshëndetje {name},\n\n"
+                "profili juaj si guide nuk u miratua nga administratori i platformës."
+            ),
+        },
+        "suspend": {
+            "status": "suspended", "log": "suspended",
+            "msg": f"🚫 Guide '{name}' u pezullua.",
+            "level": messages.WARNING,
+            "subject": "ℹ️ Profili juaj si guide u pezullua",
+            "body": (
+                f"Përshëndetje {name},\n\n"
+                "profili juaj si guide u pezullua përkohësisht nga administratori i platformës."
+            ),
+        },
+        "reactivate": {
+            "status": "verified", "log": "reactivated",
+            "msg": f"✅ Guide '{name}' u riaktivizua.",
+            "level": messages.SUCCESS,
+            "subject": "🎉 Profili juaj u riaktivizua!",
+            "body": (
+                f"Përshëndetje {name},\n\n"
+                "profili juaj si guide u riaktivizua. Mund të vazhdoni të ofroni ture normalisht."
+            ),
+        },
+    }
+
+    if action in status_actions:
+        cfg = status_actions[action]
+        guide.status = cfg["status"]
+        guide.is_verified = (cfg["status"] == "verified")
+        guide.is_active = (cfg["status"] == "verified")
+        guide.verified_at = timezone.now() if cfg["status"] == "verified" else None
+        guide.user.is_active = guide.is_active
+        guide.user.save(update_fields=["is_active"])
+        guide.save(update_fields=["status", "is_verified", "is_active", "verified_at", "updated_at"])
+
+        GuideModerationLog.objects.create(
+            guide=guide, action=cfg["log"], reason=reason, admin=admin
+        )
+        messages.add_message(request, cfg["level"], cfg["msg"])
+
+        if guide.user.email:
+            body = cfg["body"]
+            if reason:
+                body += f"\n\nArsyeja: {reason}"
+            send_notification_email(guide.user.email, cfg["subject"], message=body)
+        return True
+
+    # --- Veprimet e veçimit (featured) ---
+    if action in {"feature", "unfeature"}:
+        guide.is_featured = (action == "feature")
+        guide.save(update_fields=["is_featured", "updated_at"])
+        GuideModerationLog.objects.create(
+            guide=guide,
+            action="featured" if action == "feature" else "unfeatured",
+            reason=reason,
+            admin=admin,
+        )
+        if action == "feature":
+            messages.success(request, f"⭐ Guide '{name}' u vu në krye.")
+        else:
+            messages.info(request, f"Guide '{name}' u hoq nga të veçuarit.")
+        return True
+
+    return False
+
+
+def _apply_guide_notes(request, guide):
+    """Ruan shënimet private të administratorit për një guide."""
+    notes = request.POST.get("admin_notes", "")
+    guide.admin_notes = notes
+    guide.save(update_fields=["admin_notes", "updated_at"])
+    messages.success(request, f"📝 Shënimet për '{guide.full_name}' u ruajtën.")
+
+
+# ==================== ADMIN: GUIDE LIST & DETAIL ====================
+
+@user_passes_test(_is_admin)
+def admin_guides(request):
+    """Lista e të gjithë guide-ve me filtra dhe kërkim për moderim të kujdesshëm."""
+    guides = GuideProfile.objects.select_related("user").all()
+
+    # ==== Filtrat ====
+    q = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    specialty = request.GET.get("specialty", "").strip()
+    experience = request.GET.get("experience", "").strip()
+    location = request.GET.get("location", "").strip()
+    featured = request.GET.get("featured", "").strip()
+    min_rating = request.GET.get("min_rating", "").strip()
+    sort = request.GET.get("sort", "").strip()
+
+    if q:
+        guides = guides.filter(
+            Q(user__username__icontains=q)
+            | Q(user__first_name__icontains=q)
+            | Q(user__last_name__icontains=q)
+            | Q(user__email__icontains=q)
+            | Q(location__icontains=q)
+            | Q(specialty__icontains=q)
+            | Q(specialties__icontains=q)
+            | Q(languages__icontains=q)
+            | Q(certifications__icontains=q)
+        )
+    if status in dict(GUIDE_STATUS):
+        guides = guides.filter(status=status)
+    if specialty in dict(TOUR_TYPES):
+        guides = guides.filter(specialty=specialty)
+    if experience in dict(EXPERIENCE_LEVELS):
+        guides = guides.filter(experience_level=experience)
+    if location:
+        guides = guides.filter(location__icontains=location)
+    if featured in {"1", "0"}:
+        guides = guides.filter(is_featured=featured == "1")
+    if min_rating:
+        try:
+            min_rating = Decimal(min_rating)
+            guides = guides.filter(average_rating__gte=min_rating)
+        except (InvalidOperation, TypeError, ValueError):
+            min_rating = ""
+
+    guides = guides.annotate(
+        admin_tour_count=Count("tours", filter=Q(tours__is_active=True), distinct=True)
+    )
+
+    if sort == "rating":
+        guides = guides.order_by("-average_rating", "-reviews_count")
+    elif sort == "name":
+        guides = guides.order_by("user__first_name", "user__last_name")
+    elif sort == "oldest":
+        guides = guides.order_by("created_at")
+    else:
+        sort = "newest"
+        guides = guides.order_by("-created_at")
+
+    paginator = Paginator(guides, 20)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # ==== Veprimet e moderimit ====
+    if request.method == "POST":
+        guide_id = request.POST.get("guide_id")
+        action = request.POST.get("action")
+        if guide_id and action in {"approve", "reject", "suspend", "reactivate", "feature", "unfeature"}:
+            guide = get_object_or_404(GuideProfile, id=guide_id)
+            reason = request.POST.get("reason", "")
+            _apply_guide_moderation(request, guide, action, reason)
+        query = request.GET.urlencode()
+        url = reverse("users:admin_guides")
+        return redirect(f"{url}?{query}" if query else url)
+
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+    query_string = query_params.urlencode()
+
+    context = {
+        "page_obj": page_obj,
+        "guides": page_obj,
+        "total_count": GuideProfile.objects.count(),
+        "featured_count": GuideProfile.objects.filter(is_featured=True).count(),
+        "verified_count": GuideProfile.objects.filter(status="verified").count(),
+        "status_choices": GUIDE_STATUS,
+        "specialty_choices": TOUR_TYPES,
+        "experience_choices": EXPERIENCE_LEVELS,
+        "filters": {
+            "q": q,
+            "status": status,
+            "specialty": specialty,
+            "experience": experience,
+            "location": location,
+            "featured": featured,
+            "min_rating": min_rating,
+            "sort": sort,
+        },
+        "query_string": query_string,
+    }
+    return render(request, "users/admin_guides.html", context)
+
+
+@user_passes_test(_is_admin)
+def admin_guide_detail(request, guide_id):
+    """Faqe e detajuar moderimi për një guide: profili, historiku dhe veprimet."""
+    guide = get_object_or_404(
+        GuideProfile.objects.select_related("user"), id=guide_id
+    )
+
+    moderation_logs = guide.moderation_logs.select_related("admin")[:50]
+
+    tours = guide.tours.all().order_by("-created_at")[:10]
+    total_tours = guide.tours.filter(is_active=True).count()
+
+    booking_stats = Booking.objects.filter(tour__guide=guide).aggregate(
+        booking_count=Count("id"),
+        tourist_count=Count("tourist", distinct=True),
+        revenue=Sum("final_price", filter=Q(status__in=["confirmed", "completed"])),
+    )
+
+    if request.method == "POST":
+        action = request.POST.get("action", "")
+        if action in {"approve", "reject", "suspend", "reactivate", "feature", "unfeature"}:
+            reason = request.POST.get("reason", "")
+            _apply_guide_moderation(request, guide, action, reason)
+        elif action == "save_notes":
+            _apply_guide_notes(request, guide)
+        return redirect("users:admin_guide_detail", guide_id=guide.id)
+
+    context = {
+        "guide": guide,
+        "moderation_logs": moderation_logs,
+        "tours": tours,
+        "total_tours": total_tours,
+        "booking_count": booking_stats["booking_count"] or 0,
+        "tourist_count": booking_stats["tourist_count"] or 0,
+        "revenue": booking_stats["revenue"] or 0,
+    }
+    return render(request, "users/admin_guide_detail.html", context)
 
 
 # ==================== GUIDE VIEWS ====================

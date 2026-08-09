@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Menaxhimi i Guide-ve - Admin{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-shell">
+
+        <div class="admin-header">
+            <div class="admin-header-row">
+                <div>
+                    <h1>🧭 Menaxhimi i Guide-ve</h1>
+                    <p>Filtro dhe kërko guide-t me kujdes, pastaj kalo te faqja e moderimit për çdo guide.</p>
+                </div>
+                <div class="admin-header-actions">
+                    <a href="{% url 'users:admin_dashboard' %}" class="btn-action view">🏛️ Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <form method="get" action="{% url 'users:admin_guides' %}" class="filter-bar">
+                <div class="filter-group filter-search">
+                    <i class="fas fa-search"></i>
+                    <input type="search" name="q" value="{{ filters.q }}" placeholder="Kërko (emri, username, email, vendndodhja, certifikata...)">
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-status">Statusi</label>
+                    <select name="status" id="f-status">
+                        <option value="">Të gjithë</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-specialty">Specialiteti</label>
+                    <select name="specialty" id="f-specialty">
+                        <option value="">Të gjithë</option>
+                        {% for value, label in specialty_choices %}
+                            <option value="{{ value }}" {% if filters.specialty == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-experience">Përvoja</label>
+                    <select name="experience" id="f-experience">
+                        <option value="">Të gjitha</option>
+                        {% for value, label in experience_choices %}
+                            <option value="{{ value }}" {% if filters.experience == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-featured">Të veçuar</label>
+                    <select name="featured" id="f-featured">
+                        <option value="">Të gjithë</option>
+                        <option value="1" {% if filters.featured == '1' %}selected{% endif %}>⭐ Po</option>
+                        <option value="0" {% if filters.featured == '0' %}selected{% endif %}>Jo</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-rating">Vlerësimi min.</label>
+                    <select name="min_rating" id="f-rating">
+                        <option value="">Të gjitha</option>
+                        {% for r in "54321" %}
+                            <option value="{{ r }}" {% if filters.min_rating == r %}selected{% endif %}>{{ r }}+ yje</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-location">Vendndodhja</label>
+                    <input type="text" name="location" id="f-location" value="{{ filters.location }}" placeholder="Qyteti / zona">
+                </div>
+
+                <div class="filter-group">
+                    <label for="f-sort">Rendit</label>
+                    <select name="sort" id="f-sort">
+                        <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Më të rinj</option>
+                        <option value="oldest" {% if filters.sort == 'oldest' %}selected{% endif %}>Më të vjetër</option>
+                        <option value="rating" {% if filters.sort == 'rating' %}selected{% endif %}>Vlerësimi</option>
+                        <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Emri</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-action approve">🔍 Filtro</button>
+                    <a href="{% url 'users:admin_guides' %}" class="btn-action view">♻️ Pastro</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Rezultatet <span class="badge">{{ guides.paginator.count }} guide</span></h2>
+                <div class="panel-tools">
+                    <span class="badge badge-green">✅ {{ verified_count }}</span>
+                    <span class="badge badge-gold">⭐ {{ featured_count }} të veçuar</span>
+                </div>
+            </div>
+
+            {% if page_obj %}
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Guide</th>
+                                <th>Statusi</th>
+                                <th>Specialiteti</th>
+                                <th>Përvoja</th>
+                                <th>Vlerësimi</th>
+                                <th>Ture</th>
+                                <th>Aplikuar më</th>
+                                <th>Veprime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for guide in page_obj %}
+                                <tr>
+                                    <td>
+                                        <div class="cell-user">
+                                            <div class="guide-avatar avatar-sm">
+                                                {% if guide.photo %}
+                                                    <img src="{{ guide.photo.url }}" alt="{{ guide.full_name }}">
+                                                {% else %}
+                                                    <span>{{ guide.user.username|slice:":1"|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <strong class="user-name">
+                                                    {{ guide.full_name }}
+                                                    {% if guide.is_featured %}<span class="badge-featured" title="I veçuar">⭐</span>{% endif %}
+                                                </strong>
+                                                <div class="user-meta">@{{ guide.user.username }}</div>
+                                                <div class="user-meta"><i class="fas fa-map-marker-alt"></i> {{ guide.location|default:'-' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="status-tag status-{{ guide.status }}">{{ guide.get_status_display }}</span></td>
+                                    <td><span class="chip chip-specialty">{{ guide.get_specialty_display }}</span></td>
+                                    <td>
+                                        <span class="cell-strong">{{ guide.years_experience }} vjet</span>
+                                        <span class="user-meta">{{ guide.get_experience_level_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if guide.reviews_count > 0 %}
+                                            <span class="stars">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star{% if forloop.counter > guide.average_rating|floatformat:"0" %} star-empty{% endif %}"></i>
+                                                {% endfor %}
+                                            </span>
+                                            <span class="user-meta">{{ guide.average_rating|floatformat:1 }} ({{ guide.reviews_count }})</span>
+                                        {% else %}
+                                            <span class="user-meta">Pa vlerësime</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-center"><strong>{{ guide.admin_tour_count }}</strong></td>
+                                    <td><span class="user-meta">{{ guide.created_at|date:"d M Y" }}</span></td>
+                                    <td class="actions">
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="pagination">
+                        {% if page_obj.has_previous %}
+                            <a class="btn-action view" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}">← Para</a>
+                        {% endif %}
+                        <span class="page-info">Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}</span>
+                        {% if page_obj.has_next %}
+                            <a class="btn-action view" href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.next_page_number }}">Tjetër →</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    Asnjë guide nuk përputhet me filtrat e zgjedhur. Provo të ndryshosh kriteret e kërkimit.
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+{% endblock %}

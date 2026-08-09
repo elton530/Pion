@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, TemplateView
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, Avg
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.utils import timezone
@@ -15,7 +15,7 @@ from .forms import (
     NewsletterSubscriptionForm, NewsletterUnsubscribeForm,
     GlobalSearchForm, FeedbackForm
 )
-from tours.models import Tour
+from tours.models import Tour, TourReview
 from users.models import GuideProfile, TouristProfile
 
 
@@ -34,11 +34,6 @@ class HomeView(TemplateView):
         # Turet më të rinj
         context['latest_tours'] = published.order_by('-created_at')[:6]
 
-        # Turet më të vlerësuar
-        context['top_rated_tours'] = published.filter(
-            reviews_count__gt=0
-        ).order_by('-average_rating')[:6]
-
         # Guide-t më aktiv
         context['featured_guides'] = GuideProfile.objects.filter(
             is_active=True,
@@ -47,10 +42,7 @@ class HomeView(TemplateView):
 
         # Statistika
         context['total_tours'] = published.count()
-        context['total_guides'] = GuideProfile.objects.filter(
-            is_active=True,
-            is_verified=True
-        ).count()
+        context['total_guides'] = GuideProfile.objects.count()
         context['total_reviews'] = published.aggregate(total=Sum('reviews_count'))['total'] or 0
         # Aliases used by templates / JS
         context['tours_count'] = context['total_tours']
@@ -92,6 +84,16 @@ class AboutView(TemplateView):
         context['total_bookings'] = Tour.objects.aggregate(
             total=Count('bookings')
         )['total'] or 0
+
+        # Dëshmitë (testimonials) nga vlerësimet e aprovuara
+        approved_reviews = TourReview.objects.filter(is_approved=True).exclude(comment='')
+        context['testimonials'] = approved_reviews.select_related(
+            'tourist__user', 'tour__guide__user'
+        ).order_by('-is_featured', '-created_at')[:6]
+        context['total_reviews'] = approved_reviews.count()
+        context['avg_rating'] = approved_reviews.aggregate(
+            avg=Avg('rating')
+        )['avg'] or 0
         
         return context
 
@@ -327,7 +329,7 @@ def global_search(request):
     
     if form.is_valid():
         query = form.cleaned_data.get('query')
-        search_type = form.cleaned_data.get('search_type', 'all')
+        search_type = form.cleaned_data.get('search_type') or 'all'
         
         if query:
             if search_type in ['all', 'tours']:

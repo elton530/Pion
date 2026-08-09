@@ -55,4 +55,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(style);
+
+    // ==================== TOP RATED CAROUSEL ====================
+
+    const topRatedTrack = document.querySelector('.top-rated-track');
+    const topRatedPrev = document.querySelector('.top-rated-btn.prev');
+    const topRatedNext = document.querySelector('.top-rated-btn.next');
+
+    if (topRatedTrack) {
+        const scrollStep = () => {
+            const card = topRatedTrack.querySelector('.top-rated-card');
+            return card ? card.offsetWidth + 24 : 364;
+        };
+
+        const updateButtons = () => {
+            const maxScroll = topRatedTrack.scrollWidth - topRatedTrack.clientWidth;
+            if (topRatedPrev) topRatedPrev.disabled = topRatedTrack.scrollLeft <= 0;
+            if (topRatedNext) topRatedNext.disabled = topRatedTrack.scrollLeft >= maxScroll - 4;
+        };
+
+        topRatedNext?.addEventListener('click', () => {
+            topRatedTrack.scrollBy({ left: scrollStep(), behavior: 'smooth' });
+        });
+
+        topRatedPrev?.addEventListener('click', () => {
+            topRatedTrack.scrollBy({ left: -scrollStep(), behavior: 'smooth' });
+        });
+
+        topRatedTrack.addEventListener('scroll', updateButtons, { passive: true });
+        window.addEventListener('resize', updateButtons);
+        updateButtons();
+    }
 });
