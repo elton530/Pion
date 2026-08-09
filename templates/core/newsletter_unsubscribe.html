@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Anulimi i Nënshkrimit — Open Map{% endblock %}
+
+{% block meta_description %}
+Anulo nënshkrimin në newsletter-in e Open Map. Nuk do të dërgojmë më email-a në adresën tënde.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Anulimi i Nënshkrimit</h1>
+            <p class="hero-subtitle">Na vjen keq që po largohesh. Fut email-in tënd për të anulluar nënshkrimin.</p>
+        </div>
+    </section>
+
+    <!-- Unsubscribe Form Section -->
+    <section class="contact-form-section">
+        <div class="container">
+            <div class="form-wrapper">
+                <div class="form-header">
+                    <h2>Konfirmo Anulimin</h2>
+                    <p>Ky veprim nuk mund të zhbëhet.</p>
+                </div>
+
+                <form method="post" class="contact-form">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.non_field_errors.0 }}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.confirm.id_for_label }}" class="form-check-label">
+                            {{ form.confirm }} Konfirmoj anulimin e nënshkrimit
+                        </label>
+                        {% if form.confirm.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.confirm.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-danger btn-large">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Anulo Nënshkrimin</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

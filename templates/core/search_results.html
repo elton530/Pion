@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kërkimi — Open Map{% endblock %}
+
+{% block meta_description %}
+Kërko tur, guide dhe lokacione në platformën Open Map.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Kërkimi</h1>
+            <p class="hero-subtitle">Gjej turin, guidën ose lokacionin që kërkon</p>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="contact-form-section">
+        <div class="container">
+            <div class="form-wrapper">
+                <form method="get" action="{% url 'core:global_search' %}" class="contact-form search-form">
+                    <div class="form-group">
+                        {{ form.query }}
+                        {% if form.query.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.query.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="search-type-options">
+                        {% for radio in form.search_type %}
+                            <label class="search-type-option">
+                                {{ radio.tag }}
+                                <span>{{ radio.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-search"></i>
+                        <span>Kërko</span>
+                    </button>
+                </form>
+
+                {% if query %}
+                    <div class="search-summary">
+                        <h3>Rezultatet për: "{{ query }}"</h3>
+                        <p>{{ total_results }} rezultate u gjetën.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    {% if query %}
+    <section class="search-results-section">
+        <div class="container">
+            {% if not results.tours and not results.guides and not results.locations %}
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h2>Nuk u gjetën rezultate</h2>
+                    <p>Provo me fjalë të tjera kërkimi ose kërko një lokacion tjetër.</p>
+                    <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
+                        <i class="fas fa-compass"></i>
+                        <span>Shiko të gjitha turet</span>
+                    </a>
+                </div>
+            {% endif %}
+
+            {% if results.tours %}
+            <div class="results-block">
+                <h2 class="results-title">
+                    <i class="fas fa-mountain"></i>
+                    Turet ({{ results.tours|length }})
+                </h2>
+                <div class="tour-grid">
+                    {% for tour in results.tours %}
+                    <article class="tour-card">
+                        <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
+                            <div class="tour-image-wrapper">
+                                {% if tour.main_image %}
+                                    <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="image-placeholder">
+                                        <i class="fas fa-mountain"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-content">
+                                <h3 class="tour-title">{{ tour.title }}</h3>
+                                <p class="tour-desc">{{ tour.short_description|truncatewords:20 }}</p>
+                                <div class="tour-meta">
+                                    {% if tour.location_city %}
+                                    <span><i class="fas fa-map-marker-alt"></i> {{ tour.location_city }}</span>
+                                    {% endif %}
+                                    {% if tour.date %}
+                                    <span><i class="far fa-calendar-alt"></i> {{ tour.date|date:"d M Y" }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="tour-footer">
+                                    <div class="tour-price">
+                                        <span class="price-amount">{{ tour.price_per_person }}</span>
+                                        <span class="price-currency">{{ tour.get_currency_display }}</span>
+                                    </div>
+                                    <div class="tour-action"><span>Shiko</span></div>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results.guides %}
+            <div class="results-block">
+                <h2 class="results-title">
+                    <i class="fas fa-users"></i>
+                    Guide-t ({{ results.guides|length }})
+                </h2>
+                <div class="guide-results-grid">
+                    {% for guide in results.guides %}
+                    <div class="guide-result-card">
+                        <div class="guide-result-avatar">
+                            {% if guide.photo %}
+                                <img src="{{ guide.photo.url }}" alt="{{ guide.user.get_full_name }}">
+                            {% else %}
+                                <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="guide-result-info">
+                            <h3>{{ guide.user.get_full_name|default:guide.user.username }}</h3>
+                            {% if guide.location %}
+                                <p><i class="fas fa-map-marker-alt"></i> {{ guide.location }}</p>
+                            {% endif %}
+                            <span class="guide-rating"><i class="fas fa-star"></i> {{ guide.average_rating|default:"5.0" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results.locations %}
+            <div class="results-block">
+                <h2 class="results-title">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Lokacionet ({{ results.locations|length }})
+                </h2>
+                <div class="location-results-grid">
+                    {% for location in results.locations %}
+                    <div class="location-result-card">
+                        <i class="fas fa-map-pin"></i>
+                        <span>{{ location.location_city }}{% if location.location_region %}, {{ location.location_region }}{% endif %}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

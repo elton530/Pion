@@ -2,11 +2,9 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import admin
 from django.utils.html import format_html
-from django.db.models import Count, Avg
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
-from .models import GuideProfile, TouristProfile
+from .models import GuideProfile, GuideModerationLog, TouristProfile
 
 
 # ==================== GUIDE PROFILE ADMIN ====================
@@ -17,11 +15,11 @@ class GuideProfileAdmin(admin.ModelAdmin):
     
     list_display = [
         'full_name', 'location', 'specialty_display', 'status_badge',
-        'is_verified', 'rating_display', 'tours_count', 'created_at'
+        'is_verified', 'is_featured', 'rating_display', 'tours_count', 'created_at'
     ]
     
     list_filter = [
-        'status', 'is_verified', 'is_active', 'experience_level',
+        'status', 'is_verified', 'is_active', 'is_featured', 'experience_level',
         'specialty', 'created_at', 'verified_at'
     ]
     
@@ -68,7 +66,7 @@ class GuideProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Statusi', {
-            'fields': ('is_active',)
+            'fields': ('is_active', 'is_featured', 'admin_notes')
         }),
         ('Kohë', {
             'fields': ('created_at', 'updated_at'),
@@ -92,7 +90,6 @@ class GuideProfileAdmin(admin.ModelAdmin):
     
     def user_link(self, obj):
         """Link drejt përdoruesit"""
-        from django.contrib.auth.models import User
         url = reverse('admin:auth_user_change', args=[obj.user.id])
         return format_html('<a href="{}">{}</a>', url, obj.user.username)
     user_link.short_description = 'Përdoruesi'
@@ -285,7 +282,6 @@ class TouristProfileAdmin(admin.ModelAdmin):
     
     def user_link(self, obj):
         """Link drejt përdoruesit"""
-        from django.contrib.auth.models import User
         url = reverse('admin:auth_user_change', args=[obj.user.id])
         return format_html('<a href="{}">{}</a>', url, obj.user.username)
     user_link.short_description = 'Përdoruesi'
@@ -330,3 +326,35 @@ class TouristProfileAdmin(admin.ModelAdmin):
         count = queryset.update(email_notifications=False)
         self.message_user(request, f'🔕 {count} turistët nuk marrin notifikime.')
     disable_notifications.short_description = '🔕 Deaktivizo notifikime'
+
+
+# ==================== GUIDE MODERATION LOG ADMIN ====================
+
+@admin.register(GuideModerationLog)
+class GuideModerationLogAdmin(admin.ModelAdmin):
+    """Admin për historikun e moderimit të guide-ve"""
+
+    list_display = ['guide', 'action_badge', 'admin', 'reason_short', 'created_at']
+    list_filter = ['action', 'created_at']
+    search_fields = ['guide__user__username', 'guide__user__first_name', 'guide__user__last_name', 'reason']
+
+    def action_badge(self, obj):
+        colors = {
+            'approved': '#27ae60',
+            'reactivated': '#27ae60',
+            'featured': '#8e44ad',
+            'rejected': '#e74c3c',
+            'suspended': '#e67e22',
+            'unfeatured': '#95a5a6',
+            'note': '#3498db',
+        }
+        color = colors.get(obj.action, '#95a5a6')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 8px; border-radius: 3px; font-weight: bold;">{}</span>',
+            color, obj.get_action_display()
+        )
+    action_badge.short_description = 'Veprimi'
+
+    def reason_short(self, obj):
+        return (obj.reason[:80] + '…') if len(obj.reason) > 80 else obj.reason
+    reason_short.short_description = 'Arsyeja'

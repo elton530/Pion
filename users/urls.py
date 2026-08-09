@@ -77,6 +77,8 @@ urlpatterns = [
     
     # ==================== ADMIN ROUTES ====================
     path("admin/dashboard/", views.admin_dashboard, name="admin_dashboard"),
+    path("admin/guides/", views.admin_guides, name="admin_guides"),
+    path("admin/guides/<int:guide_id>/", views.admin_guide_detail, name="admin_guide_detail"),
 
     # ==================== GUIDE ROUTES ====================
     # GET /users/guide/dashboard/ - Dashboard i guide-it

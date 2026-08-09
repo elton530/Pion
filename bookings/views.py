@@ -1,23 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.generic import DetailView, ListView
 from django.core.paginator import Paginator
-from django.db.models import Q, Sum, Count, Avg
-from django.utils import timezone
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.http import HttpResponseForbidden
+from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from decimal import Decimal
+import logging
+
+from core.utils import send_notification_email
 
 from tours.models import Tour
-from users.models import TouristProfile, GuideProfile
+from users.models import TouristProfile
 from .forms import (
     BookingForm, BookingEditForm, BookingCancellationForm,
     BookingConfirmationForm, BookingReviewForm, BookingSearchForm
 )
-from .models import Booking, Payment, BookingReview
+from .models import Booking
+
+logger = logging.getLogger(__name__)
 
 
 # ==================== BOOKING CREATION ====================
@@ -277,7 +277,7 @@ def booking_list(request):
         tourist_profile = request.user.tourist_profile
     except TouristProfile.DoesNotExist:
         messages.error(request, "❌ Vetëm turistët mund të shikojnë prenomet e tyre.")
-        return redirect("home")
+        return redirect("core:home")
     
     bookings = Booking.objects.filter(tourist=tourist_profile).select_related('tour__guide__user')
     
@@ -399,11 +399,10 @@ def send_new_booking_email_to_guide(booking):
                 'currency': booking.tour.get_currency_display(),
                 'notes': booking.notes or 'Nuk ka shënime',
             }
-            # message = render_to_string('emails/new_booking_guide.html', context)
             message = f"Prenim i ri: {booking.tourist.user.get_full_name()} për {booking.num_people} persona"
-            send_mail(subject, message, 'no-reply@platforma-jone.com', [guide_email])
+            send_notification_email(guide_email, subject, message=message, context=context)
     except Exception as e:
-        print(f"Gabim në dërgimin e email për guide: {e}")
+        logger.error(f"Gabim në dërgimin e email për guide: {e}")
 
 
 def send_booking_confirmation_email_to_tourist(booking):
@@ -422,10 +421,10 @@ def send_booking_confirmation_email_to_tourist(booking):
                 'total_price': booking.total_price,
                 'currency': booking.tour.get_currency_display(),
             }
-            message = f"Prenimit u krye. Guide-i do të kontaktojë së shpejti."
-            send_mail(subject, message, 'no-reply@platforma-jone.com', [tourist_email])
+            message = "Prenimit u krye. Guide-i do të kontaktojë së shpejti."
+            send_notification_email(tourist_email, subject, message=message, context=context)
     except Exception as e:
-        print(f"Gabim në dërgimin e email për turist: {e}")
+        logger.error(f"Gabim në dërgimin e email për turist: {e}")
 
 
 def send_cancellation_email(booking):
@@ -435,6 +434,6 @@ def send_cancellation_email(booking):
         if tourist_email:
             subject = f"❌ Anulim i prenimit për '{booking.tour.title}'"
             message = f"Prenimit u anullua. Rimbursim: {booking.refund_amount} {booking.tour.get_currency_display()}"
-            send_mail(subject, message, 'no-reply@platforma-jone.com', [tourist_email])
+            send_notification_email(tourist_email, subject, message=message)
     except Exception as e:
-        print(f"Gabim në dërgimin e email anulimi: {e}")
+        logger.error(f"Gabim në dërgimin e email anulimi: {e}")

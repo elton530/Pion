@@ -1,10 +1,9 @@
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
 import logging
+
+from core.utils import send_notification_email
 
 from .models import Booking, Payment, BookingReview
 
@@ -206,7 +205,7 @@ def send_payment_confirmation_email(payment):
     try:
         booking = payment.booking
         tourist_email = booking.tourist.user.email
-        
+
         if tourist_email:
             subject = f"✅ Pagesa u konfirmua për '{booking.tour.title}'"
             context = {
@@ -216,11 +215,8 @@ def send_payment_confirmation_email(payment):
                 'amount': payment.amount,
                 'currency': payment.currency,
             }
-            # message = render_to_string('emails/payment_confirmed.html', context)
             message = f"Pagesa u konfirmua. Prenim i përfunduar për {booking.tour.title}."
-            
-            # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [tourist_email])
-            logger.info(f"Payment confirmation email i dërgua: {tourist_email}")
+            send_notification_email(tourist_email, subject, message=message, context=context)
     except Exception as e:
         logger.error(f"Gabim në send_payment_confirmation_email: {e}")
 
@@ -230,58 +226,10 @@ def send_payment_failed_email(payment):
     try:
         booking = payment.booking
         tourist_email = booking.tourist.user.email
-        
+
         if tourist_email:
             subject = f"❌ Pagesa dështoi për '{booking.tour.title}'"
-            message = f"Pagesa dështoi. Provo të ri ose kontakto ne."
-            
-            # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [tourist_email])
-            logger.info(f"Payment failed email i dërgua: {tourist_email}")
+            message = "Pagesa dështoi. Provo të ri ose kontakto ne."
+            send_notification_email(tourist_email, subject, message=message)
     except Exception as e:
         logger.error(f"Gabim në send_payment_failed_email: {e}")
-
-
-def send_booking_confirmation_to_guide(booking):
-    """Dërgoni email te guide kur ka prenim të ri"""
-    try:
-        guide_email = booking.tour.guide.user.email
-        
-        if guide_email:
-            subject = f"📬 Prenim i ri për '{booking.tour.title}'"
-            context = {
-                'guide_name': booking.tour.guide.user.get_full_name() or booking.tour.guide.user.username,
-                'tour_title': booking.tour.title,
-                'tour_date': booking.tour.date,
-                'tourist_name': booking.tourist.user.get_full_name() or booking.tourist.user.username,
-                'num_people': booking.num_people,
-                'total_price': booking.total_price,
-            }
-            # message = render_to_string('emails/new_booking_guide.html', context)
-            message = f"Prenim i ri: {booking.tourist.user.get_full_name()} për {booking.num_people} persona."
-            
-            # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [guide_email])
-            logger.info(f"New booking email i dërgua: {guide_email}")
-    except Exception as e:
-        logger.error(f"Gabim në send_booking_confirmation_to_guide: {e}")
-
-
-def send_booking_cancellation_email(booking):
-    """Dërgoni email anulimi"""
-    try:
-        tourist_email = booking.tourist.user.email
-        
-        if tourist_email:
-            subject = f"❌ Prenim u anullua për '{booking.tour.title}'"
-            context = {
-                'tourist_name': booking.tourist.user.get_full_name() or booking.tourist.user.username,
-                'tour_title': booking.tour.title,
-                'refund_amount': booking.refund_amount,
-                'currency': booking.tour.currency,
-            }
-            # message = render_to_string('emails/booking_cancelled.html', context)
-            message = f"Prenim u anullua. Rimbursim: {booking.refund_amount} {booking.tour.currency}."
-            
-            # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [tourist_email])
-            logger.info(f"Cancellation email i dërgua: {tourist_email}")
-    except Exception as e:
-        logger.error(f"Gabim në send_booking_cancellation_email: {e}")

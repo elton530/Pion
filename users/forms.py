@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from .models import GuideProfile, TouristProfile, TOUR_TYPES, EXPERIENCE_LEVELS
+from .models import GuideProfile, TouristProfile
 
 
 # ==================== USER REGISTRATION FORMS ====================

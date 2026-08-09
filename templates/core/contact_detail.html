@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mesazhi i Kontaktit — Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-envelope-open"></i> Detajet e Mesazhit
+                </h1>
+                <p>Shiko mesazhin dhe përgjigju</p>
+            </div>
+            <a href="{% url 'core:contact_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Kthehu te Lista
+            </a>
+        </div>
+
+        <!-- Message Details -->
+        <div class="booking-form-card" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="margin: 0;">{{ contact.subject }}</h2>
+                    <p style="margin: 0.25rem 0 0; color: var(--muted, #64748b);">
+                        {{ contact.created_at|date:"d M Y H:i" }}
+                    </p>
+                </div>
+                <span style="background: {% if contact.status == 'new' %}#f59e0b{% elif contact.status == 'replied' %}#10b981{% elif contact.status == 'resolved' %}#0ea5e9{% elif contact.status == 'spam' %}#ef4444{% endif %}; color: #fff; padding: 3px 8px; border-radius: 3px;">
+                    {{ contact.get_status_display }}
+                </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <strong>Emri:</strong> {{ contact.name }}
+                </div>
+                <div>
+                    <strong>Email:</strong> <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                </div>
+                {% if contact.phone %}
+                <div>
+                    <strong>Telefon:</strong> <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="background: var(--bg, #f8fafc); padding: 1.5rem; border-radius: 8px;">
+                <h3>Mesazhi</h3>
+                <p style="white-space: pre-wrap; margin: 0;">{{ contact.message }}</p>
+            </div>
+        </div>
+
+        <!-- Reply Section -->
+        <div class="booking-form-card">
+            <h3>Përgjigju</h3>
+            {% if contact.status == 'replied' and contact.reply_message %}
+                <div style="background: #ecfdf5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #10b981;">
+                    <h4>Përgjigja ekzistuese</h4>
+                    <p style="white-space: pre-wrap; margin: 0;">{{ contact.reply_message }}</p>
+                    {% if contact.replied_by %}
+                        <p style="margin: 0.75rem 0 0; color: var(--muted, #64748b);">
+                            Përgjigjur nga: {{ contact.replied_by.get_full_name|default:contact.replied_by.username }}
+                            {% if contact.replied_at %}— {{ contact.replied_at|date:"d M Y H:i" }}{% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="booking-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="reply_message">Përgjigja juaj</label>
+                    <textarea name="reply_message" id="reply_message" rows="6" class="form-control"
+                              placeholder="Shkruaj përgjigjen për {{ contact.name }}..."
+                              style="width: 100%; padding: 0.875rem; border: 2px solid #e2e8f0; border-radius: 8px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Dërgo Përgjigjen
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

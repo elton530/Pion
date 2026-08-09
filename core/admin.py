@@ -1,8 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.urls import reverse
-from django.db.models import Count
-from django.utils.translation import gettext_lazy as _
 
 from .models import SiteSettings, ContactMessage, NewsletterSubscription, FAQ, SocialLink
 
@@ -114,6 +111,7 @@ class ContactMessageAdmin(admin.ModelAdmin):
     
     date_hierarchy = 'created_at'
     ordering = ['-created_at']
+    list_select_related = ('replied_by',)
     
     def name_with_email(self, obj):
         """Emri me email"""

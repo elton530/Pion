@@ -14,119 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pageRoot = homePage;
 
-    // ==================== HERO SLIDER ====================
-
-    const slider = pageRoot.querySelector('.hero-slider');
-    const slides = pageRoot.querySelectorAll('.hero-slider .slide');
-    const prevBtn = pageRoot.querySelector('.slider-control.prev');
-    const nextBtn = pageRoot.querySelector('.slider-control.next');
-    const indicators = pageRoot.querySelectorAll('.slider-indicators .indicator');
-
-    if (slider && slides.length > 1) {
-
-        let currentSlide = 0;
-        let slideInterval = null;
-        const autoplayDelay = 5500;
-
-        /**
-         * Go to specific slide
-         */
-        function goToSlide(index) {
-            slides[currentSlide]?.classList.remove('active');
-            indicators[currentSlide]?.classList.remove('active');
-
-            currentSlide = index;
-
-            slides[currentSlide]?.classList.add('active');
-            indicators[currentSlide]?.classList.add('active');
-        }
-
-        /**
-         * Go to next slide
-         */
-        function nextSlide() {
-            const next = (currentSlide + 1) % slides.length;
-            goToSlide(next);
-        }
-
-        /**
-         * Go to previous slide
-         */
-        function prevSlide() {
-            const prev = (currentSlide - 1 + slides.length) % slides.length;
-            goToSlide(prev);
-        }
-
-        /**
-         * Start auto-play
-         */
-        function startAutoPlay() {
-            if (!slideInterval) {
-                slideInterval = setInterval(nextSlide, autoplayDelay);
-            }
-        }
-
-        /**
-         * Stop auto-play
-         */
-        function stopAutoPlay() {
-            clearInterval(slideInterval);
-            slideInterval = null;
-        }
-
-        // Next button click
-        nextBtn?.addEventListener('click', () => {
-            stopAutoPlay();
-            nextSlide();
-            startAutoPlay();
-        });
-
-        // Previous button click
-        prevBtn?.addEventListener('click', () => {
-            stopAutoPlay();
-            prevSlide();
-            startAutoPlay();
-        });
-
-        // Indicator clicks
-        indicators.forEach((indicator, index) => {
-            indicator.addEventListener('click', () => {
-                stopAutoPlay();
-                goToSlide(index);
-                startAutoPlay();
-            });
-        });
-
-        // Pause on hover
-        slider.addEventListener('mouseenter', stopAutoPlay);
-        slider.addEventListener('mouseleave', startAutoPlay);
-
-        // Keyboard navigation (only when not typing in a form field)
-        document.addEventListener('keydown', (e) => {
-            const tag = document.activeElement && document.activeElement.tagName;
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
-                return;
-            }
-            if (e.key === 'ArrowLeft') {
-                stopAutoPlay();
-                prevSlide();
-                startAutoPlay();
-            } else if (e.key === 'ArrowRight') {
-                stopAutoPlay();
-                nextSlide();
-                startAutoPlay();
-            }
-        });
-
-        // Start auto-play
-        startAutoPlay();
-    }
-
     // ==================== SCROLL-TRIGGERED EFFECTS ====================
     // (stat counters + card fade-in share a single observer)
 
-    const statNumbers = pageRoot.querySelectorAll('.stat-number[data-target]');
-    const revealCards = pageRoot.querySelectorAll('.tour-card, .feature-card');
+    const statNumbers = pageRoot.querySelectorAll('.hero-stat-number[data-target]');
+    const revealCards = pageRoot.querySelectorAll('.tour-card, .feature-card, .cta-card');
 
     /**
      * Animate counter from 0 to target value using requestAnimationFrame
@@ -165,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             entry.target.dataset.animated = 'true';
 
-            if (entry.target.matches('.stat-number[data-target]')) {
+            if (entry.target.matches('.hero-stat-number[data-target]')) {
                 animateCounter(entry.target);
             } else {
                 setTimeout(() => {

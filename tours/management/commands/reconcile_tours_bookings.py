@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from tours.models import Tour
 from bookings.models import Booking
-from django.db.models import Sum, Q
+from django.db.models import Sum
 
 class Command(BaseCommand):
     help = 'Reconcile Tour.available_spots and Tour.booking_count against Booking records. Run with --apply to write fixes.'

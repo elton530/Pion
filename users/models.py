@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg, Count
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 
 # ==================== CHOICES ====================
@@ -162,6 +162,17 @@ class GuideProfile(models.Model):
         help_text="A është aktiv guide-i?"
     )
     
+    # ===== ADMIN CONFIGURATION =====
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="A është guide-i i veçuar (featured) nga administratori?"
+    )
+    
+    admin_notes = models.TextField(
+        blank=True,
+        help_text="Shënime private të administratorit për këtë guide"
+    )
+    
     # ===== RATINGS & STATISTICS =====
     average_rating = models.DecimalField(
         max_digits=3,
@@ -249,7 +260,6 @@ class GuideProfile(models.Model):
     
     def update_rating(self):
         """Përditëso vlerësimin e guide-it bazuar në reviews"""
-        from django.db.models import Avg, Count
         from tours.models import TourReview
         
         reviews = TourReview.objects.filter(
@@ -278,7 +288,6 @@ class GuideProfile(models.Model):
     def update_earnings(self):
         """Përditëso fitimin total"""
         from bookings.models import Booking
-        from decimal import Decimal
         
         bookings = Booking.objects.filter(
             tour__guide=self,
@@ -292,6 +301,62 @@ class GuideProfile(models.Model):
         
         self.total_earnings = total
         self.save(update_fields=['total_earnings', 'updated_at'])
+
+
+# ==================== GUIDE MODERATION LOG MODEL ====================
+
+class GuideModerationLog(models.Model):
+    """Historiku i veprimeve të moderimit të bëra nga administratori për një guide."""
+
+    MODERATION_ACTIONS = [
+        ("approved", "Miratuar"),
+        ("rejected", "Refuzuar"),
+        ("suspended", "Pezulluar"),
+        ("reactivated", "Riaktivizuar"),
+        ("featured", "Vënë në krye"),
+        ("unfeatured", "Hequr nga krye"),
+        ("note", "Shënim"),
+    ]
+
+    guide = models.ForeignKey(
+        GuideProfile,
+        on_delete=models.CASCADE,
+        related_name="moderation_logs",
+        help_text="Guide-i të cilit i përket ky veprim"
+    )
+
+    action = models.CharField(
+        max_length=20,
+        choices=MODERATION_ACTIONS,
+        help_text="Lloji i veprimit të moderimit"
+    )
+
+    reason = models.TextField(
+        blank=True,
+        help_text="Arsyeja / shënimi i veprimit"
+    )
+
+    admin = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="guide_moderation_actions",
+        help_text="Administratori që kreu veprimin"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["guide", "-created_at"]),
+        ]
+        verbose_name = "Log moderimi i guide-it"
+        verbose_name_plural = "Log-ët e moderimit të guide-ve"
+
+    def __str__(self):
+        return f"{self.guide} — {self.get_action_display()} ({self.created_at:%d %b %Y %H:%M})"
 
 
 # ==================== TOURIST PROFILE MODEL ====================
@@ -453,18 +518,6 @@ class TouristProfile(models.Model):
 
 
 # ==================== SIGNALS ====================
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """Krijo profile për User të ri"""
-    if created:
-        try:
-            # Në të ardhmen mund ta përmirësojmë këtë
-            # për të përcaktuar nëse është guide apo turist
-            pass
-        except Exception as e:
-            print(f"Error creating profile: {e}")
-
 
 @receiver(post_save, sender=GuideProfile)
 def update_guide_on_status_change(sender, instance, created, **kwargs):

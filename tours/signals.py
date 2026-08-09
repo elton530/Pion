@@ -1,10 +1,7 @@
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.conf import settings
 import logging
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 
 from .models import Tour, TourReview, TourStatistic, TourImage, TourSchedule
 
@@ -66,22 +63,7 @@ def update_guide_statistics(sender, instance, created, **kwargs):
 def notify_admin_on_new_tour(sender, instance, created, **kwargs):
     """Dërgoni notifikimin te admin kur krijohet tur i ri"""
     if created and instance.status == 'published':
-        try:
-            admin_emails = [admin[1] for admin in settings.ADMINS]
-            if admin_emails:
-                context = {
-                    'tour_title': instance.title,
-                    'guide_name': instance.guide.user.get_full_name(),
-                    'date': instance.date,
-                    'location': f"{instance.location_city}, {instance.location_region}",
-                }
-                # Këtu mund të përdorësh template për email
-                subject = f"Tur i ri u publikua: {instance.title}"
-                message = f"Tur i ri u publikua nga {context['guide_name']}: {instance.title} në {context['location']}"
-                # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, admin_emails)
-                logger.info(f"Notifikimi i admin-it për turin: {instance.title}")
-        except Exception as e:
-            logger.error(f"Gabim gjatë dërgimit të notifikimit të admin-it: {e}")
+        logger.info(f"Notifikimi i admin-it për turin: {instance.title}")
 
 
 # ==================== REVIEW SIGNALS ====================
@@ -115,22 +97,7 @@ def update_tour_rating_on_review_delete(sender, instance, **kwargs):
 def notify_guide_on_new_review(sender, instance, created, **kwargs):
     """Dërgoni notifikimin te guide kur ka review të ri"""
     if created and instance.is_approved:
-        try:
-            guide_email = instance.tour.guide.user.email
-            if guide_email:
-                context = {
-                    'guide_name': instance.tour.guide.user.get_full_name(),
-                    'tourist_name': instance.tourist.user.get_full_name(),
-                    'tour_title': instance.tour.title,
-                    'rating': instance.rating,
-                    'comment': instance.comment[:100],
-                }
-                subject = f"Review i ri për turin tuaj: {instance.tour.title}"
-                message = f"Turist u lë review për turin '{instance.tour.title}' me vlerësim {instance.rating}/5"
-                # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [guide_email])
-                logger.info(f"Notifikimi të guide-it për review-in: {instance.tour.title}")
-        except Exception as e:
-            logger.error(f"Gabim gjatë dërgimit të notifikimit për review-in: {e}")
+        logger.info(f"Notifikimi të guide-it për review-in: {instance.tour.title}")
 
 
 @receiver(post_save, sender=TourReview)
@@ -142,15 +109,7 @@ def notify_tourist_review_approved(sender, instance, created, **kwargs):
     """
     old_approved = getattr(instance, '_old_is_approved', None)
     if old_approved is False and instance.is_approved:
-        try:
-            tourist_email = instance.tourist.user.email
-            if tourist_email:
-                subject = f"Review-i juaj u aprova për: {instance.tour.title}"
-                message = f"Review-i juaj për turin '{instance.tour.title}' u aprova dhe është duke shfaqet në faqen e turit."
-                # send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [tourist_email])
-                logger.info(f"Notifikimi të turistit për aprovim të review-it")
-        except Exception as e:
-            logger.error(f"Gabim gjatë dërgimit të notifikimit për aprovim: {e}")
+        logger.info("Notifikimi të turistit për aprovim të review-it")
 
 
 @receiver(pre_save, sender=TourReview)
@@ -237,36 +196,3 @@ def log_statistic_changes(sender, instance, created, **kwargs):
             logger.debug(f"Statistika u përditësuan për turin: {instance.tour.title}")
     except Exception as e:
         logger.error(f"Gabim gjatë logging-ut të statistikave: {e}")
-
-
-# ==================== UTILITY FUNCTIONS ====================
-
-def send_notification_email(email, subject, template_name=None, context=None):
-    """Send email; when EMAIL_BACKEND is console, log instead of sending.
-
-    This keeps development logs clean and prevents accidental real sends
-    until a real backend is configured.
-    """
-    try:
-        backend = getattr(settings, 'EMAIL_BACKEND', '') or ''
-        if 'console' in backend:
-            logger.info("EMAIL (console) -> to=%s subject=%s context=%s", email, subject, context)
-            return True
-
-        html_message = None
-        if template_name and context is not None:
-            html_message = render_to_string(template_name, context)
-
-        send_mail(
-            subject=subject,
-            message=html_message or '',
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
-            recipient_list=[email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        logger.info("Email sent to: %s subject=%s", email, subject)
-        return True
-    except Exception as e:
-        logger.error(f"Gabim gjatë dërgimit të email-it: {e}")
-        return False

@@ -3,8 +3,6 @@ from decimal import Decimal, InvalidOperation
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
-from django.db.models import Sum, Count, F
-from django.utils.translation import gettext_lazy as _
 
 from .models import Booking, Payment, BookingReview
 
@@ -103,7 +101,6 @@ class BookingAdmin(admin.ModelAdmin):
     
     def tourist_link(self, obj):
         """Link drejt turistit"""
-        from django.contrib.auth.models import User
         url = reverse('admin:auth_user_change', args=[obj.tourist.user.id])
         return format_html('<a href="{}">{}</a>', url, obj.tourist.user.username)
     tourist_link.short_description = 'Turist'
