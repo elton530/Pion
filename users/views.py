@@ -13,8 +13,14 @@ from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
 
 from decimal import Decimal, InvalidOperation
+import logging
 
 from core.utils import file_exists, send_notification_email
+
+from bookings.models import Booking
+from bookings.views import send_cancellation_email
+
+logger = logging.getLogger(__name__)
 
 from .forms import (
     SignupForm, GuideProfileForm, GuideEditProfileForm,
@@ -26,7 +32,6 @@ from .models import (
     GUIDE_STATUS, TOUR_TYPES, EXPERIENCE_LEVELS,
 )
 from tours.models import Tour, TourReview
-from bookings.models import Booking
 
 
 def _is_admin(user):
@@ -639,14 +644,14 @@ def guide_dashboard(request):
 
 @login_required
 def guide_booking_detail(request, booking_id):
-    """Detajet e një reservimi"""
-    
+    """Detajet e një reservimi (ridrejtim te view-i i unifikuar i bookings)"""
+
     booking = get_object_or_404(Booking, id=booking_id)
-    
+
     if booking.tour.guide.user != request.user:
         raise PermissionDenied("Nuk ke leje për këtë veprim.")
-    
-    return render(request, "users/guide_booking_detail.html", {"booking": booking})
+
+    return redirect("bookings:booking_detail", booking_id=booking.id)
 
 
 @login_required
@@ -671,8 +676,12 @@ def guide_booking_action(request, booking_id, action):
     
     elif action == "cancel":
         if booking.status != "cancelled":
-            booking.cancel()
-            messages.success(request, "✅ Rezervimi u anulua.")
+            booking.cancel(cancelled_by="guide")
+            try:
+                send_cancellation_email(booking)
+            except Exception:
+                logger.exception("Gabim në dërgimin e email të anulimit nga guida")
+            messages.success(request, "✅ Rezervimi u anulua dhe turisti u njoftua.")
     
     return redirect("users:guide_dashboard")
 
@@ -774,70 +783,56 @@ def tourist_dashboard(request):
 
 @login_required
 def tourist_booking_detail(request, booking_id):
-    """Detajet e një rezervimi"""
-    
+    """Detajet e një rezervimi (ridrejtim te view-i i unifikuar i bookings)"""
+
     booking = get_object_or_404(Booking, id=booking_id)
-    
+
     if booking.tourist.user != request.user:
         raise PermissionDenied("Nuk ke leje për këtë veprim.")
-    
-    return render(request, "users/tourist_booking_detail.html", {"booking": booking})
+
+    return redirect("bookings:booking_detail", booking_id=booking.id)
 
 
 @login_required
 def tourist_booking_cancel(request, booking_id):
-    """Anulim i një rezervimi"""
-    
+    """Anulim i një rezervimi (ridrejtim te forma e anulimit të bookings)"""
+
     booking = get_object_or_404(Booking, id=booking_id)
-    
+
     if booking.tourist.user != request.user:
         raise PermissionDenied("Nuk ke leje për këtë veprim.")
-    
-    if request.method != "POST":
-        return HttpResponseForbidden("Method not allowed")
-    
-    if booking.status == "cancelled":
-        messages.info(request, "ℹ️ Ky rezervim është tashmë anulluar.")
-    else:
-        booking.cancel()
-        messages.success(request, f"✅ Rezervimi për '{booking.tour.title}' u anullua.")
-    
-    return redirect("users:tourist_dashboard")
+
+    if not booking.can_be_cancelled:
+        messages.error(
+            request,
+            f"❌ Nuk mund ta anulosh këtë prenim. Turit i mbeten {booking.days_until_tour} ditë."
+        )
+        return redirect("bookings:booking_detail", booking_id=booking.id)
+
+    return redirect("bookings:booking_cancel", booking_id=booking.id)
 
 
 @login_required
 def tourist_confirm_participation(request, booking_id):
     """Konfirmim i pjesëmarrjes 24h para turit"""
-    
+
     booking = get_object_or_404(Booking, id=booking_id)
-    
+
     if booking.tourist.user != request.user:
         raise PermissionDenied("Nuk ke leje për këtë veprim.")
-    
+
     if request.method != "POST":
         return HttpResponseForbidden("Method not allowed")
-    
-    tour_datetime = timezone.make_aware(
-        timezone.datetime.combine(booking.tour.date, booking.tour.time_start)
-    )
-    hours_until = (tour_datetime - timezone.now()).total_seconds() / 3600
-    
-    if hours_until > 24:
-        messages.error(
-            request,
-            "❌ Mund të konfirmosh vetëm 24 orë përpara fillimit të turit."
-        )
-    elif hours_until < 0:
-        messages.error(request, "❌ Turi ka përfunduar tashmë.")
-    else:
-        booking.is_confirmed_24h = True
-        booking.confirmed_24h_at = timezone.now()
-        booking.save(update_fields=['is_confirmed_24h', 'confirmed_24h_at'])
+
+    try:
+        booking.confirm_participation_24h()
         messages.success(
             request,
             f"✅ Pjesmarrja jote në '{booking.tour.title}' u konfirmua!"
         )
-    
+    except ValueError as e:
+        messages.error(request, f"❌ {str(e)}")
+
     return redirect("users:tourist_dashboard")
 
 

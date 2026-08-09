@@ -90,7 +90,7 @@
 
                 {% if booking.notes %}
                 <div style="background: rgba(14, 165, 233, 0.07); border-radius: 14px; padding: 1rem; margin-top: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.12);">
-                    <strong><i class="fas fa-sticky-note"></i> Shënimet e ita:</strong>
+                    <strong><i class="fas fa-sticky-note"></i> Shënimet e tua:</strong>
                     <p style="margin: 0.5rem 0 0; color: var(--text-light);">
                         {{ booking.notes }}
                     </p>
@@ -130,10 +130,32 @@
                 </div>
                 {% elif is_guide %}
                 <div style="background: rgba(14, 165, 233, 0.07); border-radius: 14px; padding: 1rem; margin-top: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.12);">
-                    <strong><i class="fas fa-info-circle"></i> Informacion për Guidën:</strong>
+                    <strong><i class="fas fa-info-circle"></i> Kontakti i Turistit:</strong>
                     <p style="margin: 0.5rem 0 0; color: var(--text-light);">
-                        Kontaktet e turistit dhe detajet e plotë janë në dispozicionin tuaj nëpërmjet dashboardit të guida-ve.
+                        {{ booking.tourist.user.get_full_name|default:booking.tourist.user.username }}
+                        {% if booking.tourist.phone %} · <i class="fas fa-phone-alt"></i> {{ booking.tourist.phone }}{% endif %}
                     </p>
+                    <p style="margin: 0.35rem 0 0; color: var(--text-light);">
+                        <i class="fas fa-envelope"></i> {{ booking.tourist.user.email }}
+                    </p>
+
+                    {% if booking.status == 'pending' %}
+                    <div class="booking-actions" style="margin-top: 1rem;">
+                        <form action="{% url 'users:guide_booking_confirm' booking.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Konfirmo
+                            </button>
+                        </form>
+                        <form action="{% url 'users:guide_booking_cancel' booking.id %}" method="post" style="display:inline;"
+                              onsubmit="return confirm('Vërtet dëshiron ta anulosh këtë prenim?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Anulo
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>

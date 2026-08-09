@@ -182,3 +182,75 @@
         padding: 1.8rem;
     }
 }
+
+/* ==================== LOGOUT PAGE ==================== */
+
+.logout-success {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.8rem;
+}
+
+.logout-success i {
+    font-size: 4.2rem;
+    color: var(--success);
+    filter: drop-shadow(0 8px 20px rgba(34, 197, 94, 0.3));
+    animation: logoutPop 0.5s ease;
+}
+
+@keyframes logoutPop {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.logout-actions {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.logout-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    font-family: inherit;
+}
+
+.logout-actions .btn-home {
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    color: white;
+    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.25);
+}
+
+.logout-actions .btn-home:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(14, 165, 233, 0.3);
+}
+
+.logout-actions .btn-login {
+    background: transparent;
+    border: 2px solid #0ea5e9;
+    color: #0ea5e9;
+}
+
+.logout-actions .btn-login:hover {
+    background: rgba(14, 165, 233, 0.08);
+    color: #0369a1;
+}
+
+.logout-actions .btn-login:active {
+    transform: translateY(0);
+}

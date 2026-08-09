@@ -39,6 +39,29 @@
             </ul>
         </nav>
 
+        <!-- Header Search -->
+        <form method="get" action="{% url 'core:global_search' %}" class="header-search" role="search">
+            <div class="header-search-box">
+                <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                <input
+                    type="text"
+                    name="query"
+                    value="{{ request.GET.query }}"
+                    placeholder="Kërko tur ose guidë..."
+                    aria-label="Kërko"
+                    autocomplete="off"
+                >
+                <select name="search_type" class="search-type-select" aria-label="Lloji i kërkimit">
+                    <option value="all"{% if request.GET.search_type == 'all' %} selected{% endif %}>Të gjitha</option>
+                    <option value="tours"{% if request.GET.search_type == 'tours' %} selected{% endif %}>Turet</option>
+                    <option value="guides"{% if request.GET.search_type == 'guides' %} selected{% endif %}>Guide-t</option>
+                </select>
+                <button type="submit" class="search-submit" aria-label="Kërko">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                </button>
+            </div>
+        </form>
+
         <!-- User Actions -->
         <div class="user-actions">
             {% if user.is_authenticated %}
@@ -68,6 +91,10 @@
                         <a href="{% url 'users:tourist_dashboard' %}" class="dropdown-item">
                             <i class="fas fa-user"></i>
                             <span>Profili im</span>
+                        </a>
+                        <a href="{% url 'bookings:booking_list' %}" class="dropdown-item">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Prenotimet e Mia</span>
                         </a>
                         {% else %}
                         <a href="{% url 'core:home' %}" class="dropdown-item">
@@ -146,6 +173,38 @@
 
             <!-- Mobile Navigation -->
             <nav class="mobile-nav" aria-label="Mobile navigation">
+                <!-- Mobile Search -->
+                <form method="get" action="{% url 'core:global_search' %}" class="mobile-search" role="search">
+                    <div class="mobile-search-box">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input
+                            type="text"
+                            name="query"
+                            value="{{ request.GET.query }}"
+                            placeholder="Kërko tur ose guidë..."
+                            aria-label="Kërko"
+                            autocomplete="off"
+                        >
+                        <button type="submit" aria-label="Kërko">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="mobile-search-types">
+                        <label>
+                            <input type="radio" name="search_type" value="all"{% if request.GET.search_type == 'all' or not request.GET.search_type %} checked{% endif %}>
+                            Të gjitha
+                        </label>
+                        <label>
+                            <input type="radio" name="search_type" value="tours"{% if request.GET.search_type == 'tours' %} checked{% endif %}>
+                            Turet
+                        </label>
+                        <label>
+                            <input type="radio" name="search_type" value="guides"{% if request.GET.search_type == 'guides' %} checked{% endif %}>
+                            Guide-t
+                        </label>
+                    </div>
+                </form>
+
                 <ul class="mobile-nav-links">
                     <li>
                         <a href="{% url 'tours:tour_list' %}" class="mobile-nav-link">
@@ -198,6 +257,11 @@
                                     <a href="{% url 'users:tourist_dashboard' %}" class="mobile-nav-link">
                                         <i class="fas fa-user"></i>
                                         <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    <a href="{% url 'bookings:booking_list' %}" class="mobile-nav-link">
+                                        <i class="fas fa-ticket-alt"></i>
+                                        <span>Prenotimet e Mia</span>
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                     {% else %}

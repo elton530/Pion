@@ -108,8 +108,14 @@
 
                         <p>
                             <strong><i class="fas fa-tag"></i> Çmimi:</strong><br>
-                            <span style="font-size: 1.4rem; color: var(--primary); font-weight: 700;">
+                            {% if tour.current_price < tour.price_per_person %}
+                            <span style="color: var(--text-light); text-decoration: line-through; font-size: 1rem;">
                                 {{ tour.price_per_person }} {{ tour.get_currency_display }}
+                            </span>
+                            <span style="color: var(--success); font-weight: 700; font-size: 1rem;">ZB.</span>
+                            {% endif %}
+                            <span style="font-size: 1.4rem; color: var(--primary); font-weight: 700;">
+                                {{ tour.current_price }} {{ tour.get_currency_display }}
                             </span>
                             <span style="color: var(--text-light); font-size: 0.9rem;">per person</span>
                         </p>
@@ -134,12 +140,22 @@
                         <tr>
                             <th>Çmim per Person:</th>
                             <td colspan="2" class="text-right" style="color: var(--text); font-weight: 600;">
-                                {{ tour.price_per_person }} {{ tour.get_currency_display }}
+                                {{ tour.current_price }} {{ tour.get_currency_display }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Totali:</th>
+                            <td colspan="2" class="text-right" style="color: var(--primary); font-weight: 700; font-size: 1.2rem;">
+                                <span id="price-total"
+                                      data-unit-price="{{ tour.current_price }}"
+                                      data-currency="{{ tour.get_currency_display }}">
+                                    {{ tour.current_price }} {{ tour.get_currency_display }}
+                                </span>
                             </td>
                         </tr>
                         <tr>
                             <th colspan="3" style="font-size: 0.9rem; color: var(--text-light); font-weight: 400;">
-                                Çmimi total llogaritet automatikisht në bazë të numrit të personave
+                                Totali përditësohet automatikisht sipas numrit të personave
                             </th>
                         </tr>
                     </table>
@@ -148,4 +164,27 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var numInput = document.getElementById('id_num_people');
+        var totalEl = document.getElementById('price-total');
+        if (!numInput || !totalEl) return;
+
+        var unitPrice = parseFloat(totalEl.getAttribute('data-unit-price')) || 0;
+        var currency = totalEl.getAttribute('data-currency') || '';
+
+        function updateTotal() {
+            var n = parseInt(numInput.value, 10);
+            if (!n || n < 1) n = 0;
+            totalEl.textContent = (unitPrice * n).toFixed(2) + ' ' + currency;
+        }
+
+        numInput.addEventListener('input', updateTotal);
+        numInput.addEventListener('change', updateTotal);
+        updateTotal();
+    });
+</script>
 {% endblock %}

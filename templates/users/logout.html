@@ -1,133 +1,38 @@
-<!DOCTYPE html>
-<html lang="sq">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dolët nga llogaria - Open Map</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
-          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% extends 'base.html' %}
+{% load static %}
 
-    <style>
-        :root {
-            --primary: #0ea5e9;
-            --primary-dark: #0369a1;
-            --success: #10b981;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #0f172a;
-            --text-light: #475569;
-            --shadow: 0 10px 30px rgba(0,0,0,0.12);
-            --radius: 16px;
-        }
+{% block title %}Dolët nga llogaria - Open Map{% endblock %}
 
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
 
-        .logout-box {
-            background: var(--card);
-            padding: 3rem 2.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-            animation: fadeIn 0.6s ease-out;
-        }
+{% block content %}
+<div class="auth-page">
+    <div class="auth-shell">
+        <!-- Header -->
+        <div class="auth-header">
+            <h1>Ke dalë me sukses!</h1>
+            <p>Faleminderit që përdore platformën tonë. Të presim sërish për aventura të reja!</p>
+        </div>
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        <!-- Body -->
+        <div class="auth-body">
+            <div class="logout-success">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+            </div>
 
-        .icon-check {
-            font-size: 4.5rem;
-            color: var(--success);
-            margin-bottom: 1.5rem;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        p {
-            font-size: 1.15rem;
-            color: var(--text-light);
-            margin-bottom: 2.5rem;
-            line-height: 1.6;
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            padding: 1rem 1.8rem;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 1.05rem;
-        }
-
-        .btn-home {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
-        }
-
-        .btn-home:hover {
-            background: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
-        }
-
-        .btn-login {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-login:hover {
-            background: var(--primary);
-            color: white;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="logout-box">
-        <i class="fas fa-check-circle icon-check"></i>
-        <h1>✅ Ke dalë me sukses nga llogaria!</h1>
-        <p>Faleminderit që përdore platformën tonë. Të presim sërish për aventura të reja!</p>
-
-        <div class="btn-group">
-            <a href="{% url 'tours:tour_list' %}" class="btn btn-home">
-                <i class="fas fa-home"></i> Kthehu në faqen kryesore
-            </a>
-            <a href="{% url 'users:login' %}" class="btn btn-login">
-                <i class="fas fa-sign-in-alt"></i> Kyçu përsëri
-            </a>
+            <div class="logout-actions">
+                <a href="{% url 'tours:tour_list' %}" class="btn btn-home">
+                    <i class="fas fa-mountain" aria-hidden="true"></i>
+                    Shiko të gjitha turet
+                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                    Kyçu përsëri
+                </a>
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

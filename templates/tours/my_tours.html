@@ -9,57 +9,91 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-shell">
-  <div class="page-header">
-    <h1>Menaxho Turet e Mia</h1>
-    <p>Lista e tureve që ke krijuar. Përdor butonat për të redaktuar ose shtuar elemente.</p>
-  </div>
-
-  <div class="actions">
-    <a href="{% url 'tours:create_tour' %}" class="btn btn-primary">Krijo Tur të Ri</a>
+<div class="page-shell my-tours-page">
+  <div class="my-tours-header">
+    <div>
+      <h1>Menaxho Turet e Mia</h1>
+      <p>Lista e tureve që ke krijuar. Përdor butonat për të redaktuar ose shtuar elemente.</p>
+    </div>
+    <a href="{% url 'tours:create_tour' %}" class="btn btn-primary">
+      <i class="fas fa-plus" aria-hidden="true"></i> Krijo Tur të Ri
+    </a>
   </div>
 
   <div class="tour-grid">
     {% if tours %}
       {% for tour in tours %}
-        <div class="tour-card">
-          {% if tour.main_image %}
-            <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}">
-          {% endif %}
-          <!-- Status Badge -->
-          <div class="status-badge-corner">
-            {% if tour.status == 'published' %}
-              <span class="status-published" title="Turi është publikuar"><i class="fas fa-check-circle"></i> Publikuar</span>
-            {% elif tour.status == 'draft' %}
-              <span class="status-draft" title="Turi në draft - nuk është publikuar"><i class="fas fa-edit"></i> Draft</span>
-            {% elif tour.status == 'hidden' %}
-              <span class="status-hidden" title="Turi është i fshehur"><i class="fas fa-eye-slash"></i> I Fshehur</span>
-            {% elif tour.status == 'cancelled' %}
-              <span class="status-cancelled" title="Turi është anuluar"><i class="fas fa-ban"></i> Anuluar</span>
+        <article class="tour-card my-tour-card">
+          <div class="tour-image-wrapper">
+            {% if tour.main_image %}
+              <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" class="tour-image">
             {% else %}
-              <span class="status-draft"><i class="fas fa-question-circle"></i> {{ tour.get_status_display }}</span>
+              <div class="no-image-placeholder">
+                <i class="fas fa-mountain" aria-hidden="true"></i>
+                <span>Pa foto</span>
+              </div>
             {% endif %}
+
+            <!-- Status Badge -->
+            <div class="status-badge-corner">
+              {% if tour.status == 'published' %}
+                <span class="status-published" title="Turi është publikuar"><i class="fas fa-check-circle"></i> Publikuar</span>
+              {% elif tour.status == 'draft' %}
+                <span class="status-draft" title="Turi në draft - nuk është publikuar"><i class="fas fa-edit"></i> Draft</span>
+              {% elif tour.status == 'hidden' %}
+                <span class="status-hidden" title="Turi është i fshehur"><i class="fas fa-eye-slash"></i> I Fshehur</span>
+              {% elif tour.status == 'cancelled' %}
+                <span class="status-cancelled" title="Turi është anuluar"><i class="fas fa-ban"></i> Anuluar</span>
+              {% else %}
+                <span class="status-draft"><i class="fas fa-question-circle"></i> {{ tour.get_status_display }}</span>
+              {% endif %}
+            </div>
           </div>
-          <h3>{{ tour.title }}</h3>
-          <p>{{ tour.date|date:"d F Y" }} · {{ tour.location_region }}</p>
-          <!-- Tour Stats -->
-          <div class="tour-stats-mini">
-            <span><i class="fas fa-users"></i> {{ tour.confirmed_booked_spots }}/{{ tour.max_participants }}</span>
-            <span><i class="fas fa-star"></i> {{ tour.average_rating|default:"0"|floatformat:1 }}</span>
+
+          <div class="tour-card-body">
+            <h3>{{ tour.title }}</h3>
+
+            <div class="tour-meta-row">
+              <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ tour.date|date:"d F Y" }}</span>
+              {% if tour.location_region %}
+                <span><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ tour.location_region }}</span>
+              {% endif %}
+            </div>
+
+            <!-- Tour Stats -->
+            <div class="tour-stats-mini">
+              <span><i class="fas fa-users"></i> {{ tour.confirmed_booked_spots }}/{{ tour.max_participants }} vende</span>
+              <span><i class="fas fa-star"></i> {{ tour.average_rating|default:"0"|floatformat:1 }}</span>
+            </div>
+
+            <div class="card-actions">
+              <a href="{% url 'tours:edit_tour' tour.slug %}" class="btn btn-edit">
+                <i class="fas fa-pen" aria-hidden="true"></i> Redakto
+              </a>
+              <a href="{% url 'tours:add_tour_image' tour.slug %}" class="btn btn-outline">
+                <i class="fas fa-images" aria-hidden="true"></i> Foto
+              </a>
+              <a href="{% url 'tours:add_tour_schedule' tour.slug %}" class="btn btn-outline">
+                <i class="fas fa-clock" aria-hidden="true"></i> Program
+              </a>
+              <a href="{% url 'tours:add_tour_faq' tour.slug %}" class="btn btn-outline">
+                <i class="fas fa-question-circle" aria-hidden="true"></i> FAQ
+              </a>
+              <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-view">
+                <i class="fas fa-arrow-right" aria-hidden="true"></i> Shiko
+              </a>
+            </div>
           </div>
-          <div class="card-actions">
-            <a href="{% url 'tours:edit_tour' tour.slug %}" class="btn btn-secondary">Redakto</a>
-            <a href="{% url 'tours:add_tour_image' tour.slug %}" class="btn btn-outline">Foto</a>
-            <a href="{% url 'tours:add_tour_schedule' tour.slug %}" class="btn btn-outline">Program</a>
-            <a href="{% url 'tours:add_tour_faq' tour.slug %}" class="btn btn-outline">FAQ</a>
-            <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-link">Shiko</a>
-          </div>
-        </div>
+        </article>
       {% endfor %}
     {% else %}
       <div class="empty-state">
-        <p>Nuk ke ture të krijuara ende.</p>
-        <a href="{% url 'tours:create_tour' %}" class="btn btn-primary">Krijo Tur të Ri</a>
+        <i class="fas fa-mountain" aria-hidden="true"></i>
+        <h2>Nuk ke ture të krijuara ende</h2>
+        <p>Krijo turin tënd të parë dhe fillo të organizosh aventura.</p>
+        <div class="empty-state-cta">
+          <a href="{% url 'tours:create_tour' %}" class="btn btn-primary">Krijo Tur të Ri</a>
+        </div>
       </div>
     {% endif %}
   </div>

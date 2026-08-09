@@ -36,46 +36,6 @@
             </div>
         </div>
 
-        <!-- Search and Filter -->
-        <div class="booking-form-card" style="margin-bottom: 2rem;">
-            <h3>Kërkim dhe Filtrim</h3>
-            <form method="get" class="booking-form">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-
-                    <div class="form-group">
-                        <label for="id_search">Kërko</label>
-                        {{ form.search }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_status">Statusi</label>
-                        {{ form.status }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_date_from">Nga Data</label>
-                        {{ form.date_from }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_date_to">Deri Data</label>
-                        {{ form.date_to }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_sort_by">Renditje</label>
-                        {{ form.sort_by }}
-                    </div>
-
-                    <div class="form-group" style="display: flex; align-items: flex-end;">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-search"></i> Kërko
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
         <!-- Bookings List -->
         {% if page_obj %}
             {% for booking in page_obj %}
@@ -144,10 +104,10 @@
             {% if page_obj.has_other_pages %}
             <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; padding: 1rem 0;">
                 {% if page_obj.has_previous %}
-                <a href="?page=1" class="btn btn-secondary">
+                <a href="?{% querystring page=1 %}" class="btn btn-secondary">
                     <i class="fas fa-angle-double-left"></i> Fillim
                 </a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">
+                <a href="?{% querystring page=page_obj.previous_page_number %}" class="btn btn-secondary">
                     <i class="fas fa-angle-left"></i> Përpara
                 </a>
                 {% endif %}
@@ -157,10 +117,10 @@
                 </span>
 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">
+                <a href="?{% querystring page=page_obj.next_page_number %}" class="btn btn-secondary">
                     Pas <i class="fas fa-angle-right"></i>
                 </a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">
+                <a href="?{% querystring page=page_obj.paginator.num_pages %}" class="btn btn-secondary">
                     Fundi <i class="fas fa-angle-double-right"></i>
                 </a>
                 {% endif %}

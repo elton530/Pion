@@ -13,7 +13,7 @@
         <!-- Header -->
         <div class="bookings-header">
             <div>
-                <h1 style="color: var(--danger);">
+                <h1 class="cancel-title">
                     <i class="fas fa-times-circle"></i> Anulo Prenotimin
                 </h1>
                 <p>Përpara se të vazhdosh, lexo politikën e anulimit më poshtë</p>
@@ -21,14 +21,17 @@
         </div>
 
         <!-- Warning Box -->
-        <div style="background: #fef2f2; border: 2px solid var(--danger); border-radius: var(--radius-lg); padding: 1.8rem; margin-bottom: 2rem;">
-            <h3 style="color: var(--danger); margin-top: 0;">
-                <i class="fas fa-exclamation-triangle"></i> Paralajmërim
-            </h3>
-            <p style="margin: 0; color: #7f1d1d;">
-                Anulimi i prenotimit është një veprim përfundimtar. Pas anulimit, do të jetë i vështirë të rikthehet në të njëjtën prenotim.
-                Kontakto guidën nëse ke pyetje ose nëse do të anulosh për një arsye të vlefshme.
-            </p>
+        <div class="cancel-warning" role="alert">
+            <div class="cancel-warning-icon">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            </div>
+            <div>
+                <h3>Paralajmërim</h3>
+                <p>
+                    Anulimi i prenotimit është një veprim përfundimtar. Pas anulimit, do të jetë i vështirë të rikthehet në të njëjtën prenotim.
+                    Kontakto guidën nëse ke pyetje ose nëse do të anulosh për një arsye të vlefshme.
+                </p>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -37,7 +40,7 @@
             <div class="booking-form-card">
                 <h2>Forma e Anulimit</h2>
                 
-                <form method="post" class="booking-form">
+                <form method="post" class="booking-form cancel-form">
                     {% csrf_token %}
                     
                     {% if form.non_field_errors %}
@@ -50,38 +53,61 @@
                     {% endif %}
 
                     {% for field in form %}
-                        <div class="form-group">
-                            {% if field.label %}
-                                <label for="{{ field.id_for_label }}">
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            <label class="cancel-confirm" for="{{ field.id_for_label }}">
+                                {{ field }}
+                                <span class="cancel-confirm-text">
                                     {{ field.label }}
-                                    {% if field.field.required %}<span style="color: var(--danger);">*</span>{% endif %}
-                                </label>
-                            {% endif %}
-                            
-                            {{ field }}
-                            
-                            {% if field.help_text %}
-                                <span class="form-note">
-                                    {{ field.help_text|safe }}
+                                    {% if field.field.required %}<span class="req">*</span>{% endif %}
                                 </span>
+                            </label>
+                            {% if field.help_text %}
+                                <span class="form-note">{{ field.help_text|safe }}</span>
                             {% endif %}
-                            
                             {% if field.errors %}
-                                <span style="color: var(--danger); font-size: 0.9rem;">
+                                <span class="field-error">
                                     {% for error in field.errors %}
-                                        {{ error }}<br>
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
                                     {% endfor %}
                                 </span>
                             {% endif %}
-                        </div>
+                        {% else %}
+                            <div class="form-group">
+                                {% if field.label %}
+                                    <label for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                        {% if field.field.required %}<span class="req">*</span>{% endif %}
+                                    </label>
+                                {% endif %}
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <span class="form-note">
+                                        {{ field.help_text|safe }}
+                                    </span>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <span class="field-error">
+                                        {% for error in field.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
 
                     <!-- Refund Info -->
-                    <div style="background: #ecfdf5; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 1rem; margin: 1.5rem 0;">
-                        <strong style="color: #065f46;"><i class="fas fa-info-circle"></i> Informacioni i Rimbursimit</strong>
-                        <p style="margin: 0.5rem 0 0; color: #065f46;">
-                            Shuma e pritshme e rimbursimit: <strong>{{ refund_amount }} {{ booking.tour.get_currency_display }}</strong>
-                        </p>
+                    <div class="cancel-refund">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        <div>
+                            <strong>Informacioni i Rimbursimit</strong>
+                            <span class="refund-amount">
+                                {{ refund_amount }} {{ booking.tour.get_currency_display }}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="booking-footer">
@@ -100,7 +126,7 @@
                 <div class="tour-card-mini">
                     <h2>{{ booking.tour.title }}</h2>
                     
-                    <div style="display: grid; gap: 0.8rem;">
+                    <div class="cancel-summary-list">
                         <p>
                             <strong><i class="fas fa-calendar-alt"></i> Data e Turit:</strong><br>
                             {{ booking.tour.date|date:"d F Y" }} në {{ booking.tour.time_start|time:"H:i" }}
@@ -111,11 +137,11 @@
                             {{ booking.num_people }}
                         </p>
 
-                        <hr style="border: none; border-top: 1px solid rgba(14, 165, 233, 0.12); margin: 0.5rem 0;">
+                        <hr class="cancel-divider">
 
                         <p>
                             <strong><i class="fas fa-tag"></i> Çmimi Total:</strong><br>
-                            <span style="font-size: 1.3rem; color: var(--primary); font-weight: 700;">
+                            <span class="cancel-total">
                                 {{ booking.total_price }} {{ booking.tour.get_currency_display }}
                             </span>
                         </p>
@@ -126,11 +152,11 @@
                 <div class="tour-card-mini">
                     <h3>Politika e Anulimit</h3>
                     {% if booking.tour.cancellation_policy %}
-                        <p style="color: var(--text-light); font-size: 0.9rem;">
+                        <p class="cancel-policy-text">
                             {{ booking.tour.cancellation_policy|linebreaks }}
                         </p>
                     {% else %}
-                        <p style="color: var(--text-light); font-size: 0.9rem;">
+                        <p class="cancel-policy-text">
                             Anulimet pranë guidës shoqërohen me një politikë specifike rimbursimi.
                             Kontakto guidën për më shumë detaje.
                         </p>

@@ -589,6 +589,17 @@
     box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
 }
 
+.guide-dashboard .btn-view {
+    background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+    color: white;
+}
+
+.guide-dashboard .btn-view:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3);
+}
+
 .guide-dashboard .booking-actions {
     display: flex;
     flex-wrap: wrap;

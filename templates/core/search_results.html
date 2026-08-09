@@ -131,22 +131,37 @@ Kërko tur, guide dhe lokacione në platformën Open Map.
                 </h2>
                 <div class="guide-results-grid">
                     {% for guide in results.guides %}
-                    <div class="guide-result-card">
+                    <a
+                        href="{% url 'users:guide_profile_public' guide.user.username %}"
+                        class="guide-result-card"
+                        aria-label="Shiko profilin publik të {{ guide.user.get_full_name|default:guide.user.username }}"
+                    >
                         <div class="guide-result-avatar">
                             {% if guide.photo %}
-                                <img src="{{ guide.photo.url }}" alt="{{ guide.user.get_full_name }}">
+                                <img src="{{ guide.photo.url }}" alt="{{ guide.user.get_full_name }}" loading="lazy">
                             {% else %}
                                 <i class="fas fa-user-circle"></i>
                             {% endif %}
                         </div>
                         <div class="guide-result-info">
-                            <h3>{{ guide.user.get_full_name|default:guide.user.username }}</h3>
+                            <h3 class="guide-result-name">{{ guide.user.get_full_name|default:guide.user.username }}</h3>
                             {% if guide.location %}
-                                <p><i class="fas fa-map-marker-alt"></i> {{ guide.location }}</p>
+                                <p class="guide-result-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ guide.location }}
+                                </p>
                             {% endif %}
-                            <span class="guide-rating"><i class="fas fa-star"></i> {{ guide.average_rating|default:"5.0" }}</span>
+                            <div class="guide-result-meta">
+                                <span class="guide-rating"><i class="fas fa-star"></i> {{ guide.average_rating|default:"5.0" }}</span>
+                                {% if guide.reviews_count %}
+                                    <span class="guide-reviews">{{ guide.reviews_count }} vlerësime</span>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
+                        <span class="guide-result-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
@@ -160,10 +175,9 @@ Kërko tur, guide dhe lokacione në platformën Open Map.
                 </h2>
                 <div class="location-results-grid">
                     {% for location in results.locations %}
-                    <div class="location-result-card">
-                        <i class="fas fa-map-pin"></i>
-                        <span>{{ location.location_city }}{% if location.location_region %}, {{ location.location_region }}{% endif %}</span>
-                    </div>
+                    <span class="location-result-card">
+                        {{ location.location_city }}{% if location.location_region %}, {{ location.location_region }}{% endif %}
+                    </span>
                     {% endfor %}
                 </div>
             </div>
