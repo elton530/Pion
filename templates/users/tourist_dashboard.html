@@ -64,7 +64,11 @@
     </div>
     {% endif %}
 
-    <h2 class="section-title"><i class="fa-regular fa-calendar-check"></i> Turet e Ardhshme</h2>
+    <h2 class="section-title"><i class="fa-regular fa-calendar-check"></i> Turet e Ardhshme
+        <a href="{% url 'bookings:booking_list' %}" class="btn btn-primary" style="font-size:0.9rem; padding:0.55rem 1.1rem; margin-left:auto;">
+            <i class="fa-solid fa-list"></i> Të gjitha prenotimet
+        </a>
+    </h2>
 
     {% if upcoming_bookings %}
     {% for booking in upcoming_bookings %}
@@ -116,14 +120,13 @@
                 {% endif %}
 
                 <a href="{% url 'tours:tour_detail' booking.tour.slug %}" class="btn btn-primary">Shiko Detajet</a>
-                <a href="{% url 'users:tourist_booking_detail' booking.id %}" class="btn btn-outline-primary">Rezervimi</a>
+                <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-outline-primary">Rezervimi</a>
 
-                                {% if booking.status != 'cancelled' %}
-                                <form action="{% url 'users:tourist_booking_cancel' booking.id %}" method="post" style="display:inline;"
-                      onsubmit="return confirm('Vërtet dëshiron ta anulosh?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger">Anullo</button>
-                </form>
+                                {% if booking.can_be_cancelled %}
+                                <a href="{% url 'bookings:booking_cancel' booking.id %}" class="btn btn-outline-danger"
+                       onclick="return confirm('Vërtet dëshiron ta anulosh?');">
+                    <i class="fa-solid fa-ban"></i> Anullo
+                </a>
                 {% endif %}
             </div>
         </div>

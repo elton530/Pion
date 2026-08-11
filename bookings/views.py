@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from decimal import Decimal
 import logging
@@ -13,7 +12,7 @@ from tours.models import Tour
 from users.models import TouristProfile
 from .forms import (
     BookingForm, BookingEditForm, BookingCancellationForm,
-    BookingConfirmationForm, BookingReviewForm, BookingSearchForm
+    BookingConfirmationForm, BookingReviewForm
 )
 from .models import Booking
 
@@ -51,7 +50,7 @@ def create_booking(request, slug):
             request,
             f"ℹ️ Ke tashmë një prenim për këtë tur me status '{existing.get_status_display()}'."
         )
-        return redirect("users:tourist_booking_detail", booking_id=existing.id)
+        return redirect("bookings:booking_detail", booking_id=existing.id)
     
     if request.method == "POST":
         form = BookingForm(request.POST, tour=tour, tourist=tourist_profile)
@@ -136,6 +135,7 @@ def booking_detail(request, booking_id):
     
     context = {
         'booking': booking,
+        'tour': booking.tour,
         'is_tourist': is_tourist,
         'is_guide': is_guide,
         'can_cancel': booking.can_be_cancelled,
@@ -281,35 +281,6 @@ def booking_list(request):
     
     bookings = Booking.objects.filter(tourist=tourist_profile).select_related('tour__guide__user')
     
-    # Filtrim dhe kërkimi
-    form = BookingSearchForm(request.GET)
-    
-    if form.is_valid():
-        if form.cleaned_data.get('search'):
-            search = form.cleaned_data['search']
-            bookings = bookings.filter(
-                Q(tour__title__icontains=search) |
-                Q(tour__location_city__icontains=search)
-            )
-        
-        if form.cleaned_data.get('status'):
-            statuses = form.cleaned_data['status']
-            bookings = bookings.filter(status__in=statuses)
-        
-        if form.cleaned_data.get('date_from'):
-            bookings = bookings.filter(
-                tour__date__gte=form.cleaned_data['date_from']
-            )
-        
-        if form.cleaned_data.get('date_to'):
-            bookings = bookings.filter(
-                tour__date__lte=form.cleaned_data['date_to']
-            )
-        
-        sort_by = form.cleaned_data.get('sort_by', '-created_at')
-        if sort_by:
-            bookings = bookings.order_by(sort_by)
-    
     # Pagination
     paginator = Paginator(bookings, 10)
     page_number = request.GET.get('page', 1)
@@ -317,7 +288,6 @@ def booking_list(request):
     
     context = {
         'page_obj': page_obj,
-        'form': form,
         'total_bookings': Booking.objects.filter(tourist=tourist_profile).count(),
         'confirmed_bookings': Booking.objects.filter(
             tourist=tourist_profile,

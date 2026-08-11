@@ -19,6 +19,71 @@
     border: 1px solid rgba(14, 165, 233, 0.12);
 }
 
+/* Password reset flow wrappers */
+.auth-container {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.auth-box {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+    border: 1px solid rgba(14, 165, 233, 0.12);
+}
+
+.auth-box .auth-form {
+    padding: 2.2rem;
+}
+
+.auth-box .auth-footer {
+    padding: 0 2.2rem 2.2rem;
+}
+
+.auth-box .alert-danger {
+    margin: 2.2rem 2.2rem 0;
+    padding: 1rem 1.15rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #7f1d1d;
+    font-weight: 600;
+}
+
+.auth-box .form-text {
+    margin-top: 0.5rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.auth-box .error-message {
+    color: var(--danger);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.btn-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.btn-link:hover {
+    color: var(--secondary);
+}
+
+.auth-box .auth-footer {
+    text-align: center;
+}
+
 .auth-header {
     background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
     padding: 2.4rem 2rem;
@@ -109,6 +174,33 @@
     color: var(--primary);
     text-decoration: none;
     font-weight: 700;
+}
+
+.form-group-extra {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+.forgot-password {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: var(--primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+    color: var(--secondary);
+}
+
+.forgot-password i {
+    font-size: 0.8rem;
 }
 
 .auth-alert {
