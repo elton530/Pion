@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import DetailView, ListView
 from django.db.models import Q, Count, Sum, Avg
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 
@@ -298,7 +298,7 @@ class TourDetailView(DetailView):
         
         # Kontrollo nëse përdoruesi mund të lërë review
         if self.request.user.is_authenticated:
-            if hasattr(self.request.user, "tourist_profile"):
+            if hasattr(self.request.user, "tourist_profile") and tour.guide.user != self.request.user:
                 context["can_review"] = True
                 try:
                     context["user_review"] = tour.reviews.get(
@@ -519,6 +519,9 @@ def add_tour_image(request, slug):
 @login_required
 def delete_tour_image(request, image_id):
     """Fshirja e fotos"""
+
+    if request.method != "POST":
+        return HttpResponseForbidden("Method not allowed")
     
     image = get_object_or_404(TourImage, id=image_id)
     tour = _ensure_owner(request, image.tour)
@@ -582,6 +585,9 @@ def edit_tour_schedule(request, schedule_id):
 @login_required
 def delete_tour_schedule(request, schedule_id):
     """Fshirja e programit ditor"""
+
+    if request.method != "POST":
+        return HttpResponseForbidden("Method not allowed")
     
     schedule = get_object_or_404(TourSchedule, id=schedule_id)
     tour = _ensure_owner(request, schedule.tour)
@@ -641,6 +647,9 @@ def edit_tour_faq(request, faq_id):
 @login_required
 def delete_tour_faq(request, faq_id):
     """Fshirja e pyetjeve të shpeshta"""
+
+    if request.method != "POST":
+        return HttpResponseForbidden("Method not allowed")
     
     faq = get_object_or_404(TourFAQ, id=faq_id)
     tour = _ensure_owner(request, faq.tour)
@@ -656,11 +665,16 @@ def delete_tour_faq(request, faq_id):
 def create_review(request, slug):
     """Krijimi i një vlerësimi"""
     
-    tour = get_object_or_404(Tour, slug=slug, is_active=True)
+    tour = get_object_or_404(Tour, slug=slug, is_active=True, status="published")
     
     # Kontrollo nëse përdoruesi është turist
     if not hasattr(request.user, "tourist_profile"):
         messages.error(request, "Vetëm turistët mund të lënë vlerësime.")
+        return redirect("tours:tour_detail", slug=slug)
+    
+    # Ndalon vlerësimin e turit tënd
+    if tour.guide.user == request.user:
+        messages.error(request, "Nuk mund të vlerësosh turin tënd.")
         return redirect("tours:tour_detail", slug=slug)
     
     if request.method == "POST":
@@ -714,6 +728,9 @@ def edit_review(request, review_id):
 @login_required
 def delete_review(request, review_id):
     """Fshirja e një vlerësimi"""
+
+    if request.method != "POST":
+        return HttpResponseForbidden("Method not allowed")
     
     review = get_object_or_404(TourReview, id=review_id)
     

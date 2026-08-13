@@ -12,15 +12,34 @@ from tours.models import Tour, TOUR_STATUS
 import json
 
 
+ALLOWED_TOUR_STATUS_TRANSITIONS = {
+    "draft": {"published", "hidden", "cancelled"},
+    "published": {"draft", "hidden", "cancelled", "completed"},
+    "hidden": {"draft", "published", "cancelled"},
+    "cancelled": set(),
+    "completed": set(),
+}
+
+
 def _owned_tour_or_404(tour_id, user):
     """Merr turin e një guide-i, ose ngre Tour.DoesNotExist."""
     return Tour.objects.get(id=tour_id, guide__user=user)
+
+
+def _is_guide_user(user):
+    return hasattr(user, 'guide_profile')
 
 
 @login_required
 @require_GET
 def get_tour_status(request, tour_id):
     """Get current status of a tour (AJAX endpoint)"""
+    if not _is_guide_user(request.user):
+        return JsonResponse({
+            'success': False,
+            'error': 'Only guides can access this endpoint'
+        }, status=403)
+
     try:
         tour = _owned_tour_or_404(tour_id, request.user)
         return JsonResponse({
@@ -42,10 +61,28 @@ def get_tour_status(request, tour_id):
 @require_POST
 def update_tour_status(request):
     """Update tour status (AJAX endpoint)"""
+    if not _is_guide_user(request.user):
+        return JsonResponse({
+            'success': False,
+            'error': 'Only guides can access this endpoint'
+        }, status=403)
+
     try:
         data = json.loads(request.body)
         tour_id = data.get('tour_id')
         new_status = data.get('status')
+
+        if not tour_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'tour_id is required'
+            }, status=400)
+
+        if not new_status:
+            return JsonResponse({
+                'success': False,
+                'error': 'status is required'
+            }, status=400)
         
         tour = _owned_tour_or_404(tour_id, request.user)
         old_status = tour.status
@@ -57,9 +94,16 @@ def update_tour_status(request):
                 'success': False,
                 'error': 'Invalid status'
             }, status=400)
+
+        allowed_targets = ALLOWED_TOUR_STATUS_TRANSITIONS.get(old_status, set())
+        if new_status != old_status and new_status not in allowed_targets:
+            return JsonResponse({
+                'success': False,
+                'error': f'Invalid status transition: {old_status} -> {new_status}'
+            }, status=400)
         
         tour.status = new_status
-        tour.save()
+        tour.save(update_fields=['status', 'updated_at'])
         
         return JsonResponse({
             'success': True,
@@ -89,6 +133,12 @@ def update_tour_status(request):
 @require_GET
 def get_guide_tours_status(request):
     """Get all tours status for guide (AJAX endpoint for bulk updates)"""
+    if not _is_guide_user(request.user):
+        return JsonResponse({
+            'success': False,
+            'error': 'Only guides can access this endpoint'
+        }, status=403)
+
     try:
         tours = (
             Tour.objects.filter(guide__user=request.user)

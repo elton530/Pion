@@ -478,6 +478,12 @@ class Tour(models.Model):
             models.Index(fields=['difficulty', 'is_active']),
             models.Index(fields=['average_rating', 'reviews_count']),
         ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(available_spots__gte=0),
+                name='tour_available_spots_non_negative',
+            ),
+        ]
         verbose_name = "Tur"
         verbose_name_plural = "Turet"
     

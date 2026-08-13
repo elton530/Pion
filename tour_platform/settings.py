@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 import environ
 
+from tour_platform.security import resolve_secret_key
+
 # ==================== PATH CONFIGURATION ====================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,9 +22,13 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # ==================== SECURITY SETTINGS ====================
 
-SECRET_KEY = env("SECRET_KEY", default="django-insecure-super-long-development-secret-key-change-me")
 DEBUG = env("DEBUG", default=False)
 ENVIRONMENT = env("ENVIRONMENT", default="production" if not DEBUG else "development")
+SECRET_KEY = resolve_secret_key(
+    secret_key=env("SECRET_KEY", default=""),
+    debug=DEBUG,
+    environment=ENVIRONMENT,
+)
 ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
 # When behind a proxy (nginx, haproxy, ngrok), respect X-Forwarded-Proto
@@ -39,7 +45,6 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True)
     SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True)
     CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True)
-    SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_SECONDS = env("SECURE_HSTS_SECONDS", default=31536000)
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
@@ -193,7 +198,6 @@ LANGUAGES = [
 
 TIME_ZONE = "Europe/Tirane"  # Albania timezone
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = [
@@ -209,8 +213,21 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Cache busting for static files
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+# Cache busting for static files: production uses hashed filenames
+# (ManifestStaticFilesStorage); local development keeps the plain backend so
+# the dev server serves static files without running collectstatic first.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
 
 
 # ==================== MEDIA FILES ====================
@@ -238,21 +255,20 @@ PASSWORD_RESET_TIMEOUT = 3
 
 # ==================== EMAIL CONFIGURATION ====================
 
-# Development - Console backend (shfaqet në console)
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-# Production - SMTP backend
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
-# EMAIL_PORT = env("EMAIL_PORT", default=587)
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-# DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-
-# Alternative - File backend (shfaqet në file)
-# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-# EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+# All values are read from environment variables so the same settings file
+# works for local development and production. In development the console
+# backend is used (emails are printed to stdout); in production set
+# EMAIL_BACKEND to the SMTP backend and provide real SMTP credentials.
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
 
 
 # ==================== REST FRAMEWORK (API) ====================
@@ -385,10 +401,6 @@ SESSION_COOKIE_HTTPONLY = True
 
 # ==================== SECURITY HEADERS ====================
 
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
@@ -403,6 +415,10 @@ TOURS_IMAGE_MAX_SIZE = 5242880  # 5MB
 # Booking settings
 BOOKING_CANCELLATION_DEADLINE = 48  # orë
 BOOKING_AUTO_CONFIRM_HOURS = 24  # orë
+
+# Authentication security settings
+LOGIN_RATE_LIMIT_MAX_ATTEMPTS = env.int("LOGIN_RATE_LIMIT_MAX_ATTEMPTS", default=5)
+LOGIN_RATE_LIMIT_WINDOW_SECONDS = env.int("LOGIN_RATE_LIMIT_WINDOW_SECONDS", default=600)
 
 # Payment settings
 PAYMENT_TIMEOUT = 3600  # 1 orë në sekonda

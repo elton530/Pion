@@ -183,6 +183,14 @@
                                             <span>Anullo</span>
                                         </button>
                                     </form>
+                                    {% elif booking.status == 'confirmed' %}
+                                    <form action="{% url 'users:guide_booking_complete' booking.id %}" method="post" class="inline-form">
+                                        {% csrf_token %}
+                                        <button class="btn btn-confirm" type="submit">
+                                            <i class="fas fa-flag-checkered"></i>
+                                            <span>Përfundo</span>
+                                        </button>
+                                    </form>
                                     {% else %}
                                     <span class="muted">Pa veprim</span>
                                     {% endif %}

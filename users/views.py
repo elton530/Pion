@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
+from django.core.cache import cache
+from django.conf import settings
 
 from decimal import Decimal, InvalidOperation
 import logging
@@ -21,6 +23,38 @@ from bookings.models import Booking
 from bookings.views import send_cancellation_email
 
 logger = logging.getLogger(__name__)
+
+
+def _get_client_ip(request):
+    """Return best-effort client IP for rate-limit keying."""
+    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "unknown")
+
+
+def _login_rate_limit_key(request, identifier):
+    normalized_identifier = (identifier or "").strip().lower()[:200]
+    return f"login-rate:{_get_client_ip(request)}:{normalized_identifier}"
+
+
+def _is_login_rate_limited(request, identifier):
+    key = _login_rate_limit_key(request, identifier)
+    attempts = cache.get(key, 0)
+    max_attempts = int(getattr(settings, "LOGIN_RATE_LIMIT_MAX_ATTEMPTS", 5))
+    return attempts >= max_attempts
+
+
+def _record_failed_login_attempt(request, identifier):
+    key = _login_rate_limit_key(request, identifier)
+    window_seconds = int(getattr(settings, "LOGIN_RATE_LIMIT_WINDOW_SECONDS", 600))
+    attempts = cache.get(key, 0) + 1
+    cache.set(key, attempts, timeout=window_seconds)
+
+
+def _clear_failed_login_attempts(request, identifier):
+    key = _login_rate_limit_key(request, identifier)
+    cache.delete(key)
 
 from .forms import (
     SignupForm, GuideProfileForm, GuideEditProfileForm,
@@ -100,6 +134,12 @@ class CustomLoginView(LoginView):
         """Verifiko kredencialet"""
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
+        safe_error_message = "❌ Kredencialet janë të pasakta ose hyrja është përkohësisht e kufizuar. Provo përsëri më vonë."
+
+        if _is_login_rate_limited(self.request, username):
+            messages.error(self.request, safe_error_message)
+            form.add_error(None, safe_error_message)
+            return self.form_invalid(form)
         
         # Provo login me username ose email
         user = None
@@ -115,11 +155,14 @@ class CustomLoginView(LoginView):
                 pass
         
         if user is not None:
+            _clear_failed_login_attempts(self.request, username)
             login(self.request, user)
             messages.success(self.request, f"✅ Mirëseerdhët, {user.first_name or user.username}!")
             return redirect(self.get_success_url())
         else:
-            messages.error(self.request, "❌ Username/email ose fjalëkalim i gabuar.")
+            _record_failed_login_attempt(self.request, username)
+            messages.error(self.request, safe_error_message)
+            form.add_error(None, safe_error_message)
             return self.form_invalid(form)
     
     def get_success_url(self):
@@ -656,7 +699,7 @@ def guide_booking_detail(request, booking_id):
 
 @login_required
 def guide_booking_action(request, booking_id, action):
-    """Veprime me reservimin (confirm, cancel)"""
+    """Veprime me reservimin (confirm, cancel, complete)"""
     
     booking = get_object_or_404(Booking, id=booking_id)
     
@@ -682,6 +725,13 @@ def guide_booking_action(request, booking_id, action):
             except Exception:
                 logger.exception("Gabim në dërgimin e email të anulimit nga guida")
             messages.success(request, "✅ Rezervimi u anulua dhe turisti u njoftua.")
+
+    elif action == "complete":
+        if booking.status == "confirmed":
+            booking.complete()
+            messages.success(request, "✅ Rezervimi u shënua si i përfunduar.")
+        else:
+            messages.error(request, "❌ Vetëm rezervimet e konfirmuara mund të shënohen si të përfunduara.")
     
     return redirect("users:guide_dashboard")
 
@@ -948,8 +998,12 @@ class UserProfileDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         guide = self.object
 
-        # Tours
-        context['tours'] = Tour.objects.filter(guide=guide, is_active=True).order_by('-date')[:6]
+        # Tours (vetëm të publikuarit - draft/hidden/cancelled nuk duhen shfaqur publikisht)
+        context['tours'] = Tour.objects.filter(
+            guide=guide,
+            is_active=True,
+            status="published",
+        ).order_by('-date')[:6]
 
         # Reviews
         approved_reviews = TourReview.objects.filter(

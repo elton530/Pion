@@ -375,6 +375,20 @@ gunicorn tour_platform.wsgi:application --bind 0.0.0.0:8000
 python manage.py test
 ```
 
+## 🔒 Login Rate Limiting
+
+Login endpoint has lightweight brute-force protection using Django cache.
+
+How it works:
+- Failed login attempts are counted per `IP + username/email` key.
+- After `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` failures within `LOGIN_RATE_LIMIT_WINDOW_SECONDS`, further login attempts are temporarily blocked.
+- A successful login clears the counter.
+- The error message is intentionally generic to avoid account enumeration.
+
+Configuration (in environment/settings):
+- `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` (default: `5`)
+- `LOGIN_RATE_LIMIT_WINDOW_SECONDS` (default: `600`)
+
 ---
 
 ## 🐛 Troubleshooting

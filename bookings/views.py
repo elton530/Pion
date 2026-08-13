@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from decimal import Decimal
 import logging
 
@@ -24,80 +25,75 @@ logger = logging.getLogger(__name__)
 @login_required
 def create_booking(request, slug):
     """Krijim i një prenim të ri"""
-    
+
     tour = get_object_or_404(Tour, slug=slug, is_active=True, status="published")
-    
-    # Kontrollo nëse përdoruesi është turist
+
     try:
         tourist_profile = request.user.tourist_profile
     except TouristProfile.DoesNotExist:
         messages.error(request, "❌ Vetëm turistët mund të rezervojnë ture.")
         return redirect("tours:tour_detail", slug=tour.slug)
-    
-    # Kontrollo disponibilitetin e turit
-    if not tour.can_be_booked:
-        messages.error(request, "❌ Ky tur nuk është më i disponueshëm për prenim.")
-        return redirect("tours:tour_detail", slug=tour.slug)
-    
-    # Kontrollo nëse ka tashmë prenim
-    existing = Booking.objects.filter(
-        tourist=tourist_profile,
-        tour=tour
-    ).exclude(status='cancelled').first()
-    
-    if existing:
-        messages.info(
-            request,
-            f"ℹ️ Ke tashmë një prenim për këtë tur me status '{existing.get_status_display()}'."
-        )
-        return redirect("bookings:booking_detail", booking_id=existing.id)
-    
-    if request.method == "POST":
-        form = BookingForm(request.POST, tour=tour, tourist=tourist_profile)
-        
-        if form.is_valid():
-            # Guard: ensure tour.current_price is numeric before creating Booking
-            try:
-                Decimal(str(tour.current_price))
-            except Exception:
-                messages.error(request, "❌ Nuk mund të vazhdosh - çmimi i turit nuk është i vlefshëm. Kontakto administratën.")
-                return redirect("tours:tour_detail", slug=tour.slug)
 
-            try:
-                booking = form.save(commit=False)
-                booking.tour = tour
-                booking.tourist = tourist_profile
-                booking.save()
-                
-                # Dërgoni email tek guide-i
-                send_new_booking_email_to_guide(booking)
-                
-                # Dërgoni email tek turist
-                send_booking_confirmation_email_to_tourist(booking)
-                
-                messages.success(
-                    request,
-                    f'✅ Rezervimi për "{tour.title}" u krye me sukses! Presim konfirmimin nga guida.'
-                )
-                return redirect("bookings:booking_success", booking_id=booking.id)
-            
-            except ValueError as e:
-                messages.error(request, f"❌ {str(e)}")
-                return redirect("tours:tour_detail", slug=tour.slug)
+    with transaction.atomic():
+        tour = Tour.objects.select_for_update().get(pk=tour.pk)
+
+        if not tour.can_be_booked:
+            messages.error(request, "❌ Ky tur nuk është më i disponueshëm për prenim.")
+            return redirect("tours:tour_detail", slug=tour.slug)
+
+        existing = Booking.objects.filter(
+            tourist=tourist_profile,
+            tour=tour
+        ).exclude(status='cancelled').first()
+
+        if existing:
+            messages.info(
+                request,
+                f"ℹ️ Ke tashmë një prenim për këtë tur me status '{existing.get_status_display()}'."
+            )
+            return redirect("bookings:booking_detail", booking_id=existing.id)
+
+        if request.method == "POST":
+            form = BookingForm(request.POST, tour=tour, tourist=tourist_profile)
+
+            if form.is_valid():
+                try:
+                    Decimal(str(tour.current_price))
+                except Exception:
+                    messages.error(request, "❌ Nuk mund të vazhdosh - çmimi i turit nuk është i vlefshëm. Kontakto administratën.")
+                    return redirect("tours:tour_detail", slug=tour.slug)
+
+                try:
+                    booking = form.save(commit=False)
+                    booking.tour = tour
+                    booking.tourist = tourist_profile
+                    booking.save()
+
+                    send_new_booking_email_to_guide(booking)
+                    send_booking_confirmation_email_to_tourist(booking)
+
+                    messages.success(
+                        request,
+                        f'✅ Rezervimi për "{tour.title}" u krye me sukses! Presim konfirmimin nga guida.'
+                    )
+                    return redirect("bookings:booking_success", booking_id=booking.id)
+
+                except ValueError as e:
+                    messages.error(request, f"❌ {str(e)}")
+                    return redirect("tours:tour_detail", slug=tour.slug)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
         else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
-    
-    else:
-        form = BookingForm(tour=tour, tourist=tourist_profile)
-    
+            form = BookingForm(tour=tour, tourist=tourist_profile)
+
     context = {
         'form': form,
         'tour': tour,
         'available_spots': tour.available_spots,
     }
-    
+
     return render(request, "bookings/create_booking.html", context)
 
 

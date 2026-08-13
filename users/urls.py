@@ -109,6 +109,14 @@ urlpatterns = [
         {"action": "cancel"},
         name="guide_booking_cancel"
     ),
+
+    # POST /users/guide/booking/<booking_id>/complete/ - Përfundim booking-ut
+        path(
+            "guide/booking/<uuid:booking_id>/complete/",
+        views.guide_booking_action,
+        {"action": "complete"},
+        name="guide_booking_complete"
+    ),
     
     
     # ==================== TOURIST ROUTES ====================

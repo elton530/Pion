@@ -1,7 +1,12 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.test import override_settings
+from django.core.cache import cache
+import time
 
+from tours.models import Tour, TourType
 from users.models import GuideProfile, GuideModerationLog, TouristProfile
 
 
@@ -272,3 +277,172 @@ class AdminGuideModerationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "profil është i yti")
         self.assertNotContains(response, 'value="reject"')
+
+
+@override_settings(LOGIN_RATE_LIMIT_MAX_ATTEMPTS=3, LOGIN_RATE_LIMIT_WINDOW_SECONDS=60)
+class LoginRateLimitingTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="login_limit_user",
+            email="login_limit_user@example.com",
+            password=self.password,
+            first_name="Arta",
+        )
+        self.login_url = reverse("users:login")
+        self.safe_error = "Kredencialet janë të pasakta ose hyrja është përkohësisht e kufizuar"
+
+    def _login(self, username, password):
+        return self.client.post(
+            self.login_url,
+            {"username": username, "password": password},
+            REMOTE_ADDR="10.10.10.10",
+        )
+
+    def test_blocks_login_after_repeated_failed_attempts(self):
+        for _ in range(3):
+            response = self._login("login_limit_user", "wrong-password")
+            self.assertEqual(response.status_code, 200)
+
+        blocked_response = self._login("login_limit_user", self.password)
+
+        self.assertEqual(blocked_response.status_code, 200)
+        self.assertContains(blocked_response, self.safe_error)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    @override_settings(LOGIN_RATE_LIMIT_MAX_ATTEMPTS=2, LOGIN_RATE_LIMIT_WINDOW_SECONDS=1)
+    def test_limit_expires_and_login_recovers(self):
+        self._login("login_limit_user", "wrong-password")
+        self._login("login_limit_user", "wrong-password")
+
+        blocked_response = self._login("login_limit_user", self.password)
+        self.assertEqual(blocked_response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+        time.sleep(1.1)
+
+        success_response = self._login("login_limit_user", self.password)
+        self.assertEqual(success_response.status_code, 302)
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_existing_and_non_existing_accounts_get_same_safe_message(self):
+        existing = self._login("login_limit_user", "wrong-password")
+        unknown = self._login("unknown_user", "wrong-password")
+
+        self.assertEqual(existing.status_code, 200)
+        self.assertEqual(unknown.status_code, 200)
+        self.assertContains(existing, self.safe_error)
+        self.assertContains(unknown, self.safe_error)
+
+
+class GuideProfilePublicVisibilityTests(TestCase):
+    """Regression: profili publik i guide-it nuk duhet të shfaqë ture draft/hidden."""
+
+    def setUp(self):
+        self.guide_user = User.objects.create_user(
+            username="public_guide",
+            password="secret123",
+            first_name="Public",
+            last_name="Guide",
+        )
+        self.guide = GuideProfile.objects.create(
+            user=self.guide_user,
+            location="Tiranë",
+            status="verified",
+            is_active=True,
+        )
+        self.tour_type = TourType.objects.create(name="Visibility Type", description="Test")
+
+        self.published_tour = Tour.objects.create(
+            guide=self.guide,
+            title="Published Public Tour",
+            slug="published-public-tour",
+            short_description="Description",
+            full_description="Full description",
+            tour_type=self.tour_type,
+            meeting_point="Qendra",
+            location_city="Tiranë",
+            location_region="Tiranë",
+            duration_hours=4,
+            date="2030-01-01",
+            time_start="10:00:00",
+            price_per_person=100,
+            max_participants=10,
+            main_image=SimpleUploadedFile(
+                "published-public.jpg",
+                b"fake-image-data",
+                content_type="image/jpeg",
+            ),
+            status="published",
+            is_active=True,
+        )
+        self.draft_tour = Tour.objects.create(
+            guide=self.guide,
+            title="Secret Draft Tour",
+            slug="secret-draft-tour",
+            short_description="Description",
+            full_description="Full description",
+            tour_type=self.tour_type,
+            meeting_point="Qendra",
+            location_city="Tiranë",
+            location_region="Tiranë",
+            duration_hours=4,
+            date="2030-01-01",
+            time_start="10:00:00",
+            price_per_person=100,
+            max_participants=10,
+            main_image=SimpleUploadedFile(
+                "secret-draft.jpg",
+                b"fake-image-data",
+                content_type="image/jpeg",
+            ),
+            status="draft",
+            is_active=True,
+        )
+        self.hidden_tour = Tour.objects.create(
+            guide=self.guide,
+            title="Hidden Tour",
+            slug="hidden-tour",
+            short_description="Description",
+            full_description="Full description",
+            tour_type=self.tour_type,
+            meeting_point="Qendra",
+            location_city="Tiranë",
+            location_region="Tiranë",
+            duration_hours=4,
+            date="2030-01-01",
+            time_start="10:00:00",
+            price_per_person=100,
+            max_participants=10,
+            main_image=SimpleUploadedFile(
+                "hidden-tour.jpg",
+                b"fake-image-data",
+                content_type="image/jpeg",
+            ),
+            status="hidden",
+            is_active=True,
+        )
+
+    def _public_profile_url(self):
+        return reverse(
+            "users:guide_profile_public",
+            kwargs={"username": self.guide_user.username},
+        )
+
+    def test_public_profile_only_lists_published_tours(self):
+        response = self.client.get(self._public_profile_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Published Public Tour")
+        self.assertNotContains(response, "Secret Draft Tour")
+        self.assertNotContains(response, "Hidden Tour")
+
+    def test_public_profile_tour_links_only_point_to_published_tours(self):
+        response = self.client.get(self._public_profile_url())
+
+        tours = response.context["tours"]
+        tour_slugs = [tour.slug for tour in tours]
+        self.assertIn(self.published_tour.slug, tour_slugs)
+        self.assertNotIn(self.draft_tour.slug, tour_slugs)
+        self.assertNotIn(self.hidden_tour.slug, tour_slugs)

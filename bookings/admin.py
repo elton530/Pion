@@ -206,7 +206,11 @@ class BookingAdmin(admin.ModelAdmin):
     
     def mark_completed(self, request, queryset):
         """Marko si të përfunduar"""
-        count = queryset.filter(status='confirmed').update(status='completed')
+        count = 0
+        for booking in queryset:
+            if booking.status == 'confirmed':
+                booking.complete()
+                count += 1
         self.message_user(request, f'✔️ {count} prenim(e) u shënua si të përfunduar.')
     mark_completed.short_description = '✔️ Marko si të përfunduar'
     

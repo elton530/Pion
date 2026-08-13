@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from decimal import Decimal, InvalidOperation
@@ -48,6 +48,15 @@ BOOKING_STATUS = [
     ("cancelled", "Anulluar"),
     ("no_show", "Nuk u paraqit"),
 ]
+
+ALLOWED_STATUS_TRANSITIONS = {
+    "pending": {"confirmed", "cancelled"},
+    "confirmed": {"completed", "cancelled"},
+    "cancelled": set(),
+    "completed": set(),
+    # Legacy status kept for compatibility with existing records, but no new transitions should target it.
+    "no_show": set(),
+}
 
 PAYMENT_STATUS = [
     ("pending", "Në pritje"),
@@ -211,68 +220,101 @@ class Booking(models.Model):
             models.Index(fields=['status', 'created_at']),
             models.Index(fields=['tourist', 'tour']),
         ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(num_people__gte=1),
+                name='booking_num_people_positive',
+            ),
+            models.UniqueConstraint(
+                fields=['tourist', 'tour'],
+                condition=~models.Q(status='cancelled'),
+                name='unique_active_booking_per_tourist_tour',
+            ),
+        ]
         verbose_name = "Prernim"
         verbose_name_plural = "Prenimet"
     
     def __str__(self):
         tourist_name = self.tourist.user.get_full_name() or self.tourist.user.username
         return f"{tourist_name} - {self.tour.title} ({self.num_people} persona)"
+
+    def _validate_status_transition(self, old_status, new_status):
+        """Validate lifecycle transition for booking status updates."""
+        if old_status == new_status:
+            return
+
+        allowed_targets = ALLOWED_STATUS_TRANSITIONS.get(old_status, set())
+        if new_status not in allowed_targets:
+            raise ValueError(
+                f"Kalim statusi i pavlefshëm: {old_status} -> {new_status}."
+            )
     
     def save(self, *args, **kwargs):
         """Llogarit çmimet dhe menaxhon vendet"""
         created = getattr(self, '_state', None) and getattr(self._state, 'adding', False)
-        
+
         if created:
-            # Kontrollo vende të lira
-            if self.tour.available_spots < self.num_people:
-                raise ValueError(
-                    f"Nuk ka vende të mjaftueshme. Vende të lira: {self.tour.available_spots}"
-                )
-            
-            # Zgjidh çmimin aktual (me ose pa zbritje)
-            self.price_per_person = self.tour.current_price
+            with transaction.atomic():
+                original_tour = self.tour
+                tour = Tour.objects.select_for_update().get(pk=self.tour_id)
+                self.tour = tour
 
-            # Guard: ensure tour has a valid price
-            if self.price_per_person is None:
-                raise ValueError(
-                    "Turi nuk ka një çmim të vendosur. Ju lutem kontrolloni konfigurimin e turit."
-                )
+                if tour.available_spots < self.num_people:
+                    raise ValueError(
+                        f"Nuk ka vende të mjaftueshme. Vende të lira: {tour.available_spots}"
+                    )
 
-            # Llogarit çmimet
-            self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
-            self.discount_applied = Decimal('0.00')
-            self.final_price = self.total_price
-            
-            # Zbrit vendet
-            self.tour.available_spots -= self.num_people
-            self.tour.save(update_fields=['available_spots', 'updated_at'])
-        
-        else:
-            # Kur ndryshon, përditëso final_price nëse ndryshon num_people
-            self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
-            self.final_price = self.total_price - _to_decimal(self.discount_applied, 'discount_applied')
-        
+                self.price_per_person = tour.current_price
+
+                if self.price_per_person is None:
+                    raise ValueError(
+                        "Turi nuk ka një çmim të vendosur. Ju lutem kontrolloni konfigurimin e turit."
+                    )
+
+                self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
+                self.discount_applied = Decimal('0.00')
+                self.final_price = self.total_price
+
+                tour.available_spots -= self.num_people
+
+                if original_tour is not None and original_tour.pk == tour.pk:
+                    original_tour.available_spots = tour.available_spots
+
+                self.tour = original_tour or tour
+                tour.save(update_fields=['available_spots', 'updated_at'])
+
+                super().save(*args, **kwargs)
+
+                Payment.objects.get_or_create(
+                    booking=self,
+                    defaults={
+                        'amount': self.final_price,
+                        'currency': tour.currency,
+                        'payment_method': 'card',
+                        'status': 'pending',
+                    }
+                )
+                return
+
+        if self.pk:
+            old_status = Booking.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+            if old_status is not None:
+                self._validate_status_transition(old_status, self.status)
+
+        self.total_price = _to_decimal(self.price_per_person, 'price_per_person') * _to_decimal(self.num_people, 'num_people')
+        self.final_price = self.total_price - _to_decimal(self.discount_applied, 'discount_applied')
+
         super().save(*args, **kwargs)
-
-        if created:
-            Payment.objects.get_or_create(
-                booking=self,
-                defaults={
-                    'amount': self.final_price,
-                    'currency': self.tour.currency,
-                    'payment_method': 'card',
-                    'status': 'pending',
-                }
-            )
     
     def cancel(self, reason=None, cancelled_by="tourist", notes=""):
         """Anulo prenimin dhe kthej vendet"""
         
-        if self.status == "cancelled":
-            raise ValueError("Ky prenim është tashmë anulluar.")
-        
-        if self.status == "completed":
-            raise ValueError("Nuk mund të anulohet një tur i përfunduar.")
+        if self.status in ["cancelled", "completed", "no_show"]:
+            if self.status == "cancelled":
+                raise ValueError("Ky prenim është tashmë anulluar.")
+            if self.status == "completed":
+                raise ValueError("Nuk mund të anulohet një tur i përfunduar.")
+            raise ValueError("Nuk mund të anulohet një prenim që është shënuar si nuk u paraqit.")
         
         # Përditëso prenimin
         self.status = "cancelled"
@@ -301,13 +343,15 @@ class Booking(models.Model):
     
     def complete(self):
         """Marko turin si të përfunduar"""
+        if self.status != "confirmed":
+            raise ValueError(f"Nuk mund të përfundosh prenimin me status {self.status}")
+
         self.status = "completed"
         self.save(update_fields=['status', 'updated_at'])
     
     def mark_no_show(self):
         """Marko si nuk u paraqit"""
-        self.status = "no_show"
-        self.save(update_fields=['status', 'updated_at'])
+        raise ValueError("Statusi 'no_show' nuk përdoret në lifecycle-in aktual të prenimeve.")
     
     def confirm_participation_24h(self):
         """Konfirmim i pjesëmarrjes 24h përpara"""
@@ -334,7 +378,7 @@ class Booking(models.Model):
     @property
     def can_be_cancelled(self):
         """Kontrollo nëse mund të anulohet"""
-        if self.status in ["cancelled", "completed"]:
+        if self.status in ["cancelled", "completed", "no_show"]:
             return False
         
         tour_datetime = timezone.make_aware(
