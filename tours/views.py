@@ -146,7 +146,10 @@ class TourSearchView(ListView):
     paginate_by = 12
     
     def get_queryset(self):
-        queryset = _published_tours_queryset()
+        # Konsistente me TourListView: mos shfaq ture të kaluar në kërkim.
+        queryset = _published_tours_queryset().filter(
+            date__gte=timezone.now().date()
+        )
 
         form = TourSearchForm(self.request.GET)
         if form.is_valid():

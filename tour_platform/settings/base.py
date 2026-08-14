@@ -1,71 +1,27 @@
 """
-Django settings for tour_platform project.
+Base Django settings shared by both development and production.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/topics/settings/
+Environment values that only make sense in one environment (DEBUG, SECRET_KEY,
+security headers, email backend, static storage, CORS origins) are defined in
+``development.py`` and ``production.py``. Everything defined here is common to
+both.
+
+See https://docs.djangoproject.com/en/5.2/topics/settings/
 """
 
 import os
 from pathlib import Path
-import environ
 
-from tour_platform.security import resolve_secret_key
+import environ
 
 # ==================== PATH CONFIGURATION ====================
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Load environment variables from .env file
+# Load environment variables from .env file (does not override values already
+# present in the process environment).
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-
-
-# ==================== SECURITY SETTINGS ====================
-
-DEBUG = env("DEBUG", default=False)
-ENVIRONMENT = env("ENVIRONMENT", default="production" if not DEBUG else "development")
-SECRET_KEY = resolve_secret_key(
-    secret_key=env("SECRET_KEY", default=""),
-    debug=DEBUG,
-    environment=ENVIRONMENT,
-)
-ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
-
-# When behind a proxy (nginx, haproxy, ngrok), respect X-Forwarded-Proto
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-# CSRF trusted origins — include local HTTPS endpoints for dev workflows
-CSRF_TRUSTED_ORIGINS = env(
-    "CSRF_TRUSTED_ORIGINS",
-    default="http://127.0.0.1:8000,https://localhost:8000",
-).split(",")
-
-# Security settings for production
-if not DEBUG:
-    SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True)
-    SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=True)
-    CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=True)
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_SECONDS = env("SECURE_HSTS_SECONDS", default=31536000)
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = env("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
-    SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=True)
-    SECURE_CONTENT_SECURITY_POLICY = {
-        "default-src": ("'self'",),
-        "script-src": ("'self'", "'unsafe-inline'"),
-        "style-src": ("'self'", "'unsafe-inline'"),
-    }
-else:
-    # Development defaults: explicitly disable strict HTTPS-only behaviors
-    # even if environment variables are set. This ensures local development
-    # (when DEBUG=True) won't redirect or require TLS and avoids ERR_SSL_*
-    # errors while testing without certificates. IMPORTANT: do NOT keep
-    # these settings enabled in production.
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
-    SECURE_HSTS_SECONDS = 0
-    # Avoid enforcing content security policy in dev (helps with local assets)
-    SECURE_CONTENT_SECURITY_POLICY = {}
 
 
 # ==================== APPLICATION DEFINITION ====================
@@ -78,13 +34,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
+
     # Third-party apps
     "rest_framework",  # DRF (opsionale - për API)
     "corsheaders",     # CORS handling
     "django_filters",  # Advanced filtering
     "django_extensions",  # Django extensions
-    
+
     # Local apps
     "core.apps.CoreConfig",
     "users.apps.UsersConfig",
@@ -96,32 +52,20 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Security middleware
     "django.middleware.security.SecurityMiddleware",
-    
+
     # CORS middleware (duhet të jetë para sesionit)
     "corsheaders.middleware.CorsMiddleware",
-    
+
     # Session and authentication
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    
+
     # Security
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-# Development helper: when DEBUG=True we may be running locally without HTTPS.
-# To avoid development-time errors (ERR_SSL_PROTOCOL_ERROR when someone visits
-# https://127.0.0.1 while the dev server speaks HTTP), remove the
-# SecurityMiddleware in dev so Django won't enforce some HTTPS-only behaviors.
-# This is safe for local development only; DO NOT enable in production.
-if DEBUG:
-    try:
-        MIDDLEWARE.remove("django.middleware.security.SecurityMiddleware")
-        SECURITY_MIDDLEWARE_DISABLED = True
-    except ValueError:
-        SECURITY_MIDDLEWARE_DISABLED = False
 
 ROOT_URLCONF = "tour_platform.urls"
 
@@ -148,14 +92,18 @@ WSGI_APPLICATION = "tour_platform.wsgi.application"
 
 # ==================== DATABASE CONFIGURATION ====================
 
+# Credentials come from environment variables (DB_*); used both locally and in
+# production. See .env.example for the full list. USER and PASSWORD are
+# required (no hardcoded fallbacks) so misconfiguration fails fast instead of
+# silently connecting with a default credential.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env("DB_NAME", default="tour_platform"),
-        "USER": env("DB_USER", default="postgres"),
-        "PASSWORD": env("DB_PASSWORD", default="password"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
         "HOST": env("DB_HOST", default="localhost"),
-        "PORT": env("DB_PORT", default="5432"),
+        "PORT": env.int("DB_PORT", default="5432"),
         "ATOMIC_REQUESTS": True,
     }
 }
@@ -213,22 +161,6 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Cache busting for static files: production uses hashed filenames
-# (ManifestStaticFilesStorage); local development keeps the plain backend so
-# the dev server serves static files without running collectstatic first.
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": (
-            "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
-            if not DEBUG
-            else "django.contrib.staticfiles.storage.StaticFilesStorage"
-        ),
-    },
-}
-
 
 # ==================== MEDIA FILES ====================
 
@@ -251,24 +183,6 @@ LOGOUT_REDIRECT_URL = "core:home"
 
 # Password reset timeout (në ditë)
 PASSWORD_RESET_TIMEOUT = 3
-
-
-# ==================== EMAIL CONFIGURATION ====================
-
-# All values are read from environment variables so the same settings file
-# works for local development and production. In development the console
-# backend is used (emails are printed to stdout); in production set
-# EMAIL_BACKEND to the SMTP backend and provide real SMTP credentials.
-EMAIL_BACKEND = env(
-    "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend",
-)
-EMAIL_HOST = env("EMAIL_HOST", default="localhost")
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
 
 
 # ==================== REST FRAMEWORK (API) ====================
@@ -296,12 +210,12 @@ REST_FRAMEWORK = {
 
 # ==================== CORS CONFIGURATION ====================
 
-CORS_ALLOWED_ORIGINS = env(
-    "CORS_ALLOWED_ORIGINS",
-    default="http://localhost:3000,http://127.0.0.1:3000"
-).split(",")
-
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = env(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://127.0.0.1:8000,http://localhost:8000",
+).split(",")
 
 
 # ==================== LOGGING ====================

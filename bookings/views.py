@@ -242,6 +242,10 @@ def booking_confirm_participation(request, booking_id):
         if form.is_valid():
             try:
                 booking.confirm_participation_24h()
+                try:
+                    send_participation_confirmation_email_to_guide(booking)
+                except Exception:
+                    logger.exception("Gabim në dërgimin e email të pjesëmarrjes për guide")
                 messages.success(
                     request,
                     f"✅ Faleminderit! Pjesmarrja jote u konfirmua për '{booking.tour.title}'."
@@ -403,3 +407,47 @@ def send_cancellation_email(booking):
             send_notification_email(tourist_email, subject, message=message)
     except Exception as e:
         logger.error(f"Gabim në dërgimin e email anulimi: {e}")
+
+
+def send_booking_confirmed_email_to_tourist(booking):
+    """Dërgoni email te turist kur guida konfirmon prenimit"""
+    try:
+        tourist_email = booking.tourist.user.email
+        if tourist_email:
+            subject = f"✅ Rezervimi yt u konfirmua nga guida: '{booking.tour.title}'"
+            context = {
+                'tourist_name': booking.tourist.user.get_full_name() or booking.tourist.user.username,
+                'tour_title': booking.tour.title,
+                'tour_date': booking.tour.date,
+                'tour_time': booking.tour.time_start,
+                'guide_name': booking.tour.guide.user.get_full_name() or booking.tour.guide.user.username,
+                'num_people': booking.num_people,
+                'total_price': booking.total_price,
+                'currency': booking.tour.get_currency_display(),
+            }
+            message = f"Guide-i konfirmoi rezervimin tënd për '{booking.tour.title}'."
+            send_notification_email(tourist_email, subject, message=message, context=context)
+    except Exception as e:
+        logger.error(f"Gabim në dërgimin e email konfirmimi për turist: {e}")
+
+
+def send_participation_confirmation_email_to_guide(booking):
+    """Dërgoni email te guide kur turisti konfirmon pjesëmarrjen 24h përpara"""
+    try:
+        guide_email = booking.tour.guide.user.email
+        if guide_email:
+            subject = f"👤 Turisti konfirmoi pjesëmarrjen për '{booking.tour.title}'"
+            context = {
+                'guide_name': booking.tour.guide.user.get_full_name() or booking.tour.guide.user.username,
+                'tour_title': booking.tour.title,
+                'tour_date': booking.tour.date,
+                'tour_time': booking.tour.time_start,
+                'tourist_name': booking.tourist.user.get_full_name() or booking.tourist.user.username,
+                'num_people': booking.num_people,
+                'total_price': booking.total_price,
+                'currency': booking.tour.get_currency_display(),
+            }
+            message = f"{booking.tourist.user.get_full_name() or booking.tourist.user.username} konfirmoi pjesëmarrjen për '{booking.tour.title}'."
+            send_notification_email(guide_email, subject, message=message, context=context)
+    except Exception as e:
+        logger.error(f"Gabim në dërgimin e email pjesëmarrjeje për guide: {e}")

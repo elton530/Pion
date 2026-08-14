@@ -297,6 +297,10 @@ class TourEditForm(forms.ModelForm):
         active_tour_types = TourType.objects.filter(is_active=True).order_by('order', 'name')
         self.fields['tour_type'].queryset = active_tour_types
 
+        # Slug-i është i pandryshueshëm në redaktim: fusha disabled në nivel
+        # Django-i (jo vetëm widget) që vlera e POST-it të mos e zbrazë kurrë.
+        self.fields['slug'].disabled = True
+
         if self.instance and self.instance.tour_type_id:
             current_type = self.instance.tour_type
             if current_type and current_type not in active_tour_types:

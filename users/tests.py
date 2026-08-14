@@ -1,9 +1,11 @@
-from django.test import TestCase
+from django.core import mail
+from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings
 from django.core.cache import cache
+import re
 import time
 
 from tours.models import Tour, TourType
@@ -446,3 +448,405 @@ class GuideProfilePublicVisibilityTests(TestCase):
         self.assertIn(self.published_tour.slug, tour_slugs)
         self.assertNotIn(self.draft_tour.slug, tour_slugs)
         self.assertNotIn(self.hidden_tour.slug, tour_slugs)
+
+
+class EmailFlowTests(TestCase):
+    """Teste për dërgimin e email-eve në flukset kryesore të users."""
+
+    def setUp(self):
+        mail.outbox.clear()
+
+    def test_guide_signup_sends_welcome_email(self):
+        response = self.client.post(
+            reverse("users:signup"),
+            {
+                "username": "new_guide_email",
+                "first_name": "Dritan",
+                "last_name": "Mulla",
+                "email": "guide_welcome@example.com",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+                "role": "guide",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertIn("guide_welcome@example.com", email.to)
+        self.assertIn("Mirëseerdhët", email.subject)
+
+    def test_tourist_signup_sends_welcome_email(self):
+        response = self.client.post(
+            reverse("users:signup"),
+            {
+                "username": "new_tourist_email",
+                "first_name": "Ana",
+                "last_name": "Kola",
+                "email": "tourist_welcome@example.com",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+                "role": "tourist",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertIn("tourist_welcome@example.com", email.to)
+        self.assertIn("Mirëseerdhët", email.subject)
+
+    def test_password_reset_sends_email_with_link(self):
+        User.objects.create_user(
+            username="reset_email_user",
+            email="reset@example.com",
+            password="OldPass123!",
+        )
+
+        response = self.client.post(
+            reverse("users:password_reset"),
+            {"email": "reset@example.com"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertIn("reset@example.com", email.to)
+        self.assertIn("/users/reset/", email.body)
+
+    def test_password_reset_unknown_email_sends_nothing(self):
+        response = self.client.post(
+            reverse("users:password_reset"),
+            {"email": "nobody@example.com"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_guide_profile_creation_sends_welcome_email(self):
+        user = User.objects.create_user(
+            username="direct_guide",
+            email="direct_guide@example.com",
+            password="testpass123",
+        )
+
+        GuideProfile.objects.create(user=user, location="Tiranë")
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertIn("direct_guide@example.com", email.to)
+        self.assertIn("Mirëseerdhët", email.subject)
+
+
+class LoginFlowTests(TestCase):
+    """Teste për rrjedhën e login-it: kredenciale, redirect sipas rolit, bllokimi."""
+
+    def setUp(self):
+        cache.clear()
+        self.password = "StrongPass123!"
+        self.login_url = reverse("users:login")
+
+        self.admin = User.objects.create_superuser(
+            username="login_admin", email="admin@login.com", password=self.password
+        )
+        self.guide_user = User.objects.create_user(
+            username="login_guide", email="guide@login.com", password=self.password
+        )
+        GuideProfile.objects.create(
+            user=self.guide_user, location="Tiranë", status="verified"
+        )
+        self.tourist_user = User.objects.create_user(
+            username="login_tourist", email="tourist@login.com", password=self.password
+        )
+        TouristProfile.objects.create(user=self.tourist_user)
+
+    def _login(self, username, password):
+        return self.client.post(
+            self.login_url,
+            {"username": username, "password": password},
+            REMOTE_ADDR="10.10.10.11",
+        )
+
+    def test_login_redirects_admin_to_admin_dashboard(self):
+        response = self._login("login_admin", self.password)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("users:admin_dashboard"))
+
+    def test_login_redirects_guide_to_guide_dashboard(self):
+        response = self._login("login_guide", self.password)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("users:guide_dashboard"))
+
+    def test_login_redirects_tourist_to_tourist_dashboard(self):
+        response = self._login("login_tourist", self.password)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("users:tourist_dashboard"))
+
+    def test_login_with_email_authenticates_user(self):
+        response = self._login("tourist@login.com", self.password)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_login_wrong_password_does_not_create_session(self):
+        response = self._login("login_tourist", "WrongPass123!")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_login_unknown_user_does_not_create_session(self):
+        response = self._login("ghost_user", self.password)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_inactive_user_cannot_login(self):
+        inactive = User.objects.create_user(
+            username="inactive_user", email="inactive@login.com", password=self.password
+        )
+        inactive.is_active = False
+        inactive.save()
+
+        response = self._login("inactive_user", self.password)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_pending_guide_cannot_login(self):
+        pending = User.objects.create_user(
+            username="pending_guide_login", email="pending@login.com", password=self.password
+        )
+        pending.is_active = False
+        pending.save()
+        GuideProfile.objects.create(user=pending, location="Vlorë", status="pending")
+
+        response = self._login("pending_guide_login", self.password)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+
+class LogoutTests(TestCase):
+    """Teste për daljen nga llogaria dhe mbrojtjen pas saj."""
+
+    def setUp(self):
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="logout_user", email="logout@example.com", password=self.password
+        )
+        TouristProfile.objects.create(user=self.user)
+        self.client.login(username="logout_user", password=self.password)
+
+    def test_logout_clears_session_and_redirects_home(self):
+        self.assertIn("_auth_user_id", self.client.session)
+        response = self.client.post(reverse("users:logout"))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("core:home"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_logout_rejects_get_requests(self):
+        response = self.client.get(reverse("users:logout"))
+        self.assertEqual(response.status_code, 405)
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_protected_page_inaccessible_after_logout(self):
+        self.client.post(reverse("users:logout"))
+        response = self.client.get(reverse("users:tourist_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("users:login"), response.url)
+
+
+class PasswordResetFullFlowTests(TestCase):
+    """Rrjedhë e plotë e rivendosjes së fjalëkalimit: kërkesë -> email -> fjalëkalim i ri."""
+
+    def test_full_password_reset_flow(self):
+        user = User.objects.create_user(
+            username="reset_full", email="resetfull@example.com", password="OldPass123!"
+        )
+
+        self.client.post(
+            reverse("users:password_reset"), {"email": "resetfull@example.com"}
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        match = re.search(r"/users/reset/([0-9A-Za-z_-]+)/([0-9A-Za-z_-]+)/", email.body)
+        self.assertIsNotNone(match)
+        reset_url = reverse(
+            "users:password_reset_confirm",
+            args=[match.group(1), match.group(2)],
+        )
+
+        # Django 5.x redirects the emailed token URL to a token-free "set-password" URL.
+        get_response = self.client.get(reset_url, follow=True)
+        self.assertEqual(get_response.status_code, 200)
+        self.assertIn("set-password", get_response.redirect_chain[-1][0])
+
+        set_password_url = reset_url.replace(
+            match.group(2), "set-password"
+        )
+        post_response = self.client.post(
+            set_password_url,
+            {"new_password1": "NewPass456!", "new_password2": "NewPass456!"},
+        )
+        self.assertEqual(post_response.status_code, 302)
+        self.assertIn("reset/done/", post_response.url)
+
+        user.refresh_from_db()
+        self.assertTrue(user.check_password("NewPass456!"))
+
+        self.client.post(
+            reverse("users:login"),
+            {"username": "reset_full", "password": "NewPass456!"},
+            REMOTE_ADDR="10.10.10.12",
+        )
+        self.assertIn("_auth_user_id", self.client.session)
+
+
+class RoleAccessTests(TestCase):
+    """Autorizimi sipas rolit: anonimë, turistë, guida dhe admin."""
+
+    def setUp(self):
+        cache.clear()
+        self.password = "StrongPass123!"
+        self.admin = User.objects.create_superuser(
+            username="role_admin", email="roleadmin@example.com", password=self.password
+        )
+        self.guide_user = User.objects.create_user(
+            username="role_guide", email="roleguide@example.com", password=self.password
+        )
+        GuideProfile.objects.create(
+            user=self.guide_user, location="Tiranë", status="verified"
+        )
+        self.tourist_user = User.objects.create_user(
+            username="role_tourist", email="roletourist@example.com", password=self.password
+        )
+        TouristProfile.objects.create(user=self.tourist_user)
+
+    def test_anonymous_redirected_to_login_for_guide_dashboard(self):
+        response = self.client.get(reverse("users:guide_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("users:login"), response.url)
+
+    def test_anonymous_redirected_to_login_for_tourist_dashboard(self):
+        response = self.client.get(reverse("users:tourist_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("users:login"), response.url)
+
+    def test_anonymous_redirected_to_login_for_admin_dashboard(self):
+        response = self.client.get(reverse("users:admin_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("users:login"), response.url)
+
+    def test_tourist_cannot_access_guide_dashboard(self):
+        self.client.force_login(self.tourist_user)
+        response = self.client.get(reverse("users:guide_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("core:home"))
+
+    def test_guide_cannot_access_tourist_dashboard(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.get(reverse("users:tourist_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("core:home"))
+
+    def test_non_admin_cannot_access_any_admin_page(self):
+        admin_pages = [
+            reverse("users:admin_dashboard"),
+            reverse("users:admin_guides"),
+            reverse("users:admin_guide_detail", args=[999]),
+        ]
+        for user in (self.tourist_user, self.guide_user):
+            self.client.force_login(user)
+            for url in admin_pages:
+                response = self.client.get(url)
+                self.assertEqual(
+                    response.status_code,
+                    302,
+                    f"{url} duhet të refuzojë përdoruesin e parregullt",
+                )
+                self.assertIn(reverse("users:login"), response.url)
+
+    def test_admin_can_access_admin_pages(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("users:admin_dashboard"))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("users:admin_guides"))
+        self.assertEqual(response.status_code, 200)
+
+
+class SessionHandlingTests(TestCase):
+    """Teste për sesionet: cookie, HttpOnly, shkatërrim pas logout."""
+
+    def setUp(self):
+        cache.clear()
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="session_user", email="session@example.com", password=self.password
+        )
+        TouristProfile.objects.create(user=self.user)
+        self.login_url = reverse("users:login")
+
+    def test_anonymous_user_has_no_session_cookie(self):
+        self.client.get(reverse("core:home"))
+        self.assertNotIn("sessionid", self.client.cookies)
+
+    def test_login_creates_httponly_session_cookie(self):
+        self.client.post(
+            self.login_url,
+            {"username": "session_user", "password": self.password},
+            REMOTE_ADDR="10.10.10.13",
+        )
+        self.assertIn("sessionid", self.client.cookies)
+        self.assertIn("HttpOnly", self.client.cookies["sessionid"].output())
+
+    def test_logout_destroys_session(self):
+        self.client.post(
+            self.login_url,
+            {"username": "session_user", "password": self.password},
+            REMOTE_ADDR="10.10.10.14",
+        )
+        self.assertIn("_auth_user_id", self.client.session)
+
+        self.client.post(reverse("users:logout"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_distinct_users_get_distinct_sessions(self):
+        other = User.objects.create_user(
+            username="session_other", email="session2@example.com", password=self.password
+        )
+        TouristProfile.objects.create(user=other)
+
+        client_a = Client()
+        client_a.post(
+            self.login_url,
+            {"username": "session_user", "password": self.password},
+            REMOTE_ADDR="10.10.10.15",
+        )
+        client_b = Client()
+        client_b.post(
+            self.login_url,
+            {"username": "session_other", "password": self.password},
+            REMOTE_ADDR="10.10.10.16",
+        )
+
+        self.assertIn("_auth_user_id", client_a.session)
+        self.assertIn("_auth_user_id", client_b.session)
+        self.assertNotEqual(
+            client_a.session["_auth_user_id"], client_b.session["_auth_user_id"]
+        )
+
+
+class SessionCookieSecuritySettingsTests(TestCase):
+    """Konfigurimi i sigurisë së sesioneve në dev dhe prod."""
+
+    def test_session_cookie_httponly_enabled_in_base(self):
+        from django.conf import settings as s
+        self.assertTrue(s.SESSION_COOKIE_HTTPONLY)
+
+    def test_production_requires_secure_session_cookie(self):
+        from django.conf import settings as s
+        self.assertFalse(s.SESSION_COOKIE_SECURE)
+
+    def test_production_security_settings(self):
+        import importlib
+        prod = importlib.import_module("tour_platform.settings.production")
+        self.assertFalse(prod.DEBUG)
+        self.assertTrue(prod.SESSION_COOKIE_SECURE)
+        self.assertTrue(prod.CSRF_COOKIE_SECURE)
+        self.assertTrue(prod.SECURE_SSL_REDIRECT)
+        self.assertGreaterEqual(prod.SECURE_HSTS_SECONDS, 31536000)

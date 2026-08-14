@@ -20,7 +20,10 @@ import logging
 from core.utils import file_exists, send_notification_email
 
 from bookings.models import Booking
-from bookings.views import send_cancellation_email
+from bookings.views import (
+    send_cancellation_email,
+    send_booking_confirmed_email_to_tourist,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -712,6 +715,10 @@ def guide_booking_action(request, booking_id, action):
     if action == "confirm":
         if booking.status == "pending":
             booking.confirm()
+            try:
+                send_booking_confirmed_email_to_tourist(booking)
+            except Exception:
+                logger.exception("Gabim në dërgimin e email të konfirmimit për turist")
             messages.success(
                 request,
                 f"✅ Rezervimi nga {booking.tourist.user.get_full_name()} u konfirmua!"

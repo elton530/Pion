@@ -21,18 +21,14 @@ def file_exists(field):
 
 
 def send_notification_email(email, subject, message=None, template_name=None, context=None):
-    """Dërgo email.
+    """Dërgo email përmes backend-it të konfiguruar të Django.
 
-    Kur EMAIL_BACKEND është console, vetëm log-o në vend që të dërgohet —
-    kjo mban log-ët e zhvillimit të pastër dhe parandalon dërgime aksidentale
-    derisa të konfigurohet një backend i vërtetë.
+    Zhvillimi: EMAIL_BACKEND=console -> email-et shtypen në console, nuk
+    dërgohen realisht. Testet: Django zëvendëson backend-in me locmem, kështu
+    që email-et mblidhen në mail.outbox. Prodhimi: SMTP (Brevo) përmes
+    variablave të ambientit.
     """
     try:
-        backend = getattr(settings, 'EMAIL_BACKEND', '') or ''
-        if 'console' in backend:
-            logger.info("EMAIL (console) -> to=%s subject=%s context=%s", email, subject, context)
-            return True
-
         html_message = None
         if template_name and context is not None:
             html_message = render_to_string(template_name, context)

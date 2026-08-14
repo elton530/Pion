@@ -1,8 +1,12 @@
+from datetime import timedelta
+import base64
+import json
+
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
-import json
+from django.utils import timezone
 
 from bookings.models import Booking
 from tours.forms import TourEditForm
@@ -460,3 +464,360 @@ class TourReviewAuthorizationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(TourReview.objects.filter(tour=own_tour).exists())
+
+
+class TourPublicListingTests(TestCase):
+    """Workflow i turistit: shfletimi i tureve publike, filtra dhe detaje."""
+
+    def setUp(self):
+        self.guide_user = User.objects.create_user(
+            username="pub_guide", password="secret123"
+        )
+        self.guide = GuideProfile.objects.create(user=self.guide_user, location="Tiranë")
+        self.tour_type = TourType.objects.create(name="Hiking", description="Test")
+
+        self.published = self._make_tour("published-tour", "Tiranë", date="2030-05-01")
+        self.draft = self._make_tour("draft-tour", "Tiranë", status="draft")
+        self.inactive = self._make_tour("inactive-tour", "Tiranë", is_active=False)
+        self.past = self._make_tour("past-tour", "Durrës", date="2020-01-01")
+        self.upcoming_durres = self._make_tour("upcoming-durres", "Durrës")
+
+    def _make_tour(self, slug, city, status="published", date="2030-06-01", is_active=True):
+        return Tour.objects.create(
+            guide=self.guide,
+            title=f"Tour {slug}",
+            slug=slug,
+            short_description="Short description",
+            full_description="Full description",
+            tour_type=self.tour_type,
+            difficulty="easy",
+            age_group="all",
+            languages="sq",
+            meeting_point="Qendra",
+            location_city=city,
+            location_region=city,
+            duration_hours=4,
+            date=date,
+            time_start="10:00:00",
+            price_per_person=100,
+            max_participants=10,
+            min_participants=2,
+            status=status,
+            is_active=is_active,
+        )
+
+    def test_list_only_shows_published_active_upcoming_tours(self):
+        response = self.client.get(reverse("tours:tour_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "published-tour")
+        self.assertContains(response, "upcoming-durres")
+        self.assertNotContains(response, "draft-tour")
+        self.assertNotContains(response, "inactive-tour")
+        self.assertNotContains(response, "past-tour")
+
+    def test_list_filters_by_location(self):
+        response = self.client.get(reverse("tours:tour_list"), {"location": "Durrës"})
+        self.assertContains(response, "upcoming-durres")
+        self.assertNotContains(response, "published-tour")
+
+    def test_list_filters_by_search_term(self):
+        response = self.client.get(reverse("tours:tour_list"), {"search": "published"})
+        self.assertContains(response, "published-tour")
+        self.assertNotContains(response, "upcoming-durres")
+
+    def test_search_excludes_past_tours(self):
+        # Konsistente me listën: kërkimi nuk duhet të shfaqë ture të kaluar.
+        response = self.client.get(reverse("tours:tour_search"), {"search": "tour"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "published-tour")
+        self.assertContains(response, "upcoming-durres")
+        self.assertNotContains(response, "past-tour")
+
+    def test_public_cannot_view_draft_tour_detail(self):
+        response = self.client.get(reverse("tours:tour_detail", args=["draft-tour"]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_guide_owner_can_view_own_draft_tour_detail(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.get(reverse("tours:tour_detail", args=["draft-tour"]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_other_guide_cannot_view_draft_tour_detail(self):
+        other = User.objects.create_user(username="pub_other_guide", password="secret123")
+        GuideProfile.objects.create(user=other, location="Vlorë")
+        self.client.force_login(other)
+        response = self.client.get(reverse("tours:tour_detail", args=["draft-tour"]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_tour_by_location_filters_by_city(self):
+        response = self.client.get(reverse("tours:tour_by_location", args=["Tiranë"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "published-tour")
+        self.assertNotContains(response, "upcoming-durres")
+
+    def test_featured_tours_shows_only_featured(self):
+        self.published.is_featured = True
+        self.published.featured_until = timezone.now().date() + timedelta(days=10)
+        self.published.save(update_fields=["is_featured", "featured_until"])
+        response = self.client.get(reverse("tours:featured_tours"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "published-tour")
+        self.assertNotContains(response, "upcoming-durres")
+
+
+class GuideTourManagementTests(TestCase):
+    """Workflow i guide-it: krijim, redaktim, fshirje, çmime dhe lista e tureve."""
+
+    @staticmethod
+    def _png_image(name="pic.jpg"):
+        return SimpleUploadedFile(
+            name,
+            base64.b64decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+            ),
+            content_type="image/png",
+        )
+
+    def setUp(self):
+        self.guide_user = User.objects.create_user(
+            username="mgmt_guide", email="mgmt@example.com", password="secret123"
+        )
+        self.guide = GuideProfile.objects.create(user=self.guide_user, location="Tiranë")
+
+        self.other_guide_user = User.objects.create_user(
+            username="mgmt_other", email="other@example.com", password="secret123"
+        )
+        self.other_guide = GuideProfile.objects.create(user=self.other_guide_user, location="Vlorë")
+
+        self.tourist_user = User.objects.create_user(
+            username="mgmt_tourist", password="secret123"
+        )
+        TouristProfile.objects.create(user=self.tourist_user)
+
+        self.tour_type = TourType.objects.create(name="Hiking", description="Test")
+        self.tour = Tour.objects.create(
+            guide=self.guide,
+            title="Mgmt Tour",
+            slug="mgmt-tour",
+            short_description="Short description",
+            full_description="Full description",
+            tour_type=self.tour_type,
+            difficulty="easy",
+            age_group="all",
+            languages="sq",
+            meeting_point="Qendra",
+            location_city="Tiranë",
+            location_region="Tiranë",
+            duration_hours=4,
+            date="2030-01-01",
+            time_start="10:00:00",
+            price_per_person=100,
+            currency="ALL",
+            max_participants=10,
+            min_participants=2,
+            status="published",
+            is_active=True,
+            main_image=SimpleUploadedFile("mgmt.jpg", b"data", content_type="image/jpeg"),
+        )
+
+    def _create_payload(self, **overrides):
+        data = {
+            "title": "New Tour",
+            "short_description": "Short description",
+            "full_description": "Full description",
+            "tour_type": self.tour_type.id,
+            "difficulty": "easy",
+            "age_group": "all",
+            "languages": "sq",
+            "meeting_point": "Qendra",
+            "location_city": "Tiranë",
+            "location_region": "Tiranë",
+            "duration_hours": 4,
+            "duration_days": 0,
+            "price_per_person": 100,
+            "currency": "ALL",
+            "max_participants": 10,
+            "min_participants": 2,
+            "date": "2030-06-01",
+            "time_start": "10:00",
+            "time_end": "14:00",
+            "main_image": self._png_image(),
+        }
+        data.update(overrides)
+        return data
+
+    def test_guide_can_create_published_tour(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.post(reverse("tours:create_tour"), self._create_payload())
+        self.assertEqual(response.status_code, 302)
+        tour = Tour.objects.get(title="New Tour")
+        self.assertEqual(tour.guide, self.guide)
+        self.assertEqual(tour.status, "published")
+
+    def test_tourist_cannot_create_tour(self):
+        self.client.force_login(self.tourist_user)
+        response = self.client.post(reverse("tours:create_tour"), self._create_payload())
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("users:guide_profile_edit"), response.url)
+        self.assertFalse(Tour.objects.filter(title="New Tour").exists())
+
+    def test_anonymous_cannot_create_tour(self):
+        response = self.client.post(reverse("tours:create_tour"), self._create_payload())
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Tour.objects.filter(title="New Tour").exists())
+
+    def test_create_tour_rejects_past_date(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.post(
+            reverse("tours:create_tour"), self._create_payload(date="2020-01-01")
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Tour.objects.filter(title="New Tour").exists())
+
+    def test_edit_tour_without_slug_does_not_crash(self):
+        # REGRESSION: fusha 'slug' është disabled; një POST që nuk e përfshin
+        # nuk duhet ta zbrazë slug-un as të kthejë 500 në ri-rendim.
+        self.client.force_login(self.guide_user)
+        payload = {
+            "title": "Updated Tour",
+            "short_description": "Short",
+            "full_description": "Full",
+            "tour_type": self.tour_type.id,
+            "difficulty": "moderate",
+            "age_group": "all",
+            "languages": "sq",
+            "meeting_point": "Qendra",
+            "location_city": "Tiranë",
+            "location_region": "Tiranë",
+            "duration_hours": 5,
+            "duration_days": 0,
+            "price_per_person": 120,
+            "currency": "ALL",
+            "max_participants": 12,
+            "min_participants": 2,
+            "date": "2030-01-01",
+            "time_start": "10:00",
+            "time_end": "15:00",
+            "cancellation_deadline_hours": 48,
+            "refund_percentage": 100,
+            "status": "published",
+        }
+        response = self.client.post(
+            reverse("tours:edit_tour", args=[self.tour.slug]), payload
+        )
+        self.assertEqual(response.status_code, 302)
+        self.tour.refresh_from_db()
+        self.assertEqual(self.tour.slug, "mgmt-tour")
+
+    def test_guide_can_edit_own_tour(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.post(
+            reverse("tours:edit_tour", args=[self.tour.slug]),
+            {
+                "title": "Updated Tour",
+                "short_description": "Short",
+                "full_description": "Full",
+                "tour_type": self.tour_type.id,
+                "difficulty": "moderate",
+                "age_group": "all",
+                "languages": "sq",
+                "meeting_point": "Qendra",
+                "location_city": "Tiranë",
+                "location_region": "Tiranë",
+                "duration_hours": 5,
+                "duration_days": 0,
+                "price_per_person": 120,
+                "currency": "ALL",
+                "max_participants": 12,
+                "min_participants": 2,
+                "date": "2030-01-01",
+                "time_start": "10:00",
+                "time_end": "15:00",
+                "cancellation_deadline_hours": 48,
+                "refund_percentage": 100,
+                "status": "published",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.tour.refresh_from_db()
+        self.assertEqual(self.tour.title, "Updated Tour")
+        self.assertEqual(self.tour.difficulty, "moderate")
+
+    def test_guide_cannot_edit_other_guides_tour(self):
+        self.client.force_login(self.other_guide_user)
+        response = self.client.post(
+            reverse("tours:edit_tour", args=[self.tour.slug]),
+            {"title": "Hacked"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_tourist_cannot_edit_tour(self):
+        self.client.force_login(self.tourist_user)
+        response = self.client.get(reverse("tours:edit_tour", args=[self.tour.slug]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_guide_can_delete_own_tour(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.post(reverse("tours:delete_tour", args=[self.tour.slug]))
+        self.assertRedirects(response, reverse("tours:my_tours"))
+        self.assertFalse(Tour.objects.filter(slug="mgmt-tour").exists())
+
+    def test_guide_cannot_delete_other_guides_tour(self):
+        self.client.force_login(self.other_guide_user)
+        response = self.client.post(reverse("tours:delete_tour", args=[self.tour.slug]))
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Tour.objects.filter(slug="mgmt-tour").exists())
+
+    def test_my_tours_lists_only_own_tours(self):
+        Tour.objects.create(
+            guide=self.other_guide,
+            title="Other Guide Tour",
+            slug="other-guide-tour",
+            short_description="Short",
+            full_description="Full",
+            tour_type=self.tour_type,
+            difficulty="easy",
+            age_group="all",
+            languages="sq",
+            meeting_point="Qendra",
+            location_city="Vlorë",
+            location_region="Vlorë",
+            duration_hours=4,
+            date="2030-02-01",
+            time_start="10:00:00",
+            price_per_person=80,
+            max_participants=8,
+            min_participants=1,
+            status="published",
+            is_active=True,
+        )
+        self.client.force_login(self.guide_user)
+        response = self.client.get(reverse("tours:my_tours"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mgmt Tour")
+        self.assertNotContains(response, "Other Guide Tour")
+
+    def test_guide_can_update_pricing(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.post(
+            reverse("tours:edit_tour_pricing", args=[self.tour.slug]),
+            {
+                "price_per_person": 150,
+                "currency": "ALL",
+                "max_participants": 10,
+                "min_participants": 2,
+                "early_bird_days": 0,
+                "early_bird_discount": 0,
+            },
+        )
+        self.assertRedirects(response, reverse("tours:tour_detail", args=[self.tour.slug]))
+        self.tour.refresh_from_db()
+        self.assertEqual(self.tour.price_per_person, 150)
+
+    def test_other_guide_cannot_update_pricing(self):
+        self.client.force_login(self.other_guide_user)
+        response = self.client.post(
+            reverse("tours:edit_tour_pricing", args=[self.tour.slug]),
+            {"price_per_person": 150, "currency": "ALL"},
+        )
+        self.assertEqual(response.status_code, 403)
