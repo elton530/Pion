@@ -862,7 +862,7 @@ def tourist_booking_cancel(request, booking_id):
     if not booking.can_be_cancelled:
         messages.error(
             request,
-            f"❌ Nuk mund ta anulosh këtë prenim. Turit i mbeten {booking.days_until_tour} ditë."
+            f"❌ Nuk mund ta anulosh këtë prenotim. Turit i mbeten {booking.days_until_tour} ditë."
         )
         return redirect("bookings:booking_detail", booking_id=booking.id)
 
