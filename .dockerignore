@@ -1,0 +1,38 @@
+# Secrets and environment files (never ship these into the image)
+.env
+.env.*
+!.env.example
+certs/
+*.key
+*.pem
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Django runtime data (built/collected in the image or mounted at runtime)
+media/
+staticfiles/
+logs/
+*.log
+db.sqlite3
+
+# Task / audit working files (project-internal, not needed at runtime)
+task*.txt
+audit*.txt
+AUDIT_REPORT.md
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

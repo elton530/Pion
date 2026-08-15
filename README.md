@@ -1,501 +1,422 @@
-# 🏔️ Pion - Tour Platform
+# 🏔️ Pion — Platformë Turistike
 
-A modern Django-based platform connecting tourists with local tour guides in Albania. Book authentic adventures, manage tours, and share experiences.
+Pion është një platformë moderne e ndërtuar me **Django 5.2** që lidh turistët me udhërrëfyesit lokalë në Shqipëri. Rezervo aventura autentike, menaxho turne dhe ndaj eksperienca — gjithçka në një ndërfaqe të shpejtë, të sigurt dhe të aksesueshme.
 
-## 📋 Project Overview
-
-Pion is a full-featured tour booking platform with:
-- **For Tourists**: Browse tours, make bookings, leave reviews, manage reservations
-- **For Guides**: Create and manage tours, accept bookings, track participants
-- **Admin**: Moderate content, manage users, resolve disputes
-
-## 🎯 Current Status: ✅ PRODUCTION READY
-
-All frontend pages are fully functional and beautifully designed with:
-- ✅ Responsive design (mobile, tablet, desktop)
-- ✅ Modern UI with professional styling
-- ✅ Complete booking workflow
-- ✅ Real-time booking status visualization
-- ✅ Secure user authentication
-- ✅ WCAG 2.1 AA accessibility compliance
+> **Statusi**: ✅ Në prodhim gati · **Versioni**: 1.0.0
 
 ---
 
-## 🚀 Quick Start
+## ✨ Karakteristikat kryesore
 
-### Prerequisites
-- Python 3.8+
-- pip and virtualenv
-- PostgreSQL (or SQLite for development)
+### Për turistët
+- ✅ Regjistrim dhe identifikim i sigurt
+- ✅ Shfletim, kërkim dhe filtrim turesh (lokacion, çmim, vështirësi, etj.)
+- ✅ Rezervim ture me numër pjesëmarrësish dhe llogaritje automatike e vendeve
+- ✅ Statuset e rezervimit në kohë reale: **në pritje → konfirmuar → përfunduar / anuluar**
+- ✅ Konfirmim pjesëmarrjeje 24 orë përpara turit
+- ✅ Vlerësime dhe komente me foto
+- ✅ Ture të ruajtura dhe histori rezervimesh
+- ✅ Profil personal (alergji, gjendje shëndetësore, preferenca)
 
-### Installation
+### Për udhërrëfyesit (Guide)
+- ✅ Krijim, redaktim dhe fshirje turesh
+- ✅ Çmime, zbritje, programe ditore (itinerary) dhe FAQ për çdo tur
+- ✅ Konfirmim / anulim / përfundim i rezervimeve
+- ✅ Statistika të detajuara për çdo tur
+- ✅ Profil publik (`/users/profile/@<username>/`) me certifikata
+- ✅ Verifikim nga administratori me regjistër veprimesh
+
+### Për administratorët
+- ✅ Dashboard me statistika
+- ✅ Moderim i udhërrëfyesve (verifikim, pezullim, log veprimesh)
+- ✅ Menaxhim i mesazheve të kontaktit, FAQ-ve dhe newsletter-it
+- ✅ Konfigurim i faqes (logo, rrjete sociale, terma & privatësi, etj.)
+
+---
+
+## 🛠️ Teknologjitë
+
+| Teknologji | Qëllim |
+|------------|--------|
+| Python 3.10+ · Django 5.2 | Backend |
+| PostgreSQL | Baza e të dhënave |
+| django-environ | Konfigurimi përmes `.env` |
+| Django REST Framework + django-filter | API dhe filtrim i avancuar |
+| django-cors-headers | Menaxhimi i CORS |
+| Pillow | Përpunimi i imazheve |
+| Stripe SDK | Integrimi i pagesave (në zhvillim) |
+| Gunicorn · Docker · Nginx | Shërbimi në prodhim |
+
+---
+
+## 🚀 Fillimi i shpejtë
+
+### Kërkesat
+- **Python 3.10+**
+- **pip** dhe **venv**
+- **PostgreSQL** (i detyrueshëm — nuk ka fallback në SQLite; `DB_USER` dhe `DB_PASSWORD` janë të kërkuara)
+
+### Instalimi
 
 ```bash
-# 1. Clone the repository
+# 1. Klono repositorin
 git clone <repository-url>
 cd Pion
 
-# 2. Create virtual environment
+# 2. Krijo dhe aktivizo virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# 3. Instalo varësitë
 pip install -r requirements.txt
 
-# 4. Run migrations
+# 4. Konfiguro variablat e mjedisit
+cp .env.example .env
+#    dhe mbushe me vlerat e tua (DB_USER, DB_PASSWORD, SECRET_KEY, etj.)
+
+# 5. Krijo bazën e të dhënave dhe ekzekuto migrimet
 python manage.py migrate
 
-# 5. Create superuser
+# 6. Krijo superuser për admin
 python manage.py createsuperuser
 
-# 6. Collect static files
-python manage.py collectstatic --no-input
-
-# 7. Run development server
+# 7. Ekzekuto serverin e zhvillimit
 python manage.py runserver
 ```
 
-Then navigate to:
-- **Application**: http://localhost:8000
-- **Admin Panel**: http://localhost:8000/admin
+Pastaj vizito:
+- **Aplikacioni**: http://localhost:8000
+- **Admin**: http://localhost:8000/admin
+
+> **Shënim**: Në modalitetin e zhvillimit (`DEBUG=True`) **nuk kërkohet** `collectstatic` — `runserver` i shërben skedarët statikë automatikisht. Email-et shfaqen në console (backend console), kështu që nuk nevojiten kredenciale SMTP lokalisht.
+
+### Konfigurimi (`.env`)
+
+Kopjo `.env.example` në `.env` dhe plotëso vlerat. Variablat kryesore:
+
+| Variabël | Përshkrim | Default |
+|----------|-----------|---------|
+| `ENVIRONMENT` | `development` ose `production` | `development` |
+| `SECRET_KEY` | **Kërkohet në prodhim** (>= 50 karaktere) | — (fallback vetëm dev) |
+| `ALLOWED_HOSTS` | Hostet e lejuar, të ndara me presje | `127.0.0.1,localhost` |
+| `CSRF_TRUSTED_ORIGINS` | Origjinat e besuara për CSRF | `http://127.0.0.1:8000,...` |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` | PostgreSQL (**USER/PASSWORD të kërkuar**) | `tour_platform` / `postgres` |
+| `DB_HOST` / `DB_PORT` | Host dhe porti i DB | `localhost` / `5432` |
+| `EMAIL_BACKEND` | Bosh në dev → console; SMTP në prodhim | `console` (dev) |
+| `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | SMTP (Brevo) për prodhim | `smtp-relay.brevo.com` / `587` |
+| `DEFAULT_FROM_EMAIL` | Adresa nga e cila dërgohen email-et | `noreply@openmap.al` |
+| `STRIPE_PUBLIC_KEY` / `STRIPE_SECRET_KEY` | Çelësat e Stripe | — |
+| `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` | Provat maksimale të loginit përpara bllokimit | `5` |
+| `LOGIN_RATE_LIMIT_WINDOW_SECONDS` | Dritarja kohore (sekonda) | `600` |
 
 ---
 
-## 📁 Project Structure
+## 📁 Struktura e projektit
 
 ```
 Pion/
-├── tours/                    # Tour management app
-│   ├── models.py            # Tour, TourType, TourImage models
-│   ├── views.py             # Tour listing & detail views
-│   ├── forms.py             # Tour creation & search forms
-│   └── admin.py             # Admin configuration
+├── manage.py                     # Komanda kryesore e Django
+├── requirements.txt              # Varësitë e Python
+├── Dockerfile                    # Imazh prodhimi (multi-stage, jo-root)
+├── docker-entrypoint.sh          # Prit DB → migrime → collectstatic → gunicorn
+├── .env.example                  # Shembull i variablave të mjedisit
 │
-├── bookings/                # Booking management app
-│   ├── models.py            # Booking, Payment, Review models
-│   ├── views.py             # Booking CRUD operations
-│   ├── forms.py             # Booking forms
-│   └── admin.py             # Admin configuration
+├── tour_platform/                # Konfigurimi kryesor
+│   ├── settings/
+│   │   ├── base.py               # Cilësime të përbashkëta
+│   │   ├── development.py        # Zhvillim (DEBUG=True, email console)
+│   │   └── production.py         # Prodhimi (hardened, HTTPS, manifest statik)
+│   ├── urls.py · wsgi.py · asgi.py
+│   ├── security.py               # Zgjidhja e SECRET_KEY (fail-fast në prodhim)
+│   └── logging_config.py         # Logging me filtër sekretesh (SensitiveDataFilter)
 │
-├── users/                   # User management app
-│   ├── models.py            # User, TouristProfile, GuideProfile
-│   ├── views.py             # Authentication views
-│   └── forms.py             # Login/signup forms
+├── core/                         # Home, rreth nesh, kontakt, FAQ, newsletter, legal
+│   └── models.py                 # SiteSettings, ContactMessage, NewsletterSubscription, FAQ, SocialLink
 │
-├── core/                    # Core app (home, utilities)
-│   ├── models.py            # General content models
-│   └── views.py             # General views
+├── users/                        # Autentikim, role dhe profile
+│   └── models.py                 # TouristProfile, GuideProfile, GuideModerationLog
 │
-├── templates/               # HTML templates
-│   ├── base.html           # Main template
-│   ├── header.html         # Navigation
-│   ├── footer.html         # Footer
-│   ├── bookings/           # Booking templates (8 files)
-│   ├── tours/              # Tour templates
-│   └── users/              # Auth templates
+├── tours/                        # Menaxhimi i turneve
+│   └── models.py                 # Tour, TourType, TourImage, TourSchedule, TourFAQ,
+│                                 # TourReview, TourReviewImage, TourHighlight, TourTag, TourStatistic
 │
-├── static/                  # Static files
-│   ├── css/                # Stylesheets (8 modular CSS files)
-│   ├── js/                 # JavaScript files
-│   └── images/             # Images & icons
+├── bookings/                     # Rezervimet
+│   └── models.py                 # Booking, Payment, BookingReview
 │
-├── manage.py               # Django management command
-├── requirements.txt        # Python dependencies
-└── README.md              # This file
+├── payments/                     # Pagesat (Stripe — në zhvillim)
+│
+├── templates/                    # Shabllone HTML (Albanian UI) bazuar në base.html
+├── static/                       # CSS / JS / imazhe (modulare)
+│
+├── media/                        # (git-ignored) Shkarkimet e përdoruesve
+├── staticfiles/                  # (git-ignored) Statika e mbledhur në prodhim
+└── logs/                         # (git-ignored) Skedarët e log-ut në dev
 ```
 
 ---
 
-## 🎨 Design System
+## 🗄️ Modeli i të dhënave
 
-### Color Palette
-- **Primary**: #0ea5e9 (Sky Blue)
-- **Success**: #10b981 (Emerald)
-- **Warning**: #f59e0b (Amber)
-- **Danger**: #ef4444 (Red)
-- **Background**: #f8fafc (Light Blue-Gray)
+### Modelet kryesore
+- **User** — përdoruesi i integruar i Django (me profile turisti/guide)
+- **TouristProfile** — detaje të turistit (alergji, shëndet, preferenca)
+- **GuideProfile** — certifikata, verifikim, statistika të guide-it
+- **Tour** — turi i krijuar nga guide (çmim, kapacitet, lokacion, itinerar)
+- **TourType · TourImage · TourSchedule · TourFAQ · TourReview · TourHighlight · TourTag** — shtesat e turit
+- **Booking** — rezervimi që lidh turistin me turin (me UUID si çelës primar)
+- **Payment** — ndjek pagesën e rezervimit
+- **BookingReview** — vlerësimi i turistit pas përfundimit
 
-### Typography
-- **Font**: Inter (with system fallback)
-- **Sizes**: Responsive with `clamp()` function
-- **Weights**: 300, 400, 500, 600, 700, 800
-
-### Spacing
-- **Base Unit**: 1rem (16px)
-- **Border Radius**: 12px, 16px, 20px, 28px
-- **Shadows**: Consistent elevation system
-
----
-
-## 📱 Pages & Features
-
-### Public Pages
-| Page | Route | Features |
-|------|-------|----------|
-| **Home** | `/` | Welcome & featured tours |
-| **Tour List** | `/tours/` | Browse all tours with filters |
-| **Tour Detail** | `/tours/<slug>/` | Full tour info & booking status |
-| **Login** | `/users/login/` | User authentication |
-| **Signup** | `/users/signup/` | Registration (Tourist/Guide) |
-
-### Authenticated Pages (Tourist)
-| Page | Route | Features |
-|------|-------|----------|
-| **Dashboard** | `/dashboard/` | My bookings & profile |
-| **My Bookings** | `/bookings/my-bookings/` | List & manage bookings |
-| **Book Tour** | `/bookings/tour/<slug>/reserve/` | Create booking |
-| **Booking Detail** | `/bookings/<id>/` | View booking info |
-| **Edit Booking** | `/bookings/<id>/edit/` | Modify pending booking |
-| **Cancel Booking** | `/bookings/<id>/cancel/` | Cancel with refund |
-| **Leave Review** | `/bookings/<id>/review/` | Rate completed tour |
-
-### Authenticated Pages (Guide)
-| Page | Route | Features |
-|------|-------|----------|
-| **Dashboard** | `/guide/dashboard/` | Tour & booking management |
-| **Create Tour** | `/tours/create/` | Add new tour |
-| **Manage Tours** | `/guide/tours/` | Edit/delete tours |
-| **View Bookings** | `/guide/bookings/` | See tour bookings |
-
----
-
-## 🔧 Key Features Implemented
-
-### Tour Management
-- ✅ Create, read, update, delete tours
-- ✅ Multiple images per tour
-- ✅ Detailed itinerary & pricing
-- ✅ Real-time booking status
-- ✅ Review & rating system
-- ✅ Tour capacity management
-
-### Booking System
-- ✅ Reserve tours with participant count
-- ✅ Automatic spot calculation
-- ✅ Status tracking (pending/confirmed/completed/cancelled)
-- ✅ Refund policy implementation
-- ✅ Email notifications
-- ✅ 24-hour confirmation window
-
-### User Management
-- ✅ Tourist & Guide roles
-- ✅ User profiles with photos
-- ✅ Authentication & authorization
-- ✅ Password reset functionality
-- ✅ Profile editing
-
-### Additional Features
-- ✅ Admin dashboard with analytics
-- ✅ Search & filter functionality
-- ✅ Email notifications
-- ✅ Payment integration ready
-- ✅ Review & rating system
-
----
-
-## 📚 Documentation
-
-Comprehensive guides are included:
-
-### [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md)
-Complete overview of all frontend improvements:
-- Page descriptions and features
-- Design system documentation
-- Backend integration points
-- Navigation flow diagrams
-- File structure
-
-### [TECHNICAL_GUIDE.md](TECHNICAL_GUIDE.md)
-In-depth technical documentation:
-- Architecture overview
-- Component system
-- Data flow examples
-- Database optimization
-- Security implementation
-- Performance considerations
-- Testing strategy
-- Deployment checklist
-- Future roadmap
-
-### [COMPLETION_CHECKLIST.md](COMPLETION_CHECKLIST.md)
-Detailed checklist of all completed tasks:
-- Phase-by-phase breakdown
-- File inventory
-- Test coverage
-- Performance metrics
-- Browser support
-
----
-
-## 🔒 Security Features
-
-- ✅ CSRF protection on all forms
-- ✅ SQL injection prevention (Django ORM)
-- ✅ XSS prevention (template escaping)
-- ✅ Secure password hashing
-- ✅ User authentication & authorization
-- ✅ Permission-based access control
-- ✅ Secure session handling
-- ✅ HTTPS-ready configuration
-
----
-
-## ♿ Accessibility
-
-WCAG 2.1 AA compliant:
-- ✅ Semantic HTML
-- ✅ Proper heading hierarchy
-- ✅ Form labels & descriptions
-- ✅ Keyboard navigation
-- ✅ Screen reader support
-- ✅ Color contrast ratios
-- ✅ Alt text for images
-- ✅ ARIA labels
-
----
-
-## 📱 Responsive Design
-
-Optimized for all devices:
-- **Mobile** (320px+): Single column, touch-friendly
-- **Tablet** (768px+): Two-column layouts
-- **Desktop** (1024px+): Full-width with sidebars
-
-Using modern CSS techniques:
-- CSS Grid & Flexbox
-- `clamp()` for fluid sizing
-- Mobile-first approach
-- Touch-friendly buttons
-
----
-
-## 🗄️ Database Schema
-
-### Core Models
-- **User**: Django built-in
-- **TouristProfile**: Links to User
-- **GuideProfile**: Links to User with certifications
-- **Tour**: Created by Guide, has max_participants
-- **Booking**: Connects Tourist to Tour
-- **Payment**: Tracks payments for bookings
-- **BookingReview**: Ratings & reviews
-- **TourImage**: Additional tour photos
-
-### Key Relationships
+### Marrëdhëniet kryesore
 ```
 User (1) ─── (1) TouristProfile
 User (1) ─── (1) GuideProfile
 Guide (1) ─── (∞) Tour
-Tour (1) ─── (∞) Booking ─── (∞) Tourist
+Tour (1) ─── (∞) TourImage / TourSchedule / TourFAQ / TourReview / TourTag
+Tour (1) ─── (∞) Booking
+Tourist (1) ─── (∞) Booking
 Booking (1) ─── (1) Payment
-Booking (1) ─── (1) Review
-Tour (1) ─── (∞) TourImage
+Booking (1) ─── (1) BookingReview
 ```
+
+### Cikli i jetës së një rezervimi
+```
+pending → confirmed → completed
+    ↘ cancelled (nga turisti ose guide-i)
+```
+
+- Konfirmimi i pjesëmarrjes bëhet **24 orë** para turit (`BOOKING_AUTO_CONFIRM_HOURS`).
+- Anulimet kanë afat 48 orë para nisjes (`BOOKING_CANCELLATION_DEADLINE`).
+- Kalimet e pavlefshme të statusit bllokohen me `ALLOWED_STATUS_TRANSITIONS`.
 
 ---
 
-## 📧 Email System
+## 📱 Rrugët kryesore
 
-Notifications sent for:
-- ✅ New booking creation (to guide)
-- ✅ Booking confirmation (to tourist)
-- ✅ Booking cancellation (to tourist)
-- ✅ Review posted (to guide)
+### Faqe publike
+| Faqja | Rruga |
+|-------|-------|
+| Home | `/` |
+| Rreth nesh | `/rreth-nesh/` |
+| Kontakt | `/kontakt/` |
+| Pyetje të shpeshta | `/pyetje-te-shpeshta/` |
+| Kërkimi global | `/kerko/` |
+| Kushte & kondicione | `/kushte-dhe-kondicion/` |
+| Politika e privatësisë | `/politika-e-privatesi/` |
+| Health check | `/health/` |
 
-Configure email in `settings.py`:
-```python
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-password'
-```
+### Autentikim & profile
+| Faqja | Rruga |
+|-------|-------|
+| Regjistrim | `/users/signup/` |
+| Login / Logout | `/users/login/` · `/users/logout/` |
+| Ndryshim / Reset fjalëkalimi | `/users/password-change/` · `/users/password-reset/` |
+| Dashboard turisti | `/users/tourist/dashboard/` |
+| Dashboard guide | `/users/guide/dashboard/` |
+| Dashboard admin | `/users/admin/dashboard/` |
+| Profil publik i guide-it | `/users/profile/@<username>/` |
+
+### Turne
+| Faqja | Rruga |
+|-------|-------|
+| Lista e turneve | `/tours/` |
+| Kërkim i avancuar | `/tours/search/` |
+| Ture të veçuara | `/tours/featured/` |
+| Ture sipas lokacionit | `/tours/location/<lokacioni>/` |
+| Turet e mia | `/tours/my-tours/` |
+| Krijim turi | `/tours/create/` |
+| Detaje turi | `/tours/<slug>/` |
+| Statistika turi | `/tours/<slug>/stats/` |
+| Statuset (AJAX) | `/tours/api/status/<tour_id>/` |
+
+### Rezervime
+| Faqja | Rruga |
+|-------|-------|
+| Rezervo tur | `/bookings/tour/<slug>/reserve/` |
+| Rezervimet e mia | `/bookings/my-bookings/` |
+| Detaje rezervimi | `/bookings/<uuid>/` |
+| Redakto / Anulo | `/bookings/<uuid>/edit/` · `/bookings/<uuid>/cancel/` |
+| Konfirmo pjesëmarrje (24h) | `/bookings/<uuid>/confirm-participation/` |
+| Vlerëso | `/bookings/<uuid>/review/` |
 
 ---
 
-## 🚀 Deployment
+## 📧 Sistemi i email-eve
 
-### Before Deploying
-1. Set `DEBUG = False` in settings
-2. Configure `ALLOWED_HOSTS`
-3. Generate strong `SECRET_KEY`
-4. Set up PostgreSQL database
-5. Configure email backend
-6. Enable HTTPS/SSL
-7. Set up static file serving
-8. Configure logging
+Njoftimet dërgohen përmes sinjaleve (signals) të Django. Përfshinë:
 
-### Deployment Steps
+- ✅ Regjistrim i ri (mire seerdhe për turistët dhe guide-t)
+- ✅ Rezervim i ri → te guide-i
+- ✅ Ndryshim i statusit të rezervimit → te turisti
+- ✅ Pagesa e konfirmuar / e dështuar → te turisti
+- ✅ Vlerësim i ri → te guide-i
+- ✅ Verifikim i profilit → te guide-i
+- ✅ Mesazh kontakti → te administratori (me përgjigje automatike)
+- ✅ Newsletter: mirëseardhje, anulim, dërgim masiv
+
+Konfigurimi bëhet **vetëm përmes variablave të mjedisit** (asnjë kredencial hardcoded):
+
 ```bash
-# 1. Collect static files
-python manage.py collectstatic --no-input
-
-# 2. Run migrations
-python manage.py migrate
-
-# 3. Create superuser
-python manage.py createsuperuser
-
-# 4. Start gunicorn (or similar)
-gunicorn tour_platform.wsgi:application --bind 0.0.0.0:8000
+EMAIL_BACKEND=           # bosh → console në dev / SMTP në prodhim
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=tuaja-veri
+EMAIL_HOST_PASSWORD=tuaja-password
+DEFAULT_FROM_EMAIL=noreply@openmap.al
 ```
-
-### Hosting Options
-- Heroku (easiest)
-- AWS (scalable)
-- DigitalOcean (affordable)
-- PythonAnywhere (simple)
 
 ---
 
-## 🧪 Testing
+## 🔒 Siguria
 
-### Manual Testing Checklist
-```
-☐ Register as Tourist
-☐ Register as Guide
-☐ Login/Logout
-☐ Browse tours
-☐ View tour details
-☐ Create booking
-☐ View booking success
-☐ Edit booking (pending)
-☐ Cancel booking
-☐ Confirm participation
-☐ Leave review
-☐ Test on mobile
-☐ Test on tablet
-☐ Keyboard navigation
-☐ Screen reader test
-```
+- ✅ Mbrojtje **CSRF** në të gjitha format
+- ✅ **SQL injection** — parandalohet nga ORM-i i Django
+- ✅ **XSS** — ikja automatike e shablloneve
+- ✅ Hashing i sigurt i fjalëkalimeve + validues (minimum 8 karaktere)
+- ✅ Autorizim i bazuar në role (Turist / Guide / Admin)
+- ✅ **Rate limiting** për login (cache; çelësi `IP + username`, mesazh gjenerik për të shmangur enumeration)
+- ✅ Në prodhim: `SECURE_SSL_REDIRECT`, **HSTS**, cookie të sigurta, `X-Frame-Options: DENY`, `CONTENT-TYPE nosniff`, **CSP**
+- ✅ `SECRET_KEY` **e kërkuar** në prodhim — aplikacioni dështon në mënyrë të shpejtë (fail-fast) nëse mungon
+- ✅ **Logging** me `SensitiveDataFilter` — pastron fjalëkalime, token dhe sekrete nga log-et
+- ✅ Kufizime madhësie ngarkimi (5 MB) dhe lloje skedarësh të lejuara
+- ✅ `ATOMIC_REQUESTS=True` — çdo kërkesë bëhet në një transaksion
 
-### Run Tests
+---
+
+## ♿ Aksesueshmëria & Dizajni
+
+- ✅ HTML semantik, hierarki titujsh të saktë
+- ✅ Etiketa dhe përshkrime formash, navigim me tastierë
+- ✅ Kontraste ngjyrash (WCAG 2.1 AA), alt text për imazhe, ARIA labels
+- ✅ **Responsive**: Mobile (320px+) · Tablet (768px+) · Desktop (1024px+)
+- ✅ CSS Grid & Flexbox, `clamp()` për madhësi fluide, qasje mobile-first
+- 🎨 Paleta: Primary `#0ea5e9` (blu qielli) · Success `#10b981` · Warning `#f59e0b` · Danger `#ef4444` · Background `#f8fafc`
+- 🔤 Font: **Inter** (fallback sistem), Font Awesome 6.6.0 (CDN)
+- 🎯 Rrezet: 12px–28px · Hije: sistem i konsistueshëm elevacioni
+
+---
+
+## 🧪 Testimi
+
 ```bash
 python manage.py test
 ```
 
-## 🔒 Login Rate Limiting
-
-Login endpoint has lightweight brute-force protection using Django cache.
-
-How it works:
-- Failed login attempts are counted per `IP + username/email` key.
-- After `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` failures within `LOGIN_RATE_LIMIT_WINDOW_SECONDS`, further login attempts are temporarily blocked.
-- A successful login clears the counter.
-- The error message is intentionally generic to avoid account enumeration.
-
-Configuration (in environment/settings):
-- `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` (default: `5`)
-- `LOGIN_RATE_LIMIT_WINDOW_SECONDS` (default: `600`)
+Çdo aplikacion (`core`, `users`, `tours`, `bookings`, `payments`) ka skedarët e vet `tests.py` me testet e backend-it.
 
 ---
 
-## 🐛 Troubleshooting
+## 🚀 Deploy
 
-| Issue | Solution |
-|-------|----------|
-| **Static files not loading** | Run `collectstatic` command |
-| **Database errors** | Run `migrate` command |
-| **Email not sending** | Check `EMAIL_*` settings in settings.py |
-| **404 on templates** | Check `TEMPLATES` setting |
-| **Images not displaying** | Check `MEDIA_URL` and `MEDIA_ROOT` |
-| **Form validation not working** | Check form widget configuration |
+### Docker (mënyra e rekomanduar)
+
+```bash
+docker build -t pion:prod .
+docker run --env-file .env -p 8000:8000 pion:prod
+```
+
+`docker-entrypoint.sh` pret që baza e të dhënave të jetë gati, ekzekuton migrimet dhe `collectstatic`, pastaj nis gunicorn-in si përdorues **jo-root**.
+
+### Arkitektura e prodhimit
+
+```
+Internet → Nginx → Gunicorn → Django → PostgreSQL
+```
+
+- **Statikë**: `collectstatic` mbledh skedarët në `staticfiles/`. Në prodhim përdoret `ManifestStaticFilesStorage` (emra me hash + `staticfiles.json`), prandaj `collectstatic` **duhet** të ekzekutohet me modalitet prodhimi:
+
+  ```bash
+  ENVIRONMENT=production python manage.py collectstatic --no-input
+  ```
+
+- **Media**: shkarkimet ruhen në `media/`. Të dyja drejtoritë janë git-ignored — në server krijohen/shkruhen në runtime.
+
+- **Health check**: `GET /health/` kthen `200 {"status": "ok"}` kur baza është e shëndetshme, përndryshe `503`. Drejtoje monitorimin/load balancer-in atje.
+
+- **Logging**: në prodhim log-et shkojnë vetëm në **stdout** (systemd/journald i mbledh); në dev edhe në `logs/django.log`. Të gjitha handler-et pastrojnë sekretet.
+
+Shembull i bllokut Nginx `server` (rregullo path-et sipas vendosjes suaj):
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    location /static/ {
+        alias /opt/Pion/staticfiles/;
+        expires 30d;
+    }
+
+    location /media/ {
+        alias /opt/Pion/media/;
+        expires 7d;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+> **Shënim**: Nuk kërkohet Nginx për zhvillim lokal — me `DEBUG=True` runserver shërben vetë statikën dhe median.
+
+### Checklist para prodhimit
+1. `ENVIRONMENT=production` dhe `SECRET_KEY` e fortë e vendosur
+2. `ALLOWED_HOSTS` dhe `CSRF_TRUSTED_ORIGINS` të sakta
+3. Kredenciale SMTP të konfiguruara
+4. HTTPS/SSL aktive (HSTS dhe cookie të sigurta)
+5. `collectstatic` me modalitet prodhimi
+6. Monitorim përmes `/health/`
 
 ---
 
-## 🔮 Future Roadmap
+## 🐛 Zgjidhja e problemeve
 
-### Phase 2: Advanced Features (Planned)
-- Payment processing (Stripe integration)
-- Real-time notifications (WebSocket)
-- Advanced search with Elasticsearch
-- Guide verification system
-- Insurance integration
-
-### Phase 3: Ecosystem Expansion (Planned)
-- Mobile app (React Native)
-- AI recommendations
-- Analytics dashboard
-- Marketplace features
-- Community features
-
-### Phase 4: Growth Features (Planned)
-- Multi-language support
-- Multiple currency support
-- Affiliate system
-- API for third-party integrations
+| Problemi | Zgjidhja |
+|----------|----------|
+| **Statika nuk ngarkohet** | Në prodhim: `ENVIRONMENT=production python manage.py collectstatic --no-input` |
+| **Gabime DB** | Verifiko `.env` (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`) dhe ekzekuto `migrate` |
+| **Email-et nuk dërgohen** | Në dev shiko console; në prodhim verifiko `EMAIL_*` në `.env` |
+| **Gabime 404 në shabllone** | Verifiko cilësimet `TEMPLATES` |
+| **Imazhet nuk shfaqen** | Verifiko `MEDIA_URL` / `MEDIA_ROOT` dhe që media ekziston në server |
+| **Login-i bllokohet** | Prit deri sa të kalojë `LOGIN_RATE_LIMIT_WINDOW_SECONDS` ose rrit kufirin në `.env` |
 
 ---
 
-## 📞 Support
+## 🔮 Rruga përpara
 
-### Common Questions
+### Në zhvillim
+- ✅ Integrimi i plotë i **Stripe** (payments app + çelësat në `.env` tashmë të gatshëm)
 
-**Q: How do I change the color scheme?**
-A: Edit CSS variables in [static/css/base.css](static/css/base.css)
-
-**Q: How do I add more fields to tours?**
-A: Add to Tour model in [tours/models.py](tours/models.py), create migration, update forms and templates
-
-**Q: How do I integrate payments?**
-A: See TECHNICAL_GUIDE.md for payment integration instructions
-
-**Q: How do I deploy to production?**
-A: See TECHNICAL_GUIDE.md for comprehensive deployment checklist
+### Faza e ardhshme
+- Njoftime në kohë reale (WebSocket) me **Celery + Redis**
+- Kërkim i avancuar me Elasticsearch
+- Sistemi i verifikimit të guide-ve me dokumente
+- Aplikacion celular (React Native)
+- Rekomandime me AI dhe dashboard analitikash
+- Shumë-gjuhësh dhe shumë-valutor
 
 ---
 
-## 📄 License
+## 📄 Licenca
 
-This project is licensed under the MIT License - see LICENSE file for details.
-
----
-
-## 👥 Contributors
-
-- **Frontend**: Modern responsive design with Django templates
-- **Backend**: Full-featured Django application
-- **Design**: Professional UI/UX with accessibility focus
+Ky projekt shpërndahet nën licencën **MIT** — shih skedarin LICENSE.
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Teknologjitë e përdorura
 
-Built with:
 - Django framework
-- Bootstrap (conceptually)
-- Font Awesome icons
-- PostgreSQL database
+- PostgreSQL
+- Font Awesome ikona
 - Inter font
+- Docker & Gunicorn & Nginx
 
 ---
 
-## 📈 Performance Metrics
-
-- **Frontend Load**: < 2 seconds (optimized CSS, lazy loading)
-- **Database Queries**: < 5 per page view (optimized)
-- **Accessibility Score**: 95+ (WCAG 2.1 AA)
-- **Mobile Score**: 90+ (responsive design)
-- **SEO Score**: 85+ (semantic HTML, meta tags)
-
----
-
-## 🎉 Summary
-
-Pion is a **production-ready tour booking platform** with:
-- ✅ Modern, responsive frontend
-- ✅ Secure, scalable backend
-- ✅ Professional design & UX
-- ✅ Complete booking workflow
-- ✅ Real-time booking status
-- ✅ Comprehensive documentation
-- ✅ Ready for deployment & growth
-
-**Ready to explore authentic adventures in Albania!** 🏔️
-
----
-
-**Last Updated**: Today
-**Status**: ✅ Production Ready
-**Version**: 1.0.0
+**Gati për të eksploruar aventura autentike në Shqipëri!** 🏔️

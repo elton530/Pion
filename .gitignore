@@ -1,12 +1,14 @@
-# Byte-compiled / optimized / DLL files
+# ============================================================
+# Pion - .gitignore
+# ============================================================
+
+# ---- Python - byte-compiled / optimized / DLL --------------
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
 
-# Distribution / packaging
+# ---- Distributon / paketim ---------------------------------
 .Python
 build/
 develop-eggs/
@@ -26,8 +28,6 @@ wheels/
 MANIFEST
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -35,7 +35,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# ---- Teste / mbulimi i kodit --------------------------------
 htmlcov/
 .tox/
 .coverage
@@ -47,29 +47,28 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Translations
+# ---- Përkthime ----------------------------------------------
 *.mo
 *.pot
 
-# Django stuff:
+# ---- Django -------------------------------------------------
 *.log
+logs/
 local_settings.py
 db.sqlite3
+db.sqlite3-journal
+*.sqlite3
 
-# Flask stuff:
+# Flask / Scrapy / Sphinx (jogenerike)
 instance/
 .webassets-cache
-
-# Scrapy stuff:
 .scrapy
-
-# Sphinx documentation
 docs/_build/
 
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# Jupyter
 .ipynb_checkpoints
 
 # pyenv
@@ -78,11 +77,13 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
+# SageMath
 *.sage.py
 
-# Environments
+# ---- Mjedise virtuale ---------------------------------------
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -90,35 +91,49 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
+# Spyder / Rope
 .spyderproject
 .spyproject
-
-# Rope project settings
 .ropeproject
 
-# mkdocs documentation
+# mkdocs
 /site
 
-# mypy
+# mypy / Pyre
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
 .pyre/
 
-# IDEs
+# ---- Sekrete & certifikata lokale ---------------------------
+# Çelësat dhe certifikatat lokale të zhvillimit nuk duhen
+# asnjëherë në version control
+certs/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ---- IDEs ----------------------------------------------------
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# ---- OS -------------------------------------------------------
 .DS_Store
 Thumbs.db
+._*
 
-# Django specific
+# ---- Django specifike ----------------------------------------
+# Skedarët e ngarkuar nga përdoruesit dhe statika e mbledhur
 media/
 staticfiles/
+
+# ---- Skedarë të tjerë të përkohshëm ---------------------------
+core.*
+*.pid
+*.seed
+*.bak
+*.orig
