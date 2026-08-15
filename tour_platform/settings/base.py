@@ -181,8 +181,8 @@ LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "core:home"
 LOGOUT_REDIRECT_URL = "core:home"
 
-# Password reset timeout (në ditë)
-PASSWORD_RESET_TIMEOUT = 3
+# Password reset timeout (në sekonda, 3 ditë)
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 3
 
 
 # ==================== REST FRAMEWORK (API) ====================
@@ -220,63 +220,12 @@ CSRF_TRUSTED_ORIGINS = env(
 
 # ==================== LOGGING ====================
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {asctime} {message}",
-            "style": "{",
-        },
-    },
-    "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse",
-        },
-        "require_debug_true": {
-            "()": "django.utils.log.RequireDebugTrue",
-        },
-    },
-    "handlers": {
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-        "file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs" / "django.log",
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console", "file"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "tours": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "users": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "bookings": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    },
-}
+# Development logs to stdout and to logs/django.log (see logging_config.py).
+# Production overrides this in production.py to log to stdout only, which
+# systemd/journald collects. All handlers scrub passwords/tokens/secrets.
+from tour_platform.logging_config import build_logging_config
+
+LOGGING = build_logging_config(base_dir=BASE_DIR, use_file=True, app_level="DEBUG")
 
 # Create logs directory if it doesn't exist
 LOGS_DIR = BASE_DIR / "logs"

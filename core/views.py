@@ -1,13 +1,19 @@
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, TemplateView
+from django.db import connection
 from django.db.models import Q, Count, Sum, Avg
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.http import JsonResponse
 from django.utils import timezone
 
 from core.utils import send_notification_email
+
+logger = logging.getLogger(__name__)
 
 from .models import ContactMessage, NewsletterSubscription, FAQ, SiteSettings, SocialLink
 from .forms import (
@@ -17,6 +23,25 @@ from .forms import (
 )
 from tours.models import Tour, TourReview
 from users.models import GuideProfile, TouristProfile
+
+
+# ==================== HEALTH CHECK ====================
+
+def health(request):
+    """Lightweight health endpoint for monitoring / load balancers.
+
+    Public (no authentication required). Returns 200 with ``{"status": "ok"}``
+    when the application and database are reachable, 503 otherwise. Never
+    exposes internal details.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except Exception:
+        logger.exception("Health check failed: database unreachable")
+        return JsonResponse({"status": "error"}, status=503)
+
+    return JsonResponse({"status": "ok"})
 
 
 # ==================== HOME & LANDING PAGES ====================

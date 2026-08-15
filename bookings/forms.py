@@ -7,7 +7,7 @@ from .models import Booking, BookingReview, CANCELLATION_REASON
 # ==================== BOOKING FORMS ====================
 
 class BookingForm(forms.ModelForm):
-    """Forma për krijimin e një prenimit të ri"""
+    """Forma për krijimin e një prenotimit të ri"""
     
     class Meta:
         model = Booking
@@ -93,7 +93,7 @@ class BookingForm(forms.ModelForm):
         
         # Kontrollo nëse turist dhe tur janë të vlefshme
         if self.tourist and self.tour:
-            # Kontrollo nëse ka tashmë prenim për këtë turist+tur
+            # Kontrollo nëse ka tashmë prenotim për këtë turist+tur
             existing = Booking.objects.filter(
                 tourist=self.tourist,
                 tour=self.tour
@@ -101,7 +101,7 @@ class BookingForm(forms.ModelForm):
             
             if existing.exists() and not self.instance.pk:
                 raise ValidationError(
-                    _("Ti ke tashmë një prenim për këtë tur."),
+                    _("Ti ke tashmë një prenotim për këtë tur."),
                     code='booking_exists'
                 )
         
@@ -109,7 +109,7 @@ class BookingForm(forms.ModelForm):
 
 
 class BookingEditForm(forms.ModelForm):
-    """Forma për redaktimin e një prenimit"""
+    """Forma për redaktimin e një prenotimit"""
     
     class Meta:
         model = Booking
@@ -133,7 +133,7 @@ class BookingEditForm(forms.ModelForm):
 
 
 class BookingCancellationForm(forms.Form):
-    """Forma për anulimin e një prenimit"""
+    """Forma për anulimin e një prenotimit"""
     
     cancellation_reason = forms.ChoiceField(
         choices=CANCELLATION_REASON,
@@ -158,7 +158,7 @@ class BookingCancellationForm(forms.Form):
     
     confirm = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        label='Konfirmoj anulimin e këtij prenimit',
+        label='Konfirmoj anulimin e këtij prenotimit',
         help_text='Ky veprim nuk mund të zhbëhet'
     )
     
@@ -190,7 +190,7 @@ class BookingConfirmationForm(forms.Form):
 # ==================== REVIEW FORMS ====================
 
 class BookingReviewForm(forms.ModelForm):
-    """Forma për vlerësimin e prenimit"""
+    """Forma për vlerësimin e prenotimit"""
     
     class Meta:
         model = BookingReview

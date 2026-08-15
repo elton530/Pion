@@ -5,6 +5,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings
 from django.core.cache import cache
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 import re
 import time
 
@@ -695,6 +697,50 @@ class PasswordResetFullFlowTests(TestCase):
             REMOTE_ADDR="10.10.10.12",
         )
         self.assertIn("_auth_user_id", self.client.session)
+
+
+class PasswordResetLinkRenderingTests(TestCase):
+    """Faqja e linkut të reset-it: formë vetëm kur linku është i vlefshëm."""
+
+    def test_valid_reset_link_renders_password_fields(self):
+        user = User.objects.create_user(
+            username="reset_valid", email="resetvalid@example.com", password="OldPass123!"
+        )
+        mail.outbox.clear()
+        self.client.post(
+            reverse("users:password_reset"), {"email": "resetvalid@example.com"}
+        )
+        email = mail.outbox[0]
+        match = re.search(r"/users/reset/([0-9A-Za-z_-]+)/([0-9A-Za-z_-]+)/", email.body)
+        reset_url = reverse(
+            "users:password_reset_confirm",
+            args=[match.group(1), match.group(2)],
+        )
+
+        response = self.client.get(reset_url, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="new_password1"')
+        self.assertContains(response, 'name="new_password2"')
+        self.assertContains(response, "type=\"password\"", count=2)
+        self.assertNotContains(response, "Link i Pavlefshëm")
+
+    def test_invalid_reset_link_shows_message_and_no_password_fields(self):
+        user = User.objects.create_user(
+            username="reset_invalid", email="resetinvalid@example.com", password="OldPass123!"
+        )
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        set_password_url = reverse(
+            "users:password_reset_confirm", args=[uidb64, "set-password"]
+        )
+
+        response = self.client.get(set_password_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Link i Pavlefshëm")
+        self.assertContains(response, "Kërko një Link të Ri")
+        self.assertNotContains(response, "name=\"new_password1\"")
+        self.assertNotContains(response, "type=\"password\"")
 
 
 class RoleAccessTests(TestCase):

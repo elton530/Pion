@@ -223,7 +223,7 @@ class NewsletterUnsubscribeForm(forms.Form):
             }
         ),
         label=_("Email *"),
-        help_text=_("Futni email-in për të anulluar nënshkrimin")
+        help_text=_("Futni email-in për të anuluar nënshkrimin")
     )
     
     confirm = forms.BooleanField(

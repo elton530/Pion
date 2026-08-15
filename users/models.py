@@ -77,7 +77,7 @@ class GuideProfile(models.Model):
         upload_to="guides/photos/%Y/%m/",
         blank=True,
         null=True,
-        help_text="Foto profilit (rekomanduese 400x400px)"
+        help_text="Foto profili (e rekomanduar: 400x400px)"
     )
     bio = models.TextField(
         max_length=1000,
@@ -186,7 +186,7 @@ class GuideProfile(models.Model):
     total_tours = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text="Numri total i tureve të ofruar"
+        help_text="Numri total i tureve të ofruara"
     )
     
     total_tourists = models.PositiveIntegerField(
@@ -227,7 +227,7 @@ class GuideProfile(models.Model):
             models.Index(fields=['average_rating', 'reviews_count']),
         ]
         verbose_name = "Profili i Guide-it"
-        verbose_name_plural = "Profelet e Guide-ve"
+        verbose_name_plural = "Profilët e Guide-ve"
     
     def __str__(self):
         return f"Guide: {self.user.get_full_name() or self.user.username} - {self.location}"
@@ -413,7 +413,7 @@ class TouristProfile(models.Model):
         max_length=20,
         choices=EXPERIENCE_LEVELS,
         default="beginner",
-        help_text="Niveli i përvojës në outdoor activities"
+        help_text="Niveli i përvojës në aktivitete në natyrë"
     )
     
     languages = models.CharField(
@@ -469,7 +469,7 @@ class TouristProfile(models.Model):
             models.Index(fields=['created_at']),
         ]
         verbose_name = "Profili i Turistit"
-        verbose_name_plural = "Profelet e Turistëve"
+        verbose_name_plural = "Profilët e Turistëve"
     
     def __str__(self):
         return f"Tourist: {self.user.get_full_name() or self.user.username}"

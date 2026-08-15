@@ -11,7 +11,7 @@ from .models import Booking, Payment, BookingReview
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    """Admin për prenime"""
+    """Admin për prenotime"""
     
     list_display = [
         'booking_info', 'tour_link', 'tourist_name', 'num_people_display',
@@ -79,13 +79,13 @@ class BookingAdmin(admin.ModelAdmin):
     ordering = ['-created_at']
     
     def booking_info(self, obj):
-        """Informacioni i prenimit"""
+        """Informacioni i prenotimit"""
         return format_html(
             '<strong>{}</strong><br><small>{}</small>',
             obj.tour.title,
             obj.id
         )
-    booking_info.short_description = 'Prenim'
+    booking_info.short_description = 'Prenotim'
     
     def tour_link(self, obj):
         """Link drejt turit"""
@@ -182,17 +182,17 @@ class BookingAdmin(admin.ModelAdmin):
     # ===== ACTIONS =====
     
     def confirm_bookings(self, request, queryset):
-        """Konfirmim i prenimeve"""
+        """Konfirmim i prenotimeve"""
         count = 0
         for booking in queryset:
             if booking.status == 'pending':
                 booking.confirm()
                 count += 1
-        self.message_user(request, f'✅ {count} prenim(e) u konfirmuan.')
+        self.message_user(request, f'✅ {count} prenotim(e) u konfirmuan.')
     confirm_bookings.short_description = '✅ Konfirmo prenomet e zgjedhura'
     
     def cancel_bookings(self, request, queryset):
-        """Anulim i prenimeve"""
+        """Anulim i prenotimeve"""
         count = 0
         for booking in queryset:
             if booking.status != 'cancelled':
@@ -201,7 +201,7 @@ class BookingAdmin(admin.ModelAdmin):
                     count += 1
                 except ValueError:
                     pass
-        self.message_user(request, f'❌ {count} prenim(e) u anulluan dhe vendet u kthyen.')
+        self.message_user(request, f'❌ {count} prenotim(e) u anuluan dhe vendet u kthyen.')
     cancel_bookings.short_description = '❌ Anullo prenomet dhe kthe vendet'
     
     def mark_completed(self, request, queryset):
@@ -211,7 +211,7 @@ class BookingAdmin(admin.ModelAdmin):
             if booking.status == 'confirmed':
                 booking.complete()
                 count += 1
-        self.message_user(request, f'✔️ {count} prenim(e) u shënua si të përfunduar.')
+        self.message_user(request, f'✔️ {count} prenotim(e) u shënuan si të përfunduara.')
     mark_completed.short_description = '✔️ Marko si të përfunduar'
     
     def mark_no_show(self, request, queryset):
@@ -220,11 +220,11 @@ class BookingAdmin(admin.ModelAdmin):
         for booking in queryset:
             booking.mark_no_show()
             count += 1
-        self.message_user(request, f'⚠️ {count} prenim(e) shënuet si nuk u paraqit.')
+        self.message_user(request, f'⚠️ {count} prenotim(e) u shënuan si të paparaqitura.')
     mark_no_show.short_description = '⚠️ Marko si nuk u paraqit'
     
     def send_confirmation_email(self, request, queryset):
-        """Dërgoni email confirmimi"""
+        """Dërgoni email konfirmimi"""
         count = 0
         for booking in queryset:
             if booking.status == 'confirmed':
@@ -235,7 +235,7 @@ class BookingAdmin(admin.ModelAdmin):
                 except:
                     pass
         self.message_user(request, f'📧 {count} email(a) u dërguan.')
-    send_confirmation_email.short_description = '📧 Dërgoni email confirmimi'
+    send_confirmation_email.short_description = '📧 Dërgoni email konfirmimi'
 
 
 # ==================== PAYMENT ADMIN ====================
@@ -290,10 +290,10 @@ class PaymentAdmin(admin.ModelAdmin):
     id_display.short_description = 'ID'
     
     def booking_link(self, obj):
-        """Link drejt prenimit"""
+        """Link drejt prenotimit"""
         url = reverse('admin:bookings_booking_change', args=[obj.booking.id])
         return format_html('<a href="{}">{}</a>', url, obj.booking.tour.title)
-    booking_link.short_description = 'Prenim'
+    booking_link.short_description = 'Prenotim'
     
     def amount_display(self, obj):
         """Shfaq shumën"""
@@ -371,7 +371,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
 @admin.register(BookingReview)
 class BookingReviewAdmin(admin.ModelAdmin):
-    """Admin për vlerësimet e prenimeve"""
+    """Admin për vlerësimet e prenotimeve"""
     
     list_display = [
         'booking_link', 'tourist_name', 'rating_display', 'created_at'
@@ -403,10 +403,10 @@ class BookingReviewAdmin(admin.ModelAdmin):
     ordering = ['-created_at']
     
     def booking_link(self, obj):
-        """Link drejt prenimit"""
+        """Link drejt prenotimit"""
         url = reverse('admin:bookings_booking_change', args=[obj.booking.id])
         return format_html('<a href="{}">{}</a>', url, obj.booking.tour.title)
-    booking_link.short_description = 'Prenim'
+    booking_link.short_description = 'Prenotim'
     
     def tourist_name(self, obj):
         """Emri i turistit"""

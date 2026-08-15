@@ -168,8 +168,8 @@ class SiteSettings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        verbose_name = 'Përkonfigurimi i Platformës'
-        verbose_name_plural = 'Përkonfigurimi i Platformës'
+        verbose_name = 'Konfigurimi i Platformës'
+        verbose_name_plural = 'Konfigurimi i Platformës'
     
     def __str__(self):
         return self.site_name
@@ -308,7 +308,7 @@ class NewsletterSubscription(models.Model):
     unsubscribed_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text='Kur u anullua nënshkrimi'
+        help_text='Kur u anulua nënshkrimi'
     )
     
     class Meta:
@@ -374,7 +374,7 @@ class FAQ(models.Model):
         indexes = [
             models.Index(fields=['category', 'is_active']),
         ]
-        verbose_name = 'Pyetje të Shpeshtë'
+        verbose_name = 'Pyetje e Shpeshtë'
         verbose_name_plural = 'Pyetje të Shpeshta'
     
     def __str__(self):

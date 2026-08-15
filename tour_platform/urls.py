@@ -27,8 +27,11 @@ urlpatterns = [
 ]
 
 # ==================== STATIC & MEDIA FILES ====================
+# Serve uploaded media during development only (DEBUG=True). Static files
+# need no URL entry here: with django.contrib.staticfiles installed, runserver
+# serves them from STATICFILES_DIRS automatically. In production both /static/
+# and /media/ are served by Nginx (see README -> Deployment).
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

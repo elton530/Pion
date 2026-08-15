@@ -318,13 +318,13 @@ class TouristProfileAdmin(admin.ModelAdmin):
     def enable_notifications(self, request, queryset):
         """Action për aktivizimin e notifikimeve"""
         count = queryset.update(email_notifications=True)
-        self.message_user(request, f'✅ {count} turistët marrin notifikime.')
+        self.message_user(request, f'🔔 Notifikimet u aktivizuan për {count} turistë.')
     enable_notifications.short_description = '🔔 Aktivizo notifikime'
     
     def disable_notifications(self, request, queryset):
         """Action për deaktivizimin e notifikimeve"""
         count = queryset.update(email_notifications=False)
-        self.message_user(request, f'🔕 {count} turistët nuk marrin notifikime.')
+        self.message_user(request, f'🔕 Notifikimet u çaktivizuan për {count} turistë.')
     disable_notifications.short_description = '🔕 Deaktivizo notifikime'
 
 

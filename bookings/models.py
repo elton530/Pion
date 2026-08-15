@@ -76,7 +76,7 @@ CANCELLATION_REASON = [
     ("personal", "Arsyje personale"),
     ("health", "Probleme shëndetësore"),
     ("weather", "Kushte të këqija motit"),
-    ("guide_cancelled", "Guide-i anulloi"),
+    ("guide_cancelled", "Guide-i anuloi"),
     ("other", "Tjetër"),
 ]
 
@@ -117,7 +117,7 @@ class Booking(models.Model):
         max_digits=10,
         decimal_places=2,
         editable=False,
-        help_text="Çmimi për person në kohën e prenimit"
+        help_text="Çmimi për person në kohën e prenotimit"
     )
     
     total_price = models.DecimalField(
@@ -147,7 +147,7 @@ class Booking(models.Model):
         max_length=20,
         choices=BOOKING_STATUS,
         default="pending",
-        help_text="Statusi i prenimit"
+        help_text="Statusi i prenotimit"
     )
     
     is_confirmed_24h = models.BooleanField(
@@ -187,20 +187,20 @@ class Booking(models.Model):
     
     cancellation_notes = models.TextField(
         blank=True,
-        help_text="Detaje shtese për anulim"
+        help_text="Detaje shtesë për anulim"
     )
     
     cancelled_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Kur u anullua"
+        help_text="Kur u anulua"
     )
     
     cancelled_by = models.CharField(
         max_length=20,
         choices=[("tourist", "Turist"), ("guide", "Guide"), ("admin", "Admin")],
         blank=True,
-        help_text="Kush anulloi"
+        help_text="Kush anuloi"
     )
     
     # ===== SYSTEM FIELDS =====
@@ -231,8 +231,8 @@ class Booking(models.Model):
                 name='unique_active_booking_per_tourist_tour',
             ),
         ]
-        verbose_name = "Prernim"
-        verbose_name_plural = "Prenimet"
+        verbose_name = "Prenotim"
+        verbose_name_plural = "Prenotimet"
     
     def __str__(self):
         tourist_name = self.tourist.user.get_full_name() or self.tourist.user.username
@@ -307,16 +307,16 @@ class Booking(models.Model):
         super().save(*args, **kwargs)
     
     def cancel(self, reason=None, cancelled_by="tourist", notes=""):
-        """Anulo prenimin dhe kthej vendet"""
+        """Anulo prenotimin dhe kthej vendet"""
         
         if self.status in ["cancelled", "completed", "no_show"]:
             if self.status == "cancelled":
-                raise ValueError("Ky prenim është tashmë anulluar.")
+                raise ValueError("Ky prenotim është tashmë anuluar.")
             if self.status == "completed":
                 raise ValueError("Nuk mund të anulohet një tur i përfunduar.")
-            raise ValueError("Nuk mund të anulohet një prenim që është shënuar si nuk u paraqit.")
+            raise ValueError("Nuk mund të anulohet një prenotim që është shënuar si nuk u paraqit.")
         
-        # Përditëso prenimin
+        # Përditëso prenotimin
         self.status = "cancelled"
         self.cancelled_at = timezone.now()
         self.cancelled_by = cancelled_by
@@ -333,9 +333,9 @@ class Booking(models.Model):
         ])
     
     def confirm(self):
-        """Konfirmim i prenimit nga guide-i"""
+        """Konfirmim i prenotimit nga guide-i"""
         if self.status != "pending":
-            raise ValueError(f"Nuk mund të konfirmosh prenimin me status {self.status}")
+            raise ValueError(f"Nuk mund të konfirmosh prenotimin me status {self.status}")
         
         self.status = "confirmed"
         self.confirmed_at = timezone.now()
@@ -344,14 +344,14 @@ class Booking(models.Model):
     def complete(self):
         """Marko turin si të përfunduar"""
         if self.status != "confirmed":
-            raise ValueError(f"Nuk mund të përfundosh prenimin me status {self.status}")
+            raise ValueError(f"Nuk mund të përfundosh prenotimin me status {self.status}")
 
         self.status = "completed"
         self.save(update_fields=['status', 'updated_at'])
     
     def mark_no_show(self):
         """Marko si nuk u paraqit"""
-        raise ValueError("Statusi 'no_show' nuk përdoret në lifecycle-in aktual të prenimeve.")
+        raise ValueError("Statusi 'no_show' nuk përdoret në lifecycle-in aktual të prenotimeve.")
     
     def confirm_participation_24h(self):
         """Konfirmim i pjesëmarrjes 24h përpara"""
@@ -474,7 +474,7 @@ class Payment(models.Model):
         
         self.save(update_fields=['status', 'paid_at', 'transaction_id'])
         
-        # Konfirmo prenimin automatikisht
+        # Konfirmo prenotimin automatikisht
         if self.booking.status == "pending":
             self.booking.confirm()
     
@@ -492,7 +492,7 @@ class Payment(models.Model):
 # ==================== REVIEW MODEL ====================
 
 class BookingReview(models.Model):
-    """Vlerësim i prenimit/tur-it"""
+    """Vlerësim i prenotimit/tur-it"""
     
     booking = models.OneToOneField(
         Booking,
@@ -510,8 +510,8 @@ class BookingReview(models.Model):
     
     class Meta:
         ordering = ["-created_at"]
-        verbose_name = "Vlerësim Prenimi"
-        verbose_name_plural = "Vlerësimet e Prenimeve"
+        verbose_name = "Vlerësim Prenotimi"
+        verbose_name_plural = "Vlerësimet e Prenotimeve"
     
     def __str__(self):
         return f"Review për {self.booking}"

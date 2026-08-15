@@ -7,7 +7,7 @@ app_name = "bookings"
 
 urlpatterns = [
     # ==================== BOOKING CREATION ====================
-    # POST /bookings/tour/<slug>/reserve/ - Krijo prenim
+    # POST /bookings/tour/<slug>/reserve/ - Krijo prenotim
     path(
         "tour/<slug:slug>/reserve/",
         views.create_booking,
@@ -23,21 +23,21 @@ urlpatterns = [
     
     
     # ==================== BOOKING MANAGEMENT ====================
-    # GET /bookings/<booking_id>/ - Detajet e prenimit
+    # GET /bookings/<booking_id>/ - Detajet e prenotimit
     path(
         "<uuid:booking_id>/",
         views.booking_detail,
         name="booking_detail"
     ),
     
-    # GET/POST /bookings/<booking_id>/edit/ - Redaktim prenimit
+    # GET/POST /bookings/<booking_id>/edit/ - Redaktim prenotimit
     path(
         "<uuid:booking_id>/edit/",
         views.booking_edit,
         name="booking_edit"
     ),
     
-    # GET/POST /bookings/<booking_id>/cancel/ - Anulim prenimit
+    # GET/POST /bookings/<booking_id>/cancel/ - Anulim prenotimit
     path(
         "<uuid:booking_id>/cancel/",
         views.booking_cancel,
@@ -53,7 +53,7 @@ urlpatterns = [
     
     
     # ==================== BOOKING LISTING ====================
-    # GET /bookings/my-bookings/ - Lista e prenimeve të turistit
+    # GET /bookings/my-bookings/ - Lista e prenotimeve të turistit
     path(
         "my-bookings/",
         views.booking_list,

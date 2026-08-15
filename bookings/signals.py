@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Booking)
 def on_booking_create(sender, instance, created, **kwargs):
-    """Veprimet kur krijohet prenim"""
+    """Veprimet kur krijohet prenotim"""
     try:
         if created:
-            logger.info(f"Prenim i ri u krijua: {instance.id} - {instance.tour.title}")
+            logger.info(f"Prenotim i ri u krijua: {instance.id} - {instance.tour.title}")
             # Update tour booking count
             instance.tour.booking_count = instance.tour.bookings.filter(
                 status__in=['confirmed', 'completed']
@@ -71,15 +71,15 @@ def track_status_change(sender, instance, **kwargs):
             # Nëse statusi ndryshon në "confirmed"
             if old_instance.status != instance.status and instance.status == "confirmed":
                 instance.confirmed_at = timezone.now()
-                logger.info(f"Prenim u konfirmua: {instance.id}")
+                logger.info(f"Prenotim u konfirmua: {instance.id}")
             
             # Nëse statusi ndryshon në "completed"
             elif old_instance.status != instance.status and instance.status == "completed":
-                logger.info(f"Prenim u përfundua: {instance.id}")
+                logger.info(f"Prenotim u përfundua: {instance.id}")
             
             # Nëse statusi ndryshon në "cancelled"
             elif old_instance.status != instance.status and instance.status == "cancelled":
-                logger.info(f"Prenim u anullua: {instance.id}")
+                logger.info(f"Prenotim u anullua: {instance.id}")
         
         except Booking.DoesNotExist:
             pass
@@ -105,7 +105,7 @@ def apply_status_transition_effects(sender, instance, created, **kwargs):
             # Ensure not to go negative
             instance.tour.available_spots = max(0, instance.tour.available_spots - instance.num_people)
             instance.tour.save(update_fields=['available_spots', 'updated_at'])
-            logger.info(f"Vendet u rimbajtën pas rikthimit të prenimit: {instance.num_people} për turin {instance.tour.title}")
+            logger.info(f"Vendet u rimbajtën pas rikthimit të prenotimit: {instance.num_people} për turin {instance.tour.title}")
 
         # Always refresh booking_count to reflect confirmed/completed
         instance.tour.booking_count = instance.tour.bookings.filter(
@@ -118,7 +118,7 @@ def apply_status_transition_effects(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Booking)
 def restore_tour_spots_on_booking_delete(sender, instance, **kwargs):
-    """Kthe vendet kur fshihet prenim"""
+    """Kthe vendet kur fshihet prenotim"""
     try:
         if instance.status != "cancelled":
             instance.tour.available_spots += instance.num_people
@@ -135,11 +135,11 @@ def on_payment_confirmation(sender, instance, created, **kwargs):
     """Veprimet kur pagesa konfirmohet"""
     try:
         if instance.status == "paid":
-            # Konfirmo prenimin automatikisht
+            # Konfirmo prenotimin automatikisht
             booking = instance.booking
             if booking.status == "pending":
                 booking.confirm()
-                logger.info(f"Prenim u konfirmua automatikisht: {booking.id}")
+                logger.info(f"Prenotim u konfirmua automatikisht: {booking.id}")
             
             # Dërgoni email confirmimi
             send_payment_confirmation_email(instance)
@@ -215,7 +215,7 @@ def send_payment_confirmation_email(payment):
                 'amount': payment.amount,
                 'currency': payment.currency,
             }
-            message = f"Pagesa u konfirmua. Prenim i përfunduar për {booking.tour.title}."
+            message = f"Pagesa u konfirmua. Prenotim i përfunduar për {booking.tour.title}."
             send_notification_email(tourist_email, subject, message=message, context=context)
     except Exception as e:
         logger.error(f"Gabim në send_payment_confirmation_email: {e}")

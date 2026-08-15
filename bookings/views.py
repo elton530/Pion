@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def create_booking(request, slug):
-    """Krijim i një prenim të ri"""
+    """Krijim i një prenotim të ri"""
 
     tour = get_object_or_404(Tour, slug=slug, is_active=True, status="published")
 
@@ -38,7 +38,7 @@ def create_booking(request, slug):
         tour = Tour.objects.select_for_update().get(pk=tour.pk)
 
         if not tour.can_be_booked:
-            messages.error(request, "❌ Ky tur nuk është më i disponueshëm për prenim.")
+            messages.error(request, "❌ Ky tur nuk është më i disponueshëm për prenotim.")
             return redirect("tours:tour_detail", slug=tour.slug)
 
         existing = Booking.objects.filter(
@@ -49,7 +49,7 @@ def create_booking(request, slug):
         if existing:
             messages.info(
                 request,
-                f"ℹ️ Ke tashmë një prenim për këtë tur me status '{existing.get_status_display()}'."
+                f"ℹ️ Ke tashmë një prenotim për këtë tur me status '{existing.get_status_display()}'."
             )
             return redirect("bookings:booking_detail", booking_id=existing.id)
 
@@ -99,7 +99,7 @@ def create_booking(request, slug):
 
 @login_required
 def booking_success(request, booking_id):
-    """Faqja e suksesit pas prenimit"""
+    """Faqja e suksesit pas prenotimit"""
     
     booking = get_object_or_404(Booking, id=booking_id)
     
@@ -118,7 +118,7 @@ def booking_success(request, booking_id):
 
 @login_required
 def booking_detail(request, booking_id):
-    """Detajet e një prenimit"""
+    """Detajet e një prenotimit"""
     
     booking = get_object_or_404(Booking, id=booking_id)
     
@@ -127,7 +127,7 @@ def booking_detail(request, booking_id):
     is_guide = booking.tour.guide.user == request.user
     
     if not (is_tourist or is_guide):
-        raise PermissionDenied("Nuk ke leje për të parë këtë prenim.")
+        raise PermissionDenied("Nuk ke leje për të parë këtë prenotim.")
     
     context = {
         'booking': booking,
@@ -143,7 +143,7 @@ def booking_detail(request, booking_id):
 
 @login_required
 def booking_edit(request, booking_id):
-    """Redaktim i prenimit"""
+    """Redaktim i prenotimit"""
     
     booking = get_object_or_404(Booking, id=booking_id)
     
@@ -153,14 +153,14 @@ def booking_edit(request, booking_id):
     
     # Mund të editoj vetëm në pending status
     if booking.status != "pending":
-        messages.error(request, "❌ Mund të editosh vetëm prenime në pritje.")
+        messages.error(request, "❌ Mund të editosh vetëm prenotime në pritje.")
         return redirect("bookings:booking_detail", booking_id=booking.id)
     
     if request.method == "POST":
         form = BookingEditForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
-            messages.success(request, "✅ Prenimit u përditësua me sukses!")
+            messages.success(request, "✅ Prenotimit u përditësua me sukses!")
             return redirect("bookings:booking_detail", booking_id=booking.id)
     else:
         form = BookingEditForm(instance=booking)
@@ -175,7 +175,7 @@ def booking_edit(request, booking_id):
 
 @login_required
 def booking_cancel(request, booking_id):
-    """Anulim i prenimit"""
+    """Anulim i prenotimit"""
     
     booking = get_object_or_404(Booking, id=booking_id)
     
@@ -186,7 +186,7 @@ def booking_cancel(request, booking_id):
     if not booking.can_be_cancelled:
         messages.error(
             request,
-            f"❌ Nuk mund ta anulohet këtë prenim. Turit i mbeten {booking.days_until_tour} ditë."
+            f"❌ Nuk mund ta anulohet këtë prenotim. Turit i mbeten {booking.days_until_tour} ditë."
         )
         return redirect("bookings:booking_detail", booking_id=booking.id)
     
@@ -205,7 +205,7 @@ def booking_cancel(request, booking_id):
                 refund = booking.refund_amount
                 messages.success(
                     request,
-                    f"✅ Prenimit u anullua. Rimbursim i pritshëm: {refund} {booking.tour.currency}"
+                    f"✅ Prenotimit u anullua. Rimbursim i pritshëm: {refund} {booking.tour.currency}"
                 )
                 return redirect("users:tourist_dashboard")
             
@@ -234,7 +234,7 @@ def booking_confirm_participation(request, booking_id):
         raise PermissionDenied("Nuk ke leje për këtë veprim.")
     
     if booking.status != "confirmed":
-        messages.error(request, "❌ Mund të konfirmosh vetëm prenime të konfirmuara.")
+        messages.error(request, "❌ Mund të konfirmosh vetëm prenotime të konfirmuara.")
         return redirect("bookings:booking_detail", booking_id=booking.id)
     
     if request.method == "POST":
@@ -271,7 +271,7 @@ def booking_confirm_participation(request, booking_id):
 
 @login_required
 def booking_list(request):
-    """Lista e prenimeve (për turistin)"""
+    """Lista e prenotimeve (për turistin)"""
     
     try:
         tourist_profile = request.user.tourist_profile
@@ -302,7 +302,7 @@ def booking_list(request):
 
 @login_required
 def create_booking_review(request, booking_id):
-    """Krijo vlerësim për prenimin"""
+    """Krijo vlerësim për prenotimin"""
     
     booking = get_object_or_404(Booking, id=booking_id)
     
@@ -314,7 +314,7 @@ def create_booking_review(request, booking_id):
         return redirect("bookings:booking_detail", booking_id=booking.id)
     
     if hasattr(booking, 'booking_review'):
-        messages.info(request, "ℹ️ Ke tashmë një vlerësim për këtë prenim.")
+        messages.info(request, "ℹ️ Ke tashmë një vlerësim për këtë prenotim.")
         return redirect("bookings:booking_detail", booking_id=booking.id)
     
     if request.method == "POST":
@@ -351,11 +351,11 @@ def create_booking_review(request, booking_id):
 # ==================== EMAIL HELPERS ====================
 
 def send_new_booking_email_to_guide(booking):
-    """Dërgoni email te guide kur ka prenim të ri"""
+    """Dërgoni email te guide kur ka prenotim të ri"""
     try:
         guide_email = booking.tour.guide.user.email
         if guide_email:
-            subject = f"📬 Prenim i ri për turin '{booking.tour.title}'"
+            subject = f"📬 Prenotim i ri për turin '{booking.tour.title}'"
             context = {
                 'guide_name': booking.tour.guide.user.get_full_name() or booking.tour.guide.user.username,
                 'tour_title': booking.tour.title,
@@ -369,7 +369,7 @@ def send_new_booking_email_to_guide(booking):
                 'currency': booking.tour.get_currency_display(),
                 'notes': booking.notes or 'Nuk ka shënime',
             }
-            message = f"Prenim i ri: {booking.tourist.user.get_full_name()} për {booking.num_people} persona"
+            message = f"Prenotim i ri: {booking.tourist.user.get_full_name()} për {booking.num_people} persona"
             send_notification_email(guide_email, subject, message=message, context=context)
     except Exception as e:
         logger.error(f"Gabim në dërgimin e email për guide: {e}")
@@ -380,7 +380,7 @@ def send_booking_confirmation_email_to_tourist(booking):
     try:
         tourist_email = booking.tourist.user.email
         if tourist_email:
-            subject = f"✅ Prenimit për '{booking.tour.title}'"
+            subject = f"✅ Prenotimit për '{booking.tour.title}'"
             context = {
                 'tourist_name': booking.tourist.user.get_full_name() or booking.tourist.user.username,
                 'tour_title': booking.tour.title,
@@ -391,7 +391,7 @@ def send_booking_confirmation_email_to_tourist(booking):
                 'total_price': booking.total_price,
                 'currency': booking.tour.get_currency_display(),
             }
-            message = "Prenimit u krye. Guide-i do të kontaktojë së shpejti."
+            message = "Prenotimit u krye. Guide-i do të kontaktojë së shpejti."
             send_notification_email(tourist_email, subject, message=message, context=context)
     except Exception as e:
         logger.error(f"Gabim në dërgimin e email për turist: {e}")
@@ -402,15 +402,15 @@ def send_cancellation_email(booking):
     try:
         tourist_email = booking.tourist.user.email
         if tourist_email:
-            subject = f"❌ Anulim i prenimit për '{booking.tour.title}'"
-            message = f"Prenimit u anullua. Rimbursim: {booking.refund_amount} {booking.tour.get_currency_display()}"
+            subject = f"❌ Anulim i prenotimit për '{booking.tour.title}'"
+            message = f"Prenotimit u anullua. Rimbursim: {booking.refund_amount} {booking.tour.get_currency_display()}"
             send_notification_email(tourist_email, subject, message=message)
     except Exception as e:
         logger.error(f"Gabim në dërgimin e email anulimi: {e}")
 
 
 def send_booking_confirmed_email_to_tourist(booking):
-    """Dërgoni email te turist kur guida konfirmon prenimit"""
+    """Dërgoni email te turist kur guida konfirmon prenotimit"""
     try:
         tourist_email = booking.tourist.user.email
         if tourist_email:

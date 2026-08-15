@@ -148,7 +148,7 @@
                             </button>
                         </form>
                         <form action="{% url 'users:guide_booking_cancel' booking.id %}" method="post" style="display:inline;"
-                              onsubmit="return confirm('Vërtet dëshiron ta anulosh këtë prenim?');">
+                              onsubmit="return confirm('Vërtet dëshiron ta anulosh këtë prenotim?');">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">
                                 <i class="fas fa-times"></i> Anulo
@@ -200,7 +200,7 @@
                     <div style="display: grid; gap: 0.8rem; font-size: 0.9rem;">
                         <div style="display: flex; align-items: center; gap: 0.8rem;">
                             <i class="fas fa-circle-check" style="color: var(--success);"></i>
-                            <span><strong>Prenim Kryer</strong><br><span style="color: var(--text-light);">{{ booking.created_at|date:"d M Y" }}</span></span>
+                            <span><strong>Prenotim Kryer</strong><br><span style="color: var(--text-light);">{{ booking.created_at|date:"d M Y" }}</span></span>
                         </div>
                         
                         {% if booking.status == 'confirmed' or booking.status == 'completed' %}

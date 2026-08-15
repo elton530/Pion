@@ -234,7 +234,7 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
             )
         else:
             return format_html(
-                '<span style="background-color: #e74c3c; color: white; padding: 3px 8px; border-radius: 3px;">❌ Anulluar</span>'
+                '<span style="background-color: #e74c3c; color: white; padding: 3px 8px; border-radius: 3px;">❌ Anuluar</span>'
             )
     status_badge.short_description = 'Statusi'
     status_badge.admin_order_field = 'is_active'

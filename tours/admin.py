@@ -6,7 +6,7 @@ from .models import (
     Tour, TourImage, TourReview, TourType, TourSchedule,
     TourFAQ, TourHighlight, TourTag, TourStatistic, TourReviewImage
 )
-from .forms import TourEditForm  # ADD THIS IMPORT
+from .forms import TourEditForm
 
 
 # ==================== INLINES ====================
@@ -95,7 +95,6 @@ class TourTypeAdmin(admin.ModelAdmin):
 class TourAdmin(admin.ModelAdmin):
     """Admin i plotë për Turet"""
     
-    # ADD THIS LINE - Tell admin to use TourEditForm
     form = TourEditForm
     
     list_display = [
@@ -242,7 +241,7 @@ class TourAdmin(admin.ModelAdmin):
     tour_type_display.admin_order_field = 'tour_type'
     
     def difficulty_display(self, obj):
-        """Vshtirësia me ikonë"""
+        """Vështirësia me ikonë"""
         icons = {
             'very_easy': '🟢',
             'easy': '🟡',
@@ -252,7 +251,7 @@ class TourAdmin(admin.ModelAdmin):
         }
         icon = icons.get(obj.difficulty, '')
         return format_html('{} {}', icon, obj.get_difficulty_display())
-    difficulty_display.short_description = 'Vshtirësia'
+    difficulty_display.short_description = 'Vështirësia'
     difficulty_display.admin_order_field = 'difficulty'
     
     def price_display(self, obj):
@@ -271,7 +270,7 @@ class TourAdmin(admin.ModelAdmin):
     price_display.admin_order_field = 'price_per_person'
     
     def booking_status(self, obj):
-        """Statusi i prenotazioneve"""
+        """Statusi i prenotimeve"""
         try:
             percentage = Decimal(str(obj.confirmed_percentage))
             percentage_text = f"{percentage:.0f}"
@@ -307,7 +306,7 @@ class TourAdmin(admin.ModelAdmin):
     confirmed_bookings_display.short_description = 'Konfirmuar'
     
     def booking_percentage_display(self, obj):
-        """Përqindja grafike e prenotazioneve"""
+        """Përqindja grafike e prenotimeve"""
         try:
             percentage = Decimal(str(obj.booking_percentage))
             percentage_text = f"{percentage:.1f}"
@@ -320,7 +319,7 @@ class TourAdmin(admin.ModelAdmin):
             '</div> {}% ({}/{})',
             percentage, percentage_text, obj.max_participants - obj.available_spots, obj.max_participants
         )
-    booking_percentage_display.short_description = 'Përqindja e Prenotazioneve'
+    booking_percentage_display.short_description = 'Përqindja e Prenotimeve'
     
     def rating_display(self, obj):
         """Vlerësimi me yje"""
@@ -499,13 +498,13 @@ class TourReviewAdmin(admin.ModelAdmin):
     
     def mark_as_featured(self, request, queryset):
         count = queryset.update(is_featured=True)
-        self.message_user(request, f'{count} vlerësim u shënoj si featured.')
-    mark_as_featured.short_description = '⭐ Shënoj si featured'
+        self.message_user(request, f'{count} vlerësim u shënua si i veçuar.')
+    mark_as_featured.short_description = '⭐ Shëno si të veçuar'
     
     def mark_as_verified(self, request, queryset):
         count = queryset.update(is_verified=True)
         self.message_user(request, f'{count} vlerësim u verifikua.')
-    mark_as_verified.short_description = '✔️ Verifikoi vlerësimet'
+    mark_as_verified.short_description = '✔️ Verifiko vlerësimet'
 
 
 # ==================== TOUR SCHEDULE ADMIN ====================
@@ -627,7 +626,7 @@ class TourTagAdmin(admin.ModelAdmin):
     tour_count.short_description = 'Numri i Tureve'
 
 
-# ==================== TOUR STATISTIC ADMIN ===================="
+# ==================== TOUR STATISTIC ADMIN ====================
 
 @admin.register(TourStatistic)
 class TourStatisticAdmin(admin.ModelAdmin):

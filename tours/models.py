@@ -235,7 +235,7 @@ class Tour(models.Model):
         max_length=50,
         choices=LANGUAGE_CHOICES,
         default="sq",
-        help_text="Gjuhet e ofruara"
+        help_text="Gjuhët e ofruara"
     )
     
     # ===== DETAJET E LOKACIONIT =====
@@ -248,14 +248,14 @@ class Tour(models.Model):
         decimal_places=6,
         null=True,
         blank=True,
-        help_text="Latitude për pikën e takimit 'gjeresia-gjeografike'"
+        help_text="Gjerësia gjeografike e pikës së takimit (latitude)"
     )
     meeting_point_lng = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
         blank=True,
-        help_text="Longitude për pikën e takimit 'gjatësia-gjeografike'"
+        help_text="Gjatësia gjeografike e pikës së takimit (longitude)"
     )
     location_city = models.CharField(
         max_length=100,
@@ -833,7 +833,7 @@ class TourReview(models.Model):
     # Fushat e administrimit
     is_verified = models.BooleanField(
         default=False,
-        help_text="Review i verifikuar (turistë i vërtetë)"
+        help_text="Vlerësim i verifikuar (turist i vërtetë)"
     )
     is_featured = models.BooleanField(
         default=False,

@@ -415,7 +415,7 @@ class BookingCancellationLogicTests(TestCase):
 
 
 class BookingViewsIntegrationTests(TestCase):
-	"""Test që verifikojnë lidhjen backend ↔ frontend të flow-ve të prenimeve"""
+	"""Test që verifikojnë lidhjen backend ↔ frontend të flow-ve të prenotimeve"""
 
 	def setUp(self):
 		self.user_guide = User.objects.create_user(
@@ -563,7 +563,7 @@ class BookingViewsIntegrationTests(TestCase):
 
 
 class BookingEmailTests(TestCase):
-	"""Teste për email-et e prenimeve, pagesave dhe anulimeve."""
+	"""Teste për email-et e prenotimeve, pagesave dhe anulimeve."""
 
 	def setUp(self):
 		mail.outbox.clear()
@@ -626,7 +626,7 @@ class BookingEmailTests(TestCase):
 		self.assertEqual(len(mail.outbox), 1)
 		email = mail.outbox[0]
 		self.assertIn("guide_email@example.com", email.to)
-		self.assertIn("Prenim i ri", email.subject)
+		self.assertIn("Prenotim i ri", email.subject)
 
 	def test_new_booking_sends_confirmation_email_to_tourist(self):
 		booking = self._create_booking()
@@ -637,7 +637,7 @@ class BookingEmailTests(TestCase):
 		self.assertEqual(len(mail.outbox), 1)
 		email = mail.outbox[0]
 		self.assertIn("tourist_email@example.com", email.to)
-		self.assertIn("Prenimit", email.subject)
+		self.assertIn("Prenotimit", email.subject)
 
 	def test_cancellation_sends_email_to_tourist(self):
 		booking = self._create_booking()
@@ -685,7 +685,7 @@ class BookingEmailTests(TestCase):
 
 
 class TouristBookingWorkflowTests(TestCase):
-	"""Workflow i turistit: krijimi, shikimi, anulimi i prenimeve, gabime e skaje."""
+	"""Workflow i turistit: krijimi, shikimi, anulimi i prenotimeve, gabime e skaje."""
 
 	def setUp(self):
 		mail.outbox.clear()
@@ -946,7 +946,7 @@ class TouristBookingWorkflowTests(TestCase):
 
 
 class GuideBookingManagementTests(TestCase):
-	"""Workflow i guide-it: shikimi, konfirmimi, anulimi, përfundimi i prenimeve."""
+	"""Workflow i guide-it: shikimi, konfirmimi, anulimi, përfundimi i prenotimeve."""
 
 	def setUp(self):
 		mail.outbox.clear()

@@ -6,6 +6,15 @@ app_name = "core"
 # Pattern: /...
 
 urlpatterns = [
+    # ==================== HEALTH CHECK ====================
+    # GET /health/ - Health check (no auth, for monitoring)
+    path(
+        "health/",
+        views.health,
+        name="health"
+    ),
+
+
     # ==================== LANDING PAGES ====================
     # GET / - Faqja kryesore
     path(

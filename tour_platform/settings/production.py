@@ -12,6 +12,7 @@ Enabled behaviors:
   - hashed (manifest) static storage for caching
 """
 
+from tour_platform.logging_config import build_logging_config
 from tour_platform.security import resolve_secret_key
 from tour_platform.settings.base import *  # noqa: F401,F403
 
@@ -69,6 +70,14 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
+
+
+# ==================== LOGGING ====================
+
+# Production logs to stdout only: systemd captures stdout for journald, which
+# handles central collection and rotation. No file handler (avoids filesystem
+# permission issues under systemd).
+LOGGING = build_logging_config(base_dir=BASE_DIR, use_file=False, app_level="INFO")
 
 
 # ==================== STATIC FILES ====================
