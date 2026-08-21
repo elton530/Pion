@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Sum
 from users.models import GuideProfile, TouristProfile
 from django.utils.text import slugify
@@ -651,6 +651,73 @@ class Tour(models.Model):
         if not self.requirements:
             return []
         return [r.strip() for r in self.requirements.split('\n') if r.strip()]
+    
+    @property
+    def can_be_republished(self):
+        """Turi mund të ripublikohet vetëm pasi të ketë përfunduar
+        (status 'completed' ose datë e kaluar me status publik/fshehur)."""
+        if self.status == "completed":
+            return True
+        return self.is_past and self.status in ("published", "hidden")
+    
+    def republish_for_new_date(self, new_date, new_time_start=None):
+        """Ripubliko turin për një datë të re pas përfundimit.
+
+        Nga realizimi i mëparshëm ruhen VETËM vlerësimet (reviews):
+        - Prenotimet e vjetra (dhe pagesat përkatëse) fshihen.
+        - Review-et e bëra mbi prenotim transferohen si review-e turi.
+        - Vendet rikthehen në kapacitet maksimal dhe numëruesit zerojohen.
+        - Vlerësimet e turit (average_rating, reviews_count) mbeten.
+        """
+        from bookings.models import BookingReview
+
+        today = timezone.now().date()
+        if not self.can_be_republished:
+            raise ValueError(
+                "Vetëm turet e përfunduar ose me datë në të kaluarën mund të ripublikohen."
+            )
+        if not new_date or new_date < today:
+            raise ValueError("Data e re duhet të jetë sot ose më vonë.")
+
+        with transaction.atomic():
+            # Review-et e nivelit të prenotimit transferohen si review-e turi,
+            # përndryshe do të fshiheshin në kaskadë bashkë me prenotimet.
+            booking_reviews = BookingReview.objects.filter(
+                booking__tour=self
+            ).select_related("booking__tourist")
+
+            for booking_review in booking_reviews:
+                TourReview.objects.update_or_create(
+                    tour=self,
+                    tourist=booking_review.booking.tourist,
+                    defaults={
+                        "rating": booking_review.rating,
+                        "comment": booking_review.comment,
+                        "is_verified": True,
+                    },
+                )
+
+            # Fshi realizimin e mëparshëm: prenotimet (+ pagesat në kaskadë)
+            self.bookings.all().delete()
+
+            # Përditësja bëhet me queryset update për të anashkaluar sinjalin
+            # pre_save që mbishkruan last_booking_at kur ndryshojnë vendet.
+            updates = {
+                "date": new_date,
+                "available_spots": self.max_participants,
+                "booking_count": 0,
+                "last_booking_at": None,
+                "status": "published",
+                "is_active": True,
+                "updated_at": timezone.now(),
+            }
+            if new_time_start:
+                updates["time_start"] = new_time_start
+
+            Tour.objects.filter(pk=self.pk).update(**updates)
+
+        self.refresh_from_db(fields=list(updates.keys()))
+        return self
     
     def update_available_spots(self):
         """Përditëso numrin e vendeve të lira bazuar në prenotimet e konfirmuara"""

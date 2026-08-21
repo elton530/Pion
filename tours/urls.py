@@ -95,6 +95,9 @@ urlpatterns = [
     # POST /tours/api/status/update/ - Përditëso statusin e turit
     path("api/status/update/", status_views.update_tour_status, name="update_tour_status"),
     
+    # POST /tours/api/republish/ - Ripubliko tur të përfunduar për datë të re
+    path("api/republish/", status_views.republish_tour, name="republish_tour"),
+    
     # GET /tours/api/guide-tours-status/ - Merr statusin e të gjithë tureve të guide-it
     path("api/guide-tours-status/", status_views.get_guide_tours_status, name="get_guide_tours_status"),
     

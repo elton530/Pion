@@ -79,6 +79,15 @@
               <a href="{% url 'tours:add_tour_faq' tour.slug %}" class="btn btn-outline">
                 <i class="fas fa-question-circle" aria-hidden="true"></i> FAQ
               </a>
+              {% if tour.can_be_republished %}
+                <button type="button"
+                        class="btn btn-republish"
+                        data-republish-tour="{{ tour.id }}"
+                        data-tour-title="{{ tour.title }}"
+                        data-current-time="{{ tour.time_start|time:'H:i' }}">
+                  <i class="fas fa-rotate-right" aria-hidden="true"></i> Ripubliko
+                </button>
+              {% endif %}
               <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-view">
                 <i class="fas fa-arrow-right" aria-hidden="true"></i> Shiko
               </a>
@@ -98,8 +107,41 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Modal: Ripubliko tur për datë të re -->
+<div class="republish-modal" id="republish-modal" hidden
+     data-endpoint="{% url 'tours:republish_tour' %}">
+  <div class="republish-modal-backdrop" data-republish-close></div>
+  <div class="republish-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="republish-modal-title">
+    <button type="button" class="republish-modal-close" data-republish-close aria-label="Mbyll">&times;</button>
+    <h2 id="republish-modal-title">Ripubliko Turin</h2>
+    <p class="republish-modal-subtitle" id="republish-tour-title"></p>
+    <p class="republish-modal-warning">
+      <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+      Prenotimet e realizimit të mëparshëm do të fshihen. Ruhen vetëm vlerësimet.
+    </p>
+    <form id="republish-form">
+      <div class="republish-field">
+        <label for="republish-new-date">Data e re *</label>
+        <input type="date" id="republish-new-date" name="new_date" required min="">
+      </div>
+      <div class="republish-field">
+        <label for="republish-new-time">Ora e nisjes</label>
+        <input type="time" id="republish-new-time" name="time_start">
+      </div>
+      <p class="republish-error" id="republish-error" hidden></p>
+      <div class="republish-modal-actions">
+        <button type="button" class="btn btn-outline" data-republish-close>Anulo</button>
+        <button type="submit" class="btn btn-primary" id="republish-submit">
+          <i class="fas fa-rotate-right" aria-hidden="true"></i> Ripubliko
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
   <script src="{% static 'js/tour_status.js' %}"></script>
+  <script src="{% static 'js/tour_republish.js' %}"></script>
 {% endblock %}

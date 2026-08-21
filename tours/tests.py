@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from bookings.models import Booking
+from bookings.models import Booking, BookingReview, Payment
 from tours.forms import TourEditForm
 from tours.models import Tour, TourReview, TourStatistic, TourType
 from users.models import GuideProfile, TouristProfile
@@ -821,3 +821,193 @@ class GuideTourManagementTests(TestCase):
             {"price_per_person": 150, "currency": "ALL"},
         )
         self.assertEqual(response.status_code, 403)
+
+
+class TourRepublishTests(TestCase):
+    """Ripublikimi i një turi të përfunduar për datë të re.
+
+    Nga realizimi i mëparshëm duhen ruajtur vetëm vlerësimet (reviews):
+    prenotimet dhe pagesat fshihen, vendet dhe numëruesit rikthehen.
+    """
+
+    def setUp(self):
+        self.guide_user = User.objects.create_user(
+            username="repub_guide", email="repub@example.com", password="secret123"
+        )
+        self.guide = GuideProfile.objects.create(user=self.guide_user, location="Tiranë")
+
+        self.other_guide_user = User.objects.create_user(
+            username="repub_other", email="repub_other@example.com", password="secret123"
+        )
+        GuideProfile.objects.create(user=self.other_guide_user, location="Vlorë")
+
+        self.tourist_user = User.objects.create_user(
+            username="repub_tourist", email="repub_tourist@example.com", password="secret123"
+        )
+        self.tourist = TouristProfile.objects.create(user=self.tourist_user)
+
+        self.second_tourist_user = User.objects.create_user(
+            username="repub_tourist2", email="repub_tourist2@example.com", password="secret123"
+        )
+        self.second_tourist = TouristProfile.objects.create(user=self.second_tourist_user)
+
+        self.tour_type = TourType.objects.create(name="Repub Type", description="Test")
+        self.past_date = timezone.now().date() - timedelta(days=7)
+        self.new_date = timezone.now().date() + timedelta(days=30)
+
+        self.tour = Tour.objects.create(
+            guide=self.guide,
+            title="Repub Tour",
+            slug="repub-tour",
+            short_description="Short description",
+            full_description="Full description",
+            tour_type=self.tour_type,
+            difficulty="easy",
+            age_group="all",
+            languages="sq",
+            meeting_point="Qendra",
+            location_city="Tiranë",
+            location_region="Tiranë",
+            duration_hours=4,
+            date=self.past_date,
+            time_start="10:00:00",
+            price_per_person=100,
+            max_participants=10,
+            min_participants=2,
+            status="completed",
+            is_active=True,
+            main_image=SimpleUploadedFile("repub.jpg", b"data", content_type="image/jpeg"),
+        )
+
+        # Prenotim i konfirmuar nga realizimi i mëparshëm (+ review mbi prenotim)
+        self.booking = Booking.objects.create(
+            tourist=self.tourist,
+            tour=self.tour,
+            num_people=2,
+        )
+        self.booking.confirm()
+        self.booking_review = BookingReview.objects.create(
+            booking=self.booking,
+            rating=5,
+            comment="Eksperiencë e mrekullueshme!",
+        )
+
+        # Review direkt mbi tur nga një turist tjetër
+        self.tour_review = TourReview.objects.create(
+            tour=self.tour,
+            tourist=self.second_tourist,
+            rating=4,
+            comment="Shumë mirë",
+        )
+
+    def test_model_republish_keeps_only_reviews(self):
+        result = self.tour.republish_for_new_date(self.new_date)
+
+        self.assertEqual(result.status, "published")
+        self.assertEqual(result.date, self.new_date)
+        self.assertTrue(result.is_active)
+
+        # Prenotimet (dhe pagesat) e realizimit të vjetër fshihen
+        self.assertEqual(self.tour.bookings.count(), 0)
+        self.assertEqual(Payment.objects.count(), 0)
+
+        # Review-et e turit ruhen
+        self.assertTrue(
+            TourReview.objects.filter(pk=self.tour_review.pk).exists()
+        )
+
+        # Review-i i bërë mbi prenotim transferohet si review turi
+        transferred = TourReview.objects.filter(tourist=self.tourist).first()
+        self.assertIsNotNone(transferred)
+        self.assertEqual(transferred.rating, 5)
+        self.assertEqual(transferred.comment, "Eksperiencë e mrekullueshme!")
+        self.assertTrue(transferred.is_verified)
+        self.assertFalse(BookingReview.objects.exists())
+
+        # Vendet rikthehen, numëruesit zerojohen
+        self.assertEqual(self.tour.available_spots, 10)
+        self.assertEqual(self.tour.booking_count, 0)
+        self.assertIsNone(self.tour.last_booking_at)
+
+    def test_model_republish_updates_start_time(self):
+        from datetime import time
+
+        result = self.tour.republish_for_new_date(self.new_date, new_time_start=time(9, 30))
+        self.assertEqual(result.time_start, time(9, 30))
+
+    def test_model_republish_rejects_past_new_date(self):
+        past = timezone.now().date() - timedelta(days=1)
+        with self.assertRaises(ValueError):
+            self.tour.republish_for_new_date(past)
+
+    def test_model_republish_rejects_unfinished_tour(self):
+        self.tour.status = "published"
+        self.tour.date = timezone.now().date() + timedelta(days=5)
+        self.tour.save(update_fields=["status", "date"])
+
+        with self.assertRaises(ValueError):
+            self.tour.republish_for_new_date(self.new_date)
+
+    def test_api_republish_success(self):
+        self.client.force_login(self.guide_user)
+        response = self.client.post(
+            reverse("tours:republish_tour"),
+            data=json.dumps({"tour_id": self.tour.id, "new_date": self.new_date.isoformat()}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["new_date"], self.new_date.isoformat())
+
+        self.tour.refresh_from_db()
+        self.assertEqual(self.tour.status, "published")
+        self.assertEqual(self.tour.date, self.new_date)
+        self.assertEqual(self.tour.bookings.count(), 0)
+        self.assertEqual(TourReview.objects.count(), 2)
+
+    def test_api_republish_requires_authentication(self):
+        response = self.client.post(
+            reverse("tours:republish_tour"),
+            data=json.dumps({"tour_id": self.tour.id, "new_date": self.new_date.isoformat()}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_api_republish_forbidden_for_non_guide(self):
+        self.client.force_login(self.tourist_user)
+        response = self.client.post(
+            reverse("tours:republish_tour"),
+            data=json.dumps({"tour_id": self.tour.id, "new_date": self.new_date.isoformat()}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_api_republish_cannot_touch_other_guides_tour(self):
+        self.client.force_login(self.other_guide_user)
+        response = self.client.post(
+            reverse("tours:republish_tour"),
+            data=json.dumps({"tour_id": self.tour.id, "new_date": self.new_date.isoformat()}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.tour.refresh_from_db()
+        self.assertEqual(self.tour.status, "completed")
+
+    def test_api_republish_rejects_missing_or_bad_date(self):
+        self.client.force_login(self.guide_user)
+
+        missing = self.client.post(
+            reverse("tours:republish_tour"),
+            data=json.dumps({"tour_id": self.tour.id}),
+            content_type="application/json",
+        )
+        self.assertEqual(missing.status_code, 400)
+
+        bad_format = self.client.post(
+            reverse("tours:republish_tour"),
+            data=json.dumps({"tour_id": self.tour.id, "new_date": "01-02-2030"}),
+            content_type="application/json",
+        )
+        self.assertEqual(bad_format.status_code, 400)
