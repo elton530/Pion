@@ -3,52 +3,112 @@
 <!DOCTYPE html>
 <html lang="sq" dir="ltr">
 <head>
+    <!-- Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Open Map — Zbulo Natyrën Shqiptare{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Platforma më e mirë për guidat lokale dhe aventurat autentike në natyrë në Shqipëri{% endblock %}">
-    
+
+    <title>{% block title %}Open Map{% endblock %}</title>
+
+    <meta
+        name="description"
+        content="{% block meta_description %}Platforma më e mirë për guidat lokale dhe aventurat autentike në natyrë në Shqipëri{% endblock %}"
+    >
+
     <!-- Favicon -->
-    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-    
-    <!-- Fontet -->
+    <link
+        rel="icon"
+        href="{% static 'images/favicon.ico' %}"
+        type="image/x-icon"
+    >
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    
-    <!-- CSS GLOBALE (funksionojnë kudo) -->
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+    <!-- Global Styles -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
-    
-    <!-- CSS specifike për faqen -->
+
+    <!-- Page Styles -->
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
-    <!-- Skip link -->
-    <a href="#main-content" class="skip-to-content">
+<body class="{% block body_class %}{% endblock %}">
+
+    <a
+        href="#main-content"
+        class="skip-to-content"
+    >
         Kalo te përmbajtja kryesore
     </a>
-    
-    <!-- Header (global) -->
-    {% include 'header.html' %}
-    
-    <!-- Përmbajtja kryesore -->
+
+    {% include "header.html" %}
+
+    {% if messages %}
+        <aside
+            class="flash-message-container"
+            role="status"
+            aria-live="polite"
+            aria-label="Njoftime të sistemit"
+        >
+            <div class="flash-message-table" aria-label="Lista e njoftimeve">
+                {% for message in messages %}
+                    {% with tag=message.tags|default:'info' %}
+                        <div class="flash-message-row flash-{{ tag }}" role="alert">
+                            <div class="flash-message-icon">
+                                {% if tag == 'success' %}
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                {% elif tag == 'error' or tag == 'danger' %}
+                                    <i class="fas fa-times-circle" aria-hidden="true"></i>
+                                {% elif tag == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flash-message-text-wrap">
+                                <div class="flash-message-title">
+                                    {% if tag == 'success' %}Sukses{% elif tag == 'error' or tag == 'danger' %}Gabim{% elif tag == 'warning' %}Paralajmërim{% else %}Informacion{% endif %}
+                                </div>
+                                <div class="flash-message-text">{{ message }}</div>
+                            </div>
+                            <button type="button" class="flash-message-close" aria-label="Mbyll njoftimin">
+                                <i class="fas fa-xmark" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        </aside>
+    {% endif %}
+
     <main id="main-content">
         {% block content %}{% endblock %}
     </main>
-    
-    <!-- Footer (global) -->
-    {% include 'footer.html' %}
-    
-    <!-- Scripts globale -->
+
+    {% include "footer.html" %}
+
+    <!-- Global Scripts -->
     <script src="{% static 'js/header.js' %}"></script>
-    <script src="{% static 'js/footer.js' %}"></script>
-    
+
+    <!-- Page Scripts -->
     {% block extra_js %}{% endblock %}
+
 </body>
 </html>

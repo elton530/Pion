@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ object.question }} — Open Map{% endblock %}
+
+{% block meta_description %}
+{{ object.question }} - Pyetje e shpeshtë në Open Map
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/faq.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="faq-detail-page">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-section">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="{% url 'core:home' %}">Home</a>
+                <span>/</span>
+                <a href="{% url 'core:faq_list' %}">Pyetje të Shpeshta</a>
+                <span>/</span>
+                <span>{{ object.question|truncatewords:5 }}</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Detail Section -->
+    <section class="faq-detail-section">
+        <div class="container">
+            <div class="faq-detail-content">
+                <h1>{{ object.question }}</h1>
+                
+                <div class="faq-meta">
+                    <span class="category-badge">{{ object.category }}</span>
+                    <span class="updated-date">Përditësuar: {{ object.updated_at|date:"d M Y" }}</span>
+                </div>
+
+                <div class="faq-answer-full">
+                    {{ object.answer|safe }}
+                </div>
+
+                <!-- Related FAQs -->
+                <div class="related-faqs">
+                    <h3>Pyetje të Tjera të Lidhura</h3>
+                    <div class="related-list">
+                        {% for related in related_faqs %}
+                            <a href="{% url 'core:faq_detail' related.id %}" class="related-item">
+                                <i class="fas fa-arrow-right"></i>
+                                <span>{{ related.question }}</span>
+                            </a>
+                        {% empty %}
+                            <p class="no-related">Nuk ka pyetje të tjera të lidhura</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="faq-navigation">
+                    {% if previous_faq %}
+                        <a href="{% url 'core:faq_detail' previous_faq.id %}" class="nav-btn nav-prev">
+                            <i class="fas fa-chevron-left"></i>
+                            <span>{{ previous_faq.question|truncatewords:3 }}</span>
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'core:faq_list' %}" class="nav-btn nav-all">
+                        <i class="fas fa-list"></i>
+                        <span>Shiko të Gjithë</span>
+                    </a>
+
+                    {% if next_faq %}
+                        <a href="{% url 'core:faq_detail' next_faq.id %}" class="nav-btn nav-next">
+                            <span>{{ next_faq.question|truncatewords:3 }}</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="faq-sidebar">
+                <div class="sidebar-card">
+                    <h3>Kërkimi Brenda Nesh?</h3>
+                    <p>Shiko të tjera pyetje të shpeshta</p>
+                    <a href="{% url 'core:faq_list' %}" class="btn btn-primary btn-full">
+                        <i class="fas fa-search"></i>
+                        <span>Kërko Pyetje</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Nuk Gjen Përgjigjen?</h3>
+                    <p>Kontakto ekipin tonë të mbështetjes</p>
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline btn-full">
+                        <i class="fas fa-envelope"></i>
+                        <span>Na Kontakto</span>
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@
     <div class="header-container">
         <!-- Logo -->
         <div class="logo">
-            <a href="{% url 'home' %}" class="logo-link">
+            <a href="{% url 'core:home' %}" class="logo-link">
                 <div class="logo-content">
                     <img src="{% static 'images/logo.png' %}" alt="Open Map Logo" class="logo-img">
                     <div class="logo-text-wrapper">
@@ -25,13 +25,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'core:about' %}" class="nav-link{% if request.resolver_match.url_name == 'about' %} active{% endif %}">
                         <i class="fas fa-info-circle"></i>
                         <span>Rreth Nesh</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'core:contact' %}" class="nav-link{% if request.resolver_match.url_name == 'contact' %} active{% endif %}">
                         <i class="fas fa-envelope"></i>
                         <span>Kontakti</span>
                     </a>
@@ -39,14 +39,39 @@
             </ul>
         </nav>
 
+        <!-- Header Search -->
+        <form method="get" action="{% url 'core:global_search' %}" class="header-search" role="search">
+            <div class="header-search-box">
+                <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                <input
+                    type="text"
+                    name="query"
+                    value="{{ request.GET.query }}"
+                    placeholder="Kërko tur ose guidë..."
+                    aria-label="Kërko"
+                    autocomplete="off"
+                >
+                <select name="search_type" class="search-type-select" aria-label="Lloji i kërkimit">
+                    <option value="all"{% if request.GET.search_type == 'all' %} selected{% endif %}>Të gjitha</option>
+                    <option value="tours"{% if request.GET.search_type == 'tours' %} selected{% endif %}>Turet</option>
+                    <option value="guides"{% if request.GET.search_type == 'guides' %} selected{% endif %}>Guide-t</option>
+                </select>
+                <button type="submit" class="search-submit" aria-label="Kërko">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                </button>
+            </div>
+        </form>
+
         <!-- User Actions -->
         <div class="user-actions">
             {% if user.is_authenticated %}
                 <div class="user-menu">
-                    <button class="user-menu-toggle" aria-label="User menu" aria-expanded="false">
+                    <button class="user-menu-toggle" aria-label="Menuja e përdoruesit" aria-expanded="false">
                         <div class="user-avatar">
-                            {% if user.profile.photo %}
-                                <img src="{{ user.profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                            {% if user.guide_profile.photo %}
+                                <img src="{{ user.guide_profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                            {% elif user.tourist_profile.photo %}
+                                <img src="{{ user.tourist_profile.photo.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
                             {% else %}
                                 <i class="fas fa-user-circle"></i>
                             {% endif %}
@@ -57,15 +82,45 @@
 
                     <!-- User Dropdown -->
                     <div class="user-dropdown">
+                        {% if user.guide_profile %}
+                        <a href="{% url 'users:guide_dashboard' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profili im</span>
+                        </a>
+                        {% elif user.tourist_profile %}
                         <a href="{% url 'users:tourist_dashboard' %}" class="dropdown-item">
                             <i class="fas fa-user"></i>
                             <span>Profili im</span>
                         </a>
-                        <a href="#" class="dropdown-item">
+                        <a href="{% url 'bookings:booking_list' %}" class="dropdown-item">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Prenotimet e Mia</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'core:home' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profili im</span>
+                        </a>
+                        {% endif %}
+                        {% if user.is_staff or user.is_superuser %}
+                        <a href="{% url 'users:admin_dashboard' %}" class="dropdown-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Dashboard Admin</span>
+                        </a>
+                        <a href="{% url 'users:admin_guides' %}" class="dropdown-item">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Menaxho Guide-t</span>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'users:password_change' %}" class="dropdown-item">
+                            <i class="fas fa-key"></i>
+                            <span>Ndrysho fjalëkalimin</span>
+                        </a>
+                        <a href="{% url 'users:saved_tours' %}" class="dropdown-item">
                             <i class="fas fa-bookmark"></i>
                             <span>Ture të ruajtura</span>
                         </a>
-                        <a href="#" class="dropdown-item">
+                        <a href="{% url 'users:history' %}" class="dropdown-item">
                             <i class="fas fa-history"></i>
                             <span>Historiku</span>
                         </a>
@@ -118,6 +173,38 @@
 
             <!-- Mobile Navigation -->
             <nav class="mobile-nav" aria-label="Mobile navigation">
+                <!-- Mobile Search -->
+                <form method="get" action="{% url 'core:global_search' %}" class="mobile-search" role="search">
+                    <div class="mobile-search-box">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input
+                            type="text"
+                            name="query"
+                            value="{{ request.GET.query }}"
+                            placeholder="Kërko tur ose guidë..."
+                            aria-label="Kërko"
+                            autocomplete="off"
+                        >
+                        <button type="submit" aria-label="Kërko">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="mobile-search-types">
+                        <label>
+                            <input type="radio" name="search_type" value="all"{% if request.GET.search_type == 'all' or not request.GET.search_type %} checked{% endif %}>
+                            Të gjitha
+                        </label>
+                        <label>
+                            <input type="radio" name="search_type" value="tours"{% if request.GET.search_type == 'tours' %} checked{% endif %}>
+                            Turet
+                        </label>
+                        <label>
+                            <input type="radio" name="search_type" value="guides"{% if request.GET.search_type == 'guides' %} checked{% endif %}>
+                            Guide-t
+                        </label>
+                    </div>
+                </form>
+
                 <ul class="mobile-nav-links">
                     <li>
                         <a href="{% url 'tours:tour_list' %}" class="mobile-nav-link">
@@ -127,14 +214,14 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="mobile-nav-link">
+                        <a href="{% url 'core:about' %}" class="mobile-nav-link{% if request.resolver_match.url_name == 'about' %} active{% endif %}">
                             <i class="fas fa-info-circle"></i>
                             <span>Rreth Nesh</span>
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="mobile-nav-link">
+                        <a href="{% url 'core:contact' %}" class="mobile-nav-link{% if request.resolver_match.url_name == 'contact' %} active{% endif %}">
                             <i class="fas fa-envelope"></i>
                             <span>Kontakti</span>
                             <i class="fas fa-chevron-right"></i>
@@ -150,11 +237,7 @@
                     <div class="mobile-user-section">
                         <div class="mobile-user-info">
                             <div class="mobile-user-avatar">
-                                {% if user.profile.photo %}
-                                    <img src="{{ user.profile.photo.url }}" alt="{{ user.get_full_name }}">
-                                {% else %}
-                                    <i class="fas fa-user-circle"></i>
-                                {% endif %}
+                                <span>{{ user.first_name|slice:":1"|default:user.username|upper }}</span>
                             </div>
                             <div class="mobile-user-details">
                                 <span class="mobile-user-name">{{ user.first_name|default:user.username }}</span>
@@ -164,21 +247,63 @@
 
                         <ul class="mobile-user-links">
                             <li>
-                                <a href="{% url 'users:tourist_dashboard' %}" class="mobile-nav-link">
-                                    <i class="fas fa-user"></i>
-                                    <span>Profili im</span>
+                                    {% if user.guide_profile %}
+                                    <a href="{% url 'users:guide_dashboard' %}" class="mobile-nav-link">
+                                        <i class="fas fa-user"></i>
+                                        <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% elif user.tourist_profile %}
+                                    <a href="{% url 'users:tourist_dashboard' %}" class="mobile-nav-link">
+                                        <i class="fas fa-user"></i>
+                                        <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    <a href="{% url 'bookings:booking_list' %}" class="mobile-nav-link">
+                                        <i class="fas fa-ticket-alt"></i>
+                                        <span>Prenotimet e Mia</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'core:home' %}" class="mobile-nav-link">
+                                        <i class="fas fa-user"></i>
+                                        <span>Profili im</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% endif %}
+                            </li>
+                            {% if user.is_staff or user.is_superuser %}
+                            <li>
+                                <a href="{% url 'users:admin_dashboard' %}" class="mobile-nav-link">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Dashboard Admin</span>
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="mobile-nav-link">
+                                <a href="{% url 'users:admin_guides' %}" class="mobile-nav-link">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span>Menaxho Guide-t</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="{% url 'users:password_change' %}" class="mobile-nav-link">
+                                    <i class="fas fa-key"></i>
+                                    <span>Ndrysho fjalëkalimin</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'users:saved_tours' %}" class="mobile-nav-link">
                                     <i class="fas fa-bookmark"></i>
                                     <span>Ture të ruajtura</span>
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="mobile-nav-link">
+                                <a href="{% url 'users:history' %}" class="mobile-nav-link">
                                     <i class="fas fa-history"></i>
                                     <span>Historiku</span>
                                     <i class="fas fa-chevron-right"></i>

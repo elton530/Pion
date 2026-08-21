@@ -13,27 +13,94 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
 {% endblock %}
 
 {% block content %}
+
+<!-- ==================== HEADER (full-bleed) ==================== -->
+<section class="list-header">
+    <div class="header-content">
+        <span class="eyebrow">Eksploro Shqipërinë</span>
+        <h1 class="page-title">
+            <i class="fas fa-compass"></i>
+            <span>Ture Turistike në Shqipëri</span>
+        </h1>
+        <p class="page-subtitle">
+            Zgjidh ndërmjet dhjetëra aventurash të emocionuara, me guida profesioniste dhe një eksperiencë autentike të udhëtimit.
+        </p>
+    </div>
+    <div class="list-header-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 90" preserveAspectRatio="none">
+            <path d="M0,64 C240,96 480,16 720,32 C960,48 1200,88 1440,56 L1440,90 L0,90 Z" fill="currentColor"></path>
+        </svg>
+    </div>
+</section>
+
 <div class="tour-list-container">
-    <!-- Header Section -->
-    <section class="list-header">
-        <div class="header-content">
-            <h1 class="page-title">
-                <i class="fas fa-compass"></i>
-                Ture Turistike në Shqipëri
-            </h1>
-            <p class="page-subtitle">
-                Zgjidh ndërmjet dhjetëra aventurave të emocionuese me guida profesioniste
-            </p>
+    <!-- ==================== TOP RATED CAROUSEL ==================== -->
+    {% if top_rated_tours %}
+    <section class="top-rated-section" aria-labelledby="top-rated-title">
+        <div class="top-rated-header">
+            <div class="top-rated-heading">
+                <span class="top-rated-eyebrow">Zgjedhja e vizitorëve</span>
+                <h2 id="top-rated-title">Turet më të vlerësuara</h2>
+            </div>
+
+            <div class="top-rated-controls">
+                <button type="button" class="top-rated-btn prev" aria-label="Kalo mbrapsht">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button type="button" class="top-rated-btn next" aria-label="Kalo përpara">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="top-rated-track" aria-label="Turet më të vlerësuara">
+            {% for tour in top_rated_tours %}
+            <article class="top-rated-card">
+                <a href="{% url 'tours:tour_detail' tour.slug %}" class="top-rated-link" aria-label="{{ tour.title }}">
+                    <div class="top-rated-media">
+                        {% if tour.main_image %}
+                            <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" loading="lazy">
+                        {% else %}
+                            <div class="top-rated-placeholder">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                        {% endif %}
+                        <span class="top-rated-rank">#{{ forloop.counter }}</span>
+                    </div>
+
+                    <div class="top-rated-body">
+                        <span class="top-rated-type">
+                            <i class="fas fa-hiking"></i>
+                            {{ tour.tour_type.name|default:"Aventurë në natyrë" }}
+                        </span>
+
+                        <h3 class="top-rated-name">{{ tour.title }}</h3>
+
+                        <div class="top-rated-meta">
+                            <span class="top-rated-rating" title="Vlerësimi mesatar">
+                                <i class="fas fa-star"></i>
+                                {{ tour.average_rating|floatformat:1|default:"5.0" }}
+                                <small>({{ tour.reviews_count }})</small>
+                            </span>
+                            <span class="top-rated-price">
+                                {{ tour.price_per_person }} {{ tour.get_currency_display }}
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
         </div>
     </section>
+    {% endif %}
 
-    <!-- Tours Grid -->
+    <!-- ==================== TOURS GRID ==================== -->
     {% if tours %}
     <div class="tour-grid" id="tour-grid">
         {% for tour in tours %}
-        <div class="tour-card" 
+        <div class="tour-card"
             data-tour-id="{{ tour.id }}"
-            data-tour-type="{{ tour.get_tour_type_display|lower }}"
+            data-tour-type="{{ tour.tour_type.name|lower|default:'' }}"
             data-tour-date="{{ tour.date|date:'Y-m-d' }}"
             data-tour-rating="{{ tour.average_rating|default:'0' }}"
             data-tour-price="{{ tour.price_per_person }}">
@@ -41,11 +108,10 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                 <!-- Image Section -->
                 <div class="tour-image-wrapper">
                     {% if tour.main_image %}
-                        <img src="{{ tour.main_image.url }}" 
-                             alt="{{ tour.title }}" 
-                             class="tour-image" 
-                             loading="lazy"
-                             onerror="this.style.display='none'">
+                        <img src="{{ tour.main_image.url }}"
+                             alt="{{ tour.title }}"
+                             class="tour-image"
+                             loading="lazy">
                     {% else %}
                         <div class="no-image-placeholder">
                             <i class="fas fa-mountain"></i>
@@ -68,15 +134,12 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
 
                     <!-- Difficulty Badge -->
                     <div class="difficulty-badge difficulty-{{ tour.difficulty }}">
-                        {{ tour.get_difficulty_display }}
+                        {{ tour.get_difficulty_display|truncatechars:22 }}
                     </div>
                 </div>
 
                 <!-- Info Section -->
                 <div class="tour-info">
-                    <!-- Title -->
-                    <h3 class="tour-title">{{ tour.title }}</h3>
-
                     <!-- Meta Information -->
                     <div class="tour-meta">
                         <span class="meta-item" title="Data e turit">
@@ -85,7 +148,7 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                         </span>
                         <span class="meta-item" title="Lloji i turit">
                             <i class="fas fa-hiking"></i>
-                            {{ tour.get_tour_type_display }}
+                            {{ tour.tour_type.name|default:"—" }}
                         </span>
                         <span class="meta-item" title="Kohëzgjatja">
                             <i class="fas fa-hourglass-end"></i>
@@ -93,37 +156,34 @@ shëtitje dhe më shumë. Rezervo me guida profesioniste lokale.
                         </span>
                     </div>
 
-                    <!-- Guide Information -->
-                    <div class="tour-guide">
-                        <i class="fas fa-user-shield"></i>
-                        <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
-                    </div>
+                    <!-- Title -->
+                    <h3 class="tour-title">{{ tour.title }}</h3>
 
-                    <!-- Rating -->
-                    {% if tour.average_rating %}
-                    <div class="tour-rating">
-                        <div class="stars">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= tour.average_rating %}
-                                    <i class="fas fa-star"></i>
-                                {% else %}
-                                    <i class="far fa-star"></i>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <span class="rating-count">({{ tour.reviews_count }})</span>
+                    <!-- Guide & Rating -->
+                    <div class="tour-attributes">
+                        <span class="tour-guide">
+                            <i class="fas fa-user-shield"></i>
+                            <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
+                        </span>
+
+                        {% if tour.reviews_count %}
+                        <span class="tour-rating">
+                            <i class="fas fa-star"></i>
+                            {{ tour.average_rating|floatformat:1 }}
+                            <span class="rating-count">({{ tour.reviews_count }})</span>
+                        </span>
+                        {% endif %}
                     </div>
-                    {% endif %}
 
                     <!-- Footer Section -->
                     <div class="tour-footer">
                         <div class="tour-price">
                             <span class="price-amount">{{ tour.price_per_person }}</span>
-                            <span class="price-label">Lekë/person</span>
+                            <span class="price-label">{{ tour.get_currency_display }}/person</span>
                         </div>
-                        <button class="tour-action" aria-label="Shiko detajet e turit">
+                        <span class="tour-action" aria-hidden="true">
                             <i class="fas fa-arrow-right"></i>
-                        </button>
+                        </span>
                     </div>
                 </div>
             </a>

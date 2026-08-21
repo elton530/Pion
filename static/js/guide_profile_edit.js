@@ -14,8 +14,9 @@ class GuideProfileEditor {
     init() {
         this.setupPhotoUpload();
         this.setupBioCounter();
-        this.setupMessageHandlers();
         this.setupFormValidation();
+        this.markServerErrors();
+        this.disableFormOnSubmit();
     }
 
     /**
@@ -78,6 +79,10 @@ class GuideProfileEditor {
     }
 
     /**
+     * Setup photo upload and preview
+     */
+
+    /**
      * Update photo preview in DOM
      */
     updatePhotoPreview(dataUrl, previewImage, photoPlaceholder) {
@@ -85,7 +90,15 @@ class GuideProfileEditor {
             previewImage.src = dataUrl;
             previewImage.parentElement.classList.add('fade-in');
         } else if (photoPlaceholder) {
-            photoPlaceholder.innerHTML = `<img src="${dataUrl}" alt="Përshkrimi" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.alt = 'Përshkrimi';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '50%';
+            photoPlaceholder.innerHTML = '';
+            photoPlaceholder.appendChild(img);
         }
     }
 
@@ -157,30 +170,6 @@ class GuideProfileEditor {
     }
 
     /**
-     * Setup message close handlers
-     */
-    setupMessageHandlers() {
-        const closeButtons = document.querySelectorAll('.close-message');
-        closeButtons.forEach((button) => {
-            button.addEventListener('click', (e) => this.closeMessage(e));
-        });
-
-        // Auto-close success messages after 5 seconds
-        const successMessages = document.querySelectorAll('.message.success');
-        successMessages.forEach((message) => {
-            setTimeout(() => this.fadeOutElement(message), 5000);
-        });
-    }
-
-    /**
-     * Close message with animation
-     */
-    closeMessage(event) {
-        const messageElement = event.target.closest('.message');
-        this.fadeOutElement(messageElement);
-    }
-
-    /**
      * Fade out element with animation
      */
     fadeOutElement(element) {
@@ -203,11 +192,22 @@ class GuideProfileEditor {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message error';
         messageDiv.setAttribute('role', 'alert');
-        messageDiv.innerHTML = `
-            <i class="fas fa-exclamation-circle"></i>
-            <span>${message}</span>
-            <button type="button" class="close-message" aria-label="Mbyll mesazhin">&times;</button>
-        `;
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-circle';
+
+        const span = document.createElement('span');
+        span.textContent = message;
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'close-message';
+        closeButton.setAttribute('aria-label', 'Mbyll mesazhin');
+        closeButton.textContent = '×';
+
+        messageDiv.appendChild(icon);
+        messageDiv.appendChild(span);
+        messageDiv.appendChild(closeButton);
 
         const firstMessage = container.querySelector('.message');
         if (firstMessage) {
@@ -239,20 +239,21 @@ class GuideProfileEditor {
      * Validate form before submission
      */
     validateForm(event) {
-        const phone = document.querySelector('input[name="phone"]').value;
-        const location = document.querySelector('input[name="location"]').value;
+        const form = event.currentTarget;
+        const phoneInput = form.querySelector('input[name="phone"]');
+        const locationInput = form.querySelector('input[name="location"]');
 
         let isValid = true;
         let errors = [];
 
         // Validate phone if provided
-        if (phone && !this.isValidPhone(phone)) {
+        if (phoneInput && phoneInput.value && !this.isValidPhone(phoneInput.value)) {
             errors.push('Numri i telefonit nuk është valid');
             isValid = false;
         }
 
         // Validate location if provided
-        if (location && location.trim().length < 2) {
+        if (locationInput && locationInput.value.trim().length < 2) {
             errors.push('Vendndodhja duhet të ketë të paktën 2 karaktere');
             isValid = false;
         }
@@ -261,6 +262,38 @@ class GuideProfileEditor {
             event.preventDefault();
             errors.forEach(error => this.showErrorMessage(error));
         }
+    }
+
+    /**
+     * Highlight inputs that have server-side validation errors and focus the first
+     */
+    markServerErrors() {
+        const form = document.getElementById('profile-form');
+        if (!form) return;
+
+        // Find all inline error lists and mark the related input
+        const errorLists = form.querySelectorAll('.messages.error');
+        let firstFocused = false;
+        errorLists.forEach((errList) => {
+            // Prefer finding the field inside the same form-group
+            let field = errList.closest('.form-group')?.querySelector('input,select,textarea');
+
+            if (!field) {
+                // Fall back to the element right before the error list
+                field = errList.previousElementSibling;
+                if (field && field.tagName === 'LABEL') {
+                    field = field.previousElementSibling;
+                }
+            }
+
+            if (field) {
+                field.classList.add('input-error');
+                if (!firstFocused && field.focus && typeof field.focus === 'function') {
+                    field.focus();
+                    firstFocused = true;
+                }
+            }
+        });
     }
 
     /**

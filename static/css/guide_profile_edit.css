@@ -494,6 +494,16 @@
     line-height: 1.6;
 }
 
+/* Highlight fields with server-side errors */
+.profile-edit-wrapper .input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 4px rgba(239,68,68,0.08) !important;
+}
+
+.profile-edit-wrapper .messages.error {
+    margin-top: 8px;
+}
+
 .profile-edit-wrapper .help-text {
     display: flex;
     align-items: center;

@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Admin - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-shell">
+        <div class="admin-header">
+            <div class="admin-header-row">
+                <div>
+                    <h1>🏛️ Dashboard Admin</h1>
+                    <p>Monitoro statusin e platformës, mirato guide-t e reja dhe ndiq performancën e guide-ve të miratuar.</p>
+                </div>
+                <div class="admin-header-actions">
+                    <a href="{% url 'users:admin_guides' %}" class="btn-action view">🧭 Menaxho të gjithë guide-t</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stats">
+            <a href="#pending-guides" class="stat-card accent-blue">
+                <div class="stat-icon">📌</div>
+                <h3>{{ pending_count }}</h3>
+                <p>Guide në pritje</p>
+            </a>
+            <a href="#verified-guides" class="stat-card accent-green">
+                <div class="stat-icon">✅</div>
+                <h3>{{ verified_count }}</h3>
+                <p>Guide të miratuar</p>
+            </a>
+            <a href="#rejected-guides" class="stat-card accent-red">
+                <div class="stat-icon">❌</div>
+                <h3>{{ rejected_count }}</h3>
+                <p>Guide të refuzuar</p>
+            </a>
+            <a href="#suspended-guides" class="stat-card accent-orange">
+                <div class="stat-icon">🚫</div>
+                <h3>{{ suspended_count }}</h3>
+                <p>Guide të pezulluar</p>
+            </a>
+            <a href="{% url 'users:admin_guides' %}?featured=1" class="stat-card accent-purple">
+                <div class="stat-icon">⭐</div>
+                <h3>{{ featured_count }}</h3>
+                <p>Guide të veçuar</p>
+            </a>
+            <div class="stat-card accent-gold">
+                <div class="stat-icon">💰</div>
+                <h3>{{ platform_revenue|floatformat:0 }} Lekë</h3>
+                <p>Të ardhura totale</p>
+            </div>
+            <div class="stat-card accent-purple">
+                <div class="stat-icon">🧾</div>
+                <h3>{{ total_bookings }}</h3>
+                <p>Rezervime totale</p>
+            </div>
+            <div class="stat-card accent-teal">
+                <div class="stat-icon">🚶</div>
+                <h3>{{ total_tourists }}</h3>
+                <p>Turistë aktivë</p>
+            </div>
+            <div class="stat-card accent-indigo">
+                <div class="stat-icon">🏔️</div>
+                <h3>{{ active_tours }}</h3>
+                <p>Ture aktive</p>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <div class="panel panel-wide" id="pending-guides">
+                <div class="panel-header">
+                    <h2>Lista e guide-ve në pritje</h2>
+                    <span class="badge">{{ pending_count }} në pritje</span>
+                </div>
+
+                {% if pending_guides %}
+                    <div class="guide-card-list">
+                        {% for guide in pending_guides %}
+                            <div class="guide-card guide-card-pending">
+                                <div class="guide-card-top">
+                                    <div class="guide-avatar">
+                                        {% if guide.photo %}
+                                            <img src="{{ guide.photo.url }}" alt="{{ guide.full_name }}">
+                                        {% else %}
+                                            <span>{{ guide.user.username|slice:":1"|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="guide-identity">
+                                        <strong class="guide-name">{{ guide.full_name }}</strong>
+                                        <span class="guide-username">@{{ guide.user.username }}</span>
+                                        <span class="status-tag status-pending">Në pritje</span>
+                                    </div>
+                                    <div class="guide-applied">
+                                        <span class="mini-label">Aplikuar më</span>
+                                        <strong>{{ guide.created_at|date:"d M Y" }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="guide-card-body">
+                                    <div class="guide-meta">
+                                        <span title="Vendndodhja"><i class="fas fa-map-marker-alt"></i> {{ guide.location|default:'-' }}</span>
+                                        <span title="Telefon"><i class="fas fa-phone"></i> {{ guide.phone|default:'-' }}</span>
+                                        <span title="Email"><i class="fas fa-envelope"></i> {{ guide.user.email|default:'-' }}</span>
+                                    </div>
+                                    <div class="guide-chips">
+                                        <span class="chip chip-specialty"><i class="fas fa-compass"></i> {{ guide.get_specialty_display }}</span>
+                                        <span class="chip chip-experience"><i class="fas fa-briefcase"></i> {{ guide.years_experience }} vjet përvojë</span>
+                                        <span class="chip chip-level"><i class="fas fa-graduation-cap"></i> {{ guide.get_experience_level_display }}</span>
+                                    </div>
+                                    {% if guide.languages %}
+                                        <div class="guide-chips">
+                                            <span class="chip chip-lang"><i class="fas fa-language"></i> {{ guide.languages_list|join:", " }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if guide.certifications_list %}
+                                        <div class="guide-certs">
+                                            {% for cert in guide.certifications_list %}
+                                                <span class="cert-badge">🏅 {{ cert }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    {% if guide.bio %}
+                                        <p class="guide-bio">{{ guide.bio|truncatechars:160 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="guide-card-actions">
+                                    <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
+                                    <form method="post" data-confirm="A je i sigurt që dëshiron ta miratosh këtë guide?">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn-action approve">✅ Mirato</button>
+                                    </form>
+                                    <form method="post" data-confirm="A je i sigurt që dëshiron ta refuzosh këtë guide?">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn-action reject">❌ Refuzo</button>
+                                    </form>
+                                    <a href="{% url 'users:guide_profile_public' guide.user.username %}" class="btn-action view" target="_blank" rel="noopener noreferrer">👁️ Shiko profilin</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        Nuk ka guide në pritje për momentin.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Shpejtësi e platformës</h2>
+                </div>
+                <div class="mini-stats">
+                    <div class="mini-stat">
+                        <span class="mini-label">Ture totale</span>
+                        <strong>{{ total_tours }}</strong>
+                    </div>
+                    <div class="mini-stat">
+                        <span class="mini-label">Rezervime të hapura</span>
+                        <strong>{{ pending_bookings }}</strong>
+                    </div>
+                    <div class="mini-stat">
+                        <span class="mini-label">Konfirmuar</span>
+                        <strong>{{ confirmed_bookings }}</strong>
+                    </div>
+                    <div class="mini-stat">
+                        <span class="mini-label">Përfunduar</span>
+                        <strong>{{ completed_bookings }}</strong>
+                    </div>
+                    <div class="mini-stat">
+                        <span class="mini-label">Përdorues gjithsej</span>
+                        <strong>{{ total_users }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="verified-guides">
+            <div class="panel-header">
+                <h2>Guide të miratuar</h2>
+                <div class="panel-tools">
+                    <div class="table-search">
+                        <i class="fas fa-search"></i>
+                        <input type="search" id="guideSearch" placeholder="Kërko guide (emri, vendndodhja, specialiteti)..." aria-label="Kërko guide">
+                    </div>
+                    <span class="badge badge-green">{{ verified_count }} të miratuar</span>
+                </div>
+            </div>
+
+            {% if verified_guides %}
+                <div class="table-scroll">
+                    <table class="verified-guides-table" id="verifiedTable">
+                        <thead>
+                            <tr>
+                                <th>Guide</th>
+                                <th>Specialiteti</th>
+                                <th>Përvoja</th>
+                                <th>Vlerësimi</th>
+                                <th>Ture</th>
+                                <th>Turistë</th>
+                                <th>Fitimet</th>
+                                <th>Verifikuar më</th>
+                                <th>Veprime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for guide in verified_guides %}
+                                <tr class="guide-row" data-search="{{ guide.full_name|lower }} {{ guide.user.username|lower }} {{ guide.location|lower }} {{ guide.get_specialty_display|lower }}">
+                                    <td>
+                                        <div class="cell-user">
+                                            <div class="guide-avatar avatar-sm">
+                                                {% if guide.photo %}
+                                                    <img src="{{ guide.photo.url }}" alt="{{ guide.full_name }}">
+                                                {% else %}
+                                                    <span>{{ guide.user.username|slice:":1"|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <strong class="user-name">
+                                                    {{ guide.full_name }}
+                                                    {% if guide.is_featured %}<span class="badge-featured" title="I veçuar">⭐</span>{% endif %}
+                                                </strong>
+                                                <div class="user-meta">@{{ guide.user.username }}</div>
+                                                <div class="user-meta"><i class="fas fa-map-marker-alt"></i> {{ guide.location|default:'-' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip chip-specialty">{{ guide.get_specialty_display }}</span></td>
+                                    <td>
+                                        <span class="cell-strong">{{ guide.years_experience }} vjet</span>
+                                        <span class="user-meta">{{ guide.get_experience_level_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if guide.reviews_count > 0 %}
+                                            <span class="stars" aria-label="Vlerësim {{ guide.average_rating }} nga 5">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star{% if forloop.counter > guide.average_rating|floatformat:"0" %} star-empty{% endif %}"></i>
+                                                {% endfor %}
+                                            </span>
+                                            <span class="user-meta">{{ guide.average_rating|floatformat:1 }} ({{ guide.reviews_count }} vlerësime)</span>
+                                        {% else %}
+                                            <span class="user-meta">Pa vlerësime</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-center"><strong>{{ guide.admin_tour_count }}</strong></td>
+                                    <td class="cell-center"><strong>{{ guide.admin_tourist_count }}</strong></td>
+                                    <td><strong class="cell-strong">{{ guide.admin_revenue|floatformat:0 }} Lekë</strong></td>
+                                    <td><span class="user-meta">{{ guide.verified_at|date:"d M Y"|default:'-' }}</span></td>
+                                    <td class="actions">
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
+                                        <form method="post" data-confirm="A je i sigurt që dëshiron ta pezullosh këtë guide?">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                            <input type="hidden" name="action" value="suspend">
+                                            <button type="submit" class="btn-action suspend">🚫 Pezullo</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="empty-state search-empty" hidden>Asnjë guide nuk përputhet me kërkimin.</div>
+            {% else %}
+                <div class="empty-state">
+                    Nuk ka ende guide të miratuar. Mirato guide-t e para nga lista në pritje.
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="panel" id="rejected-guides">
+            <div class="panel-header">
+                <h2>Guide të refuzuar dhe të pezulluar</h2>
+                <span class="badge badge-red">{{ rejected_count }} refuzuar · {{ suspended_count }} pezulluar</span>
+            </div>
+
+            {% if rejected_guides or suspended_guides %}
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Përdorues</th>
+                                <th>Vendndodhja</th>
+                                <th>Specialiteti</th>
+                                <th>Status</th>
+                                <th>Veprime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for guide in rejected_guides %}
+                                <tr>
+                                    <td>
+                                        <strong class="user-name">{{ guide.full_name }}</strong>
+                                        <span class="user-meta">@{{ guide.user.username }}</span>
+                                    </td>
+                                    <td>{{ guide.location|default:'-' }}</td>
+                                    <td>{{ guide.get_specialty_display }}</td>
+                                    <td><span class="status-tag status-rejected">Refuzuar</span></td>
+                                    <td class="actions">
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
+                                        <form method="post" data-confirm="A dëshiron ta miratosh përsëri këtë guide?">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                            <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="btn-action approve">Mirato përsëri</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% for guide in suspended_guides %}
+                                <tr>
+                                    <td>
+                                        <strong class="user-name">{{ guide.full_name }}</strong>
+                                        <span class="user-meta">@{{ guide.user.username }}</span>
+                                    </td>
+                                    <td>{{ guide.location|default:'-' }}</td>
+                                    <td>{{ guide.get_specialty_display }}</td>
+                                    <td><span class="status-tag status-suspended">Pezulluar</span></td>
+                                    <td class="actions">
+                                        <a href="{% url 'users:admin_guide_detail' guide.id %}" class="btn-action view">⚙️ Menaxho</a>
+                                        <form method="post" data-confirm="A dëshiron ta riaktivizosh këtë guide?">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="guide_id" value="{{ guide.id }}">
+                                            <input type="hidden" name="action" value="reactivate">
+                                            <button type="submit" class="btn-action reactivate">✅ Riaktivizo</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    Nuk ka guide të refuzuar ose të pezulluar.
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Rezervimet e fundit</h2>
+                <span class="badge">{{ total_bookings }} gjithsej</span>
+            </div>
+
+            {% if recent_bookings %}
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Turist</th>
+                                <th>Tur</th>
+                                <th>Çmim</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings %}
+                                <tr>
+                                    <td>{{ booking.tourist.user.get_full_name|default:booking.tourist.user.username }}</td>
+                                    <td>{{ booking.tour.title }}</td>
+                                    <td>{{ booking.final_price|floatformat:0 }} {{ booking.tour.get_currency_display }}</td>
+                                    <td><span class="status-tag status-{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                                    <td>{{ booking.created_at|date:"d M Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    Nuk ka rezervime të fundit për momentin.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+{% endblock %}

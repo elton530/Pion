@@ -1,53 +1,122 @@
-<!DOCTYPE html>
-<html lang="sq">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Rezervim i Suksesshëm!</title>
-    <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            padding: 100px;
-            background: #f0f2f5;
-        }
+{% block title %}Prenotim i Suksesshëm - Open Map{% endblock %}
 
-        .box {
-            background: white;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 50px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+{% block meta_description %}Prenotimi u krye me sukses. Presim konfirmimin nga guida.{% endblock %}
 
-        h1 {
-            color: #27ae60;
-        }
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
 
-        p {
-            font-size: 1.2em;
-        }
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Success Message -->
+        <div style="text-align: center; padding: 4rem 2rem; background: var(--card); border-radius: var(--radius-lg); box-shadow: var(--shadow); margin-bottom: 2rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+            <h1 style="color: var(--success); font-size: 2.4rem; margin-bottom: 0.5rem;">
+                Prenotimi u Krye me Sukses!
+            </h1>
+            <p style="color: var(--text-light); font-size: 1.1rem; margin-bottom: 2rem;">
+                Faleminderit për prenotimin! Guida do të kontaktojë së shpejti.
+            </p>
+        </div>
 
-        a {
-            background: #3498db;
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-        }
-    </style>
-</head>
+        <!-- Booking Details Card -->
+        <div class="booking-card">
+            <h2 style="margin-top: 0;">Detajet e Prenotimit</h2>
+            
+            <div class="booking-meta">
+                <div class="booking-meta-item">
+                    <strong>Numri i Prenotimit</strong>
+                    <span style="font-family: monospace; font-weight: 700;">{{ booking.id }}</span>
+                </div>
+                <div class="booking-meta-item">
+                    <strong>Statusi</strong>
+                    <span class="booking-badge pending">
+                        <i class="fas fa-hourglass-half"></i> Në Pritje
+                    </span>
+                </div>
+                <div class="booking-meta-item">
+                    <strong>Data e Prenotimit</strong>
+                    <span>{{ booking.created_at|date:"d M Y" }} {{ booking.created_at|time:"H:i" }}</span>
+                </div>
+            </div>
 
-<body>
-    <div class="box">
-        <h1>🎉 Rezervimi u krye me sukses!</h1>
-        <p>Faleminderit! Rezervimi yt për "<strong>{{ tour.title }}</strong>" është regjistruar.</p>
-        <p>Guida do ta konfirmojë shpejt. Do të njoftohesh me email ose në platformë.</p>
-        <br>
-        <a href="{% url 'tours:tour_list' %}">Shiko ture të tjera</a>
+            <div style="border-top: 1px solid rgba(15, 23, 42, 0.08); padding-top: 1.5rem; margin-top: 1.5rem;">
+                <h3>Detajet e Turit</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th style="text-align: left; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">Turi</th>
+                        <td style="text-align: right; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06); font-weight: 600;">
+                            {{ tour.title }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">Data</th>
+                        <td style="text-align: right; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">
+                            {{ tour.date|date:"d F Y" }} në {{ tour.time_start|time:"H:i" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">Vendi i Takimit</th>
+                        <td style="text-align: right; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">
+                            {{ tour.meeting_point }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">Udhëzuesi</th>
+                        <td style="text-align: right; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">
+                            {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06);">Numri i Personave</th>
+                        <td style="text-align: right; padding: 0.8rem 0; border-bottom: 1px solid rgba(15, 23, 42, 0.06); font-weight: 600;">
+                            {{ booking.num_people }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 0.8rem 0;">Çmimi Total</th>
+                        <td style="text-align: right; padding: 0.8rem 0; font-size: 1.3rem; color: var(--primary); font-weight: 700;">
+                            {{ booking.total_price }} {{ tour.get_currency_display }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            {% if booking.notes %}
+            <div style="background: rgba(14, 165, 233, 0.07); border-radius: 14px; padding: 1rem; margin-top: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.12);">
+                <strong>Shënimet e tua:</strong>
+                <p style="margin: 0.5rem 0 0; color: var(--text-light);">
+                    {{ booking.notes }}
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="booking-footer" style="margin-top: 1.5rem;">
+                <a href="{% url 'users:tourist_dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kthehu në Dashboard
+                </a>
+                <a href="{% url 'tours:tour_list' %}" class="btn btn-primary">
+                    <i class="fas fa-compass"></i> Shfletim Tureve
+                </a>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div style="background: #ecfdf5; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-lg); padding: 1.8rem; margin-top: 2rem;">
+            <h3 style="color: #065f46; margin-top: 0;">
+                <i class="fas fa-info-circle"></i> Çfarë Ndodh Tani?
+            </h3>
+            <ul style="color: #065f46; margin: 0; padding-left: 1.5rem;">
+                <li>Guida do të marrë njoftimin tuaj dhe do të kontaktojë për konfirmim</li>
+                <li>Mund të shohësh statusin e prenotimit në dashboard-in tuaj</li>
+                <li>Për pyetje, kontakto guida drejtpërdrejt në platformë</li>
+                <li>Kujtoje këtë numër prenotimi: <strong style="font-family: monospace;">{{ booking.id }}</strong></li>
+            </ul>
+        </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

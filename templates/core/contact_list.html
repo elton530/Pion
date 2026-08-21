@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mesazhet e Kontaktit — Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-envelope"></i> Mesazhet e Kontaktit
+                </h1>
+                <p>Menaxho mesazhet e ardhura nga forma e kontaktit</p>
+            </div>
+            <a href="{% url 'core:contact' %}" class="btn btn-outline">
+                <i class="fas fa-plus"></i> Kontakti
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="booking-meta" style="margin-bottom: 2rem;">
+            <div class="booking-meta-item">
+                <strong>Total Mesazhe</strong>
+                <span style="font-size: 1.5rem; color: var(--primary);">{{ page_obj.paginator.count }}</span>
+            </div>
+            <div class="booking-meta-item">
+                <strong>Mesazhe të Reja</strong>
+                <span style="font-size: 1.5rem; color: var(--warning);">{{ new_count }}</span>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="booking-form-card" style="margin-bottom: 2rem;">
+            <form method="get" class="booking-form">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label for="status">Statusi</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">Të gjitha</option>
+                            <option value="new" {% if request.GET.status == 'new' %}selected{% endif %}>I ri</option>
+                            <option value="replied" {% if request.GET.status == 'replied' %}selected{% endif %}>Përgjigjur</option>
+                            <option value="resolved" {% if request.GET.status == 'resolved' %}selected{% endif %}>Zgjidhur</option>
+                            <option value="spam" {% if request.GET.status == 'spam' %}selected{% endif %}>Spam</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search">Kërko</label>
+                        <input type="text" name="search" id="search" class="form-control"
+                               placeholder="Emër, email ose temë..."
+                               value="{{ request.GET.search }}">
+                    </div>
+                    <div class="form-group" style="align-self: end;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filtro
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Messages List -->
+        {% if page_obj.object_list %}
+            <div class="booking-form-card">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border, #e5e7eb);">
+                            <th style="padding: 0.75rem; text-align: left;">Emri</th>
+                            <th style="padding: 0.75rem; text-align: left;">Tema</th>
+                            <th style="padding: 0.75rem; text-align: left;">Statusi</th>
+                            <th style="padding: 0.75rem; text-align: left;">Data</th>
+                            <th style="padding: 0.75rem; text-align: left;">Veprim</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in page_obj.object_list %}
+                        <tr style="border-bottom: 1px solid var(--border, #eef0f3);">
+                            <td style="padding: 0.75rem;">
+                                <strong>{{ msg.name }}</strong><br>
+                                <small style="color: var(--muted, #64748b);">{{ msg.email }}</small>
+                            </td>
+                            <td style="padding: 0.75rem;">{{ msg.subject|truncatechars:40 }}</td>
+                            <td style="padding: 0.75rem;">
+                                {% if msg.status == 'new' %}
+                                    <span style="background: #f59e0b; color: #fff; padding: 3px 8px; border-radius: 3px;">I ri</span>
+                                {% elif msg.status == 'replied' %}
+                                    <span style="background: #10b981; color: #fff; padding: 3px 8px; border-radius: 3px;">Përgjigjur</span>
+                                {% elif msg.status == 'resolved' %}
+                                    <span style="background: #0ea5e9; color: #fff; padding: 3px 8px; border-radius: 3px;">Zgjidhur</span>
+                                {% elif msg.status == 'spam' %}
+                                    <span style="background: #ef4444; color: #fff; padding: 3px 8px; border-radius: 3px;">Spam</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.75rem;">{{ msg.created_at|date:"d M Y H:i" }}</td>
+                            <td style="padding: 0.75rem;">
+                                <a href="{% url 'core:contact_detail' msg.id %}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-eye"></i> Shiko
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state" style="text-align: center; padding: 4rem 2rem;">
+                <i class="fas fa-envelope-open" style="font-size: 3rem; color: var(--muted, #94a3b8);"></i>
+                <h3>Nuk ka mesazhe</h3>
+                <p>Nuk u gjetën mesazhe kontakti me filtrat e zgjedhur.</p>
+            </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination" style="display: flex; gap: 1rem; align-items: center; justify-content: center; margin-top: 2rem;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="btn btn-secondary">
+                    <i class="fas fa-chevron-left"></i> Mbrapa
+                </a>
+            {% endif %}
+            <span class="page-current">
+                Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="btn btn-secondary">
+                    Përpara <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

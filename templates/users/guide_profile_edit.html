@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Plotëso Profilin tënd si Guide Lokal - Pion{% endblock %}
+{% block title %}Plotëso Profilin tënd si Guide Lokal - Open Map{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/guide_profile_edit.css' %}">
@@ -50,16 +50,13 @@
             </div>
         </div>
 
-        <!-- Messages -->
-        {% if messages %}
-        <div class="messages-container" id="messages-container">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}" role="alert">
-                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
-                <span>{{ message }}</span>
-                <button type="button" class="close-message" aria-label="Mbyll mesazhin">&times;</button>
-            </div>
-            {% endfor %}
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            <ul class="messages error">
+                {% for err in form.non_field_errors %}
+                <li>{{ err }}</li>
+                {% endfor %}
+            </ul>
         </div>
         {% endif %}
 
@@ -76,7 +73,7 @@
                     </div>
 
                     <div class="photo-upload-area">
-                        {% if profile.photo %}
+                        {% if profile.photo and photo_exists %}
                         <div class="current-photo">
                             <img src="{{ profile.photo.url }}" alt="Foto profilit aktuale" id="preview-image">
                             <div class="photo-overlay">
@@ -98,6 +95,14 @@
                                 Zgjidh foto
                             </label>
                         </div>
+                        {% if form.photo.errors %}
+                        <ul class="messages error">
+                            {% for e in form.photo.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+
                         <p class="help-text">
                             <i class="fas fa-info-circle"></i>
                             Ngarko një foto të qartë të fytyrës tënde. Formatet: JPG, PNG (max 5MB)
@@ -111,6 +116,13 @@
                             {{ form.bio.label }}
                         </label>
                         {{ form.bio }}
+                        {% if form.bio.errors %}
+                        <ul class="messages error">
+                            {% for e in form.bio.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                         <p class="help-text">
                             <i class="fas fa-lightbulb"></i>
                             Trego pak për përvojën tënde si guide, pasionet dhe çfarë e bën unik stilin tënd.
@@ -137,6 +149,13 @@
                         <div class="input-with-icon">
                             {{ form.phone }}
                         </div>
+                        {% if form.phone.errors %}
+                        <ul class="messages error">
+                            {% for e in form.phone.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                         <p class="help-text">
                             <i class="fas fa-info-circle"></i>
                             Numri me kod vendi, p.sh. +355 69 123 4567
@@ -152,6 +171,13 @@
                         <div>
                             {{ form.location }}
                         </div>
+                        {% if form.location.errors %}
+                        <ul class="messages error">
+                            {% for e in form.location.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                         <p class="help-text">
                             <i class="fas fa-info-circle"></i>
                             p.sh. Theth, Valbonë, Tiranë, Durrës, Gjirokastër
@@ -167,6 +193,13 @@
                         <div>
                             {{ form.languages }}
                         </div>
+                        {% if form.languages.errors %}
+                        <ul class="messages error">
+                            {% for e in form.languages.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                         <p class="help-text">
                             <i class="fas fa-info-circle"></i>
                             p.sh. Shqip, Anglisht, Italisht, Gjermanisht
@@ -180,10 +213,38 @@
                             {{ form.certifications.label }}
                         </label>
                         {{ form.certifications }}
+                        {% if form.certifications.errors %}
+                        <ul class="messages error">
+                            {% for e in form.certifications.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                         <p class="help-text">
                             <i class="fas fa-info-circle"></i>
                             Certifikime alpinizmi, ndihma e parë, guidë turistike, etj.
                         </p>
+                    </div>
+
+                    <!-- Certification Document Upload -->
+                    <div class="form-group">
+                        <label for="{{ form.certification_document.id_for_label }}">
+                            <i class="fas fa-file-upload"></i>
+                            {{ form.certification_document.label|default:'Dokument certifikimi' }}
+                        </label>
+                        <div>
+                            {{ form.certification_document }}
+                        </div>
+                        {% if form.certification_document.errors %}
+                        <ul class="messages error">
+                            {% for e in form.certification_document.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        {% if cert_exists %}
+                        <p class="help-text">Dokumenti i certifikimit ekziston.</p>
+                        {% endif %}
                     </div>
 
                     <!-- Specialty -->
@@ -196,6 +257,48 @@
                             <i class="fas fa-star"></i>
                             {{ form.specialty }}
                         </div>
+                        {% if form.specialty.errors %}
+                        <ul class="messages error">
+                            {% for e in form.specialty.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+
+                    <!-- Experience level and years -->
+                    <div class="form-group">
+                        <label for="{{ form.experience_level.id_for_label }}">
+                            <i class="fas fa-briefcase"></i>
+                            {{ form.experience_level.label|default:'Niveli i përvojës' }}
+                        </label>
+                        <div>
+                            {{ form.experience_level }}
+                        </div>
+                        {% if form.experience_level.errors %}
+                        <ul class="messages error">
+                            {% for e in form.experience_level.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.years_experience.id_for_label }}">
+                            <i class="fas fa-hourglass-half"></i>
+                            {{ form.years_experience.label|default:'Vitet e përvojës' }}
+                        </label>
+                        <div>
+                            {{ form.years_experience }}
+                        </div>
+                        {% if form.years_experience.errors %}
+                        <ul class="messages error">
+                            {% for e in form.years_experience.errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shto Foto - {{ tour.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tour_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="page-header">
+    <h1>Shto Foto për: {{ tour.title }}</h1>
+    <p>Ngarko foto shtesë për të pasuruar gallery-n e turit.</p>
+  </div>
+
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for err in form.non_field_errors %}
+          <div>{{ err }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="{{ form.image.id_for_label }}">Zgjidh Foto</label>
+        {{ form.image }}
+        {% if form.image.help_text %}
+          <small class="form-text text-muted">{{ form.image.help_text|safe }}</small>
+        {% endif %}
+        {% if form.image.errors %}
+          <div class="error-message">{% for e in form.image.errors %}{{ e }}<br>{% endfor %}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.caption.id_for_label }}">Përshkrim (opsional)</label>
+        {{ form.caption }}
+      </div>
+
+      <div class="form-actions">
+        <a href="{% url 'tours:tour_detail' tour.slug %}" class="btn btn-secondary">Kthehu</a>
+        <button type="submit" class="btn btn-primary">Ngarko Foto</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

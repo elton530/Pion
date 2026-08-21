@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nënshkrimi në Newsletter — Open Map{% endblock %}
+
+{% block meta_description %}
+Nënshkruhu në newsletter-in e Open Map dhe merr njoftime për ture të reja, oferta speciale dhe këshilla për aventura në natyrë.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Na Ndiqni</h1>
+            <p class="hero-subtitle">Merr njoftime për ture të reja dhe oferta speciale direkt në email-in tënd</p>
+        </div>
+    </section>
+
+    <!-- Newsletter Form Section -->
+    <section class="contact-form-section">
+        <div class="container">
+            <div class="form-wrapper">
+                <div class="form-header">
+                    <h2>Nënshkrimi në Newsletter</h2>
+                    <p>Plotëso email-in tënd dhe ne do të të dërgojmë lajmet më të reja.</p>
+                </div>
+
+                <form method="post" class="contact-form">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.non_field_errors.0 }}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">Emri (opsionale)</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.agree_privacy.id_for_label }}" class="form-check-label">
+                            {{ form.agree_privacy }} Pajtohem me politikën e privatësisë
+                        </label>
+                        {% if form.agree_privacy.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {{ form.agree_privacy.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text">Ne nuk do të ndajmë email-in tuaj.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Nënshkruhu</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

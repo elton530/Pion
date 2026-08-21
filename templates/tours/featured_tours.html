@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Turet e Veçuar - Open Map{% endblock %}
+
+{% block meta_description %}
+Zbuloni turet më të veçuara dhe të spikatura në natyrën shqiptare, të zgjedhura për eksperienca autentike.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tour_list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ==================== HEADER (full-bleed) ==================== -->
+<section class="list-header">
+    <div class="header-content">
+        <span class="eyebrow">Eksploro Shqipërinë</span>
+        <h1 class="page-title">
+            <i class="fas fa-star"></i>
+            <span>Turet e Veçuar</span>
+        </h1>
+        <p class="page-subtitle">
+            Një përzgjedhje e veçantë turesh, të zgjedhura me kujdes për eksperiencat më të mira.
+        </p>
+    </div>
+    <div class="list-header-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 90" preserveAspectRatio="none">
+            <path d="M0,64 C240,96 480,16 720,32 C960,48 1200,88 1440,56 L1440,90 L0,90 Z" fill="currentColor"></path>
+        </svg>
+    </div>
+</section>
+
+<div class="tour-list-container">
+    {% if tours %}
+    <div class="tour-grid" id="tour-grid">
+        {% for tour in tours %}
+        <div class="tour-card" data-tour-id="{{ tour.id }}">
+            <a href="{% url 'tours:tour_detail' tour.slug %}" class="tour-card-link">
+                <!-- Image Section -->
+                <div class="tour-image-wrapper">
+                    {% if tour.main_image %}
+                        <img src="{{ tour.main_image.url }}"
+                             alt="{{ tour.title }}"
+                             class="tour-image"
+                             loading="lazy">
+                    {% else %}
+                        <div class="no-image-placeholder">
+                            <i class="fas fa-mountain"></i>
+                            <span>Pa foto</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Availability Badge -->
+                    {% if tour.available_spots > 0 %}
+                    <div class="tour-badge available">
+                        <i class="fas fa-check-circle"></i>
+                        {{ tour.available_spots }} vende
+                    </div>
+                    {% else %}
+                    <div class="tour-badge sold-out">
+                        <i class="fas fa-times-circle"></i>
+                        Mbushur
+                    </div>
+                    {% endif %}
+
+                    <!-- Difficulty Badge -->
+                    <div class="difficulty-badge difficulty-{{ tour.difficulty }}">
+                        {{ tour.get_difficulty_display|truncatechars:22 }}
+                    </div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="tour-info">
+                    <!-- Meta Information -->
+                    <div class="tour-meta">
+                        <span class="meta-item" title="Data e turit">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ tour.date|date:"d M Y" }}
+                        </span>
+                        <span class="meta-item" title="Lloji i turit">
+                            <i class="fas fa-hiking"></i>
+                            {{ tour.tour_type.name|default:"—" }}
+                        </span>
+                        <span class="meta-item" title="Kohëzgjatja">
+                            <i class="fas fa-hourglass-end"></i>
+                            {{ tour.duration_hours }}h
+                        </span>
+                    </div>
+
+                    <!-- Title -->
+                    <h3 class="tour-title">{{ tour.title }}</h3>
+
+                    <!-- Guide & Rating -->
+                    <div class="tour-attributes">
+                        <span class="tour-guide">
+                            <i class="fas fa-user-shield"></i>
+                            <span>{{ tour.guide.user.get_full_name|default:tour.guide.user.username }}</span>
+                        </span>
+
+                        {% if tour.reviews_count %}
+                        <span class="tour-rating">
+                            <i class="fas fa-star"></i>
+                            {{ tour.average_rating|floatformat:1 }}
+                            <span class="rating-count">({{ tour.reviews_count }})</span>
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Footer Section -->
+                    <div class="tour-footer">
+                        <div class="tour-price">
+                            <span class="price-amount">{{ tour.price_per_person }}</span>
+                            <span class="price-label">{{ tour.get_currency_display }}/person</span>
+                        </div>
+                        <span class="tour-action" aria-hidden="true">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="no-tours">
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h2>Ende nuk ka ture të veçuar</h2>
+            <p>Po punojmë për të sjellë eksperiencat më të mira për ty!</p>
+            <p class="empty-state-hint">Kontrolloni më vonë për ture të reja</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

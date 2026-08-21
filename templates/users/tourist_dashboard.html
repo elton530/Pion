@@ -1,18 +1,28 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Paneli im — Pion{% endblock %}
+{% block title %}Paneli im — Open Map{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/turist_dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container tourist-dashboard">
 
     <header>
-        <h1 class="page-title">Mirë se vini, {{ user.first_name }}! 🌄</h1>
-        <p class="subtitle">Menaxho rezervimet dhe aventurat e tua në një vend</p>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+                <h1 class="page-title">Mirë se vini, {{ user.first_name }}! 🌄</h1>
+                <p class="subtitle">Menaxho rezervimet dhe aventurat e tua në një vend</p>
+            </div>
+            <div>
+                <a href="{% url 'users:tourist_profile_edit' %}" class="btn-edit-profile">
+                    <i class="fa-regular fa-user"></i>
+                    Edito Profilin
+                </a>
+            </div>
+        </div>
     </header>
 
     {% if messages %}
@@ -38,7 +48,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ total_spent|floatformat:0 }}</div>
-            <div class="stat-label">Shpenzime (Lekë)</div>
+            <div class="stat-label">Shpenzime</div>
         </div>
     </div>
 
@@ -54,7 +64,11 @@
     </div>
     {% endif %}
 
-    <h2 class="section-title"><i class="fa-regular fa-calendar-check"></i> Turet e Ardhshme</h2>
+    <h2 class="section-title"><i class="fa-regular fa-calendar-check"></i> Turet e Ardhshme
+        <a href="{% url 'bookings:booking_list' %}" class="btn btn-primary" style="font-size:0.9rem; padding:0.55rem 1.1rem; margin-left:auto;">
+            <i class="fa-solid fa-list"></i> Të gjitha prenotimet
+        </a>
+    </h2>
 
     {% if upcoming_bookings %}
     {% for booking in upcoming_bookings %}
@@ -75,42 +89,44 @@
                 <span class="status-badge 
                     {% if booking.is_confirmed_24h %}status-24h
                     {% elif booking.status == 'confirmed' %}status-confirmed
+                    {% elif booking.status == 'cancelled' %}status-cancelled
                     {% else %}status-pending{% endif %}">
                     {% if booking.is_confirmed_24h %}Konfirmuar 24h
                     {% elif booking.status == 'confirmed' %}Konfirmuar
+                    {% elif booking.status == 'cancelled' %}Anuluar
                     {% else %}Në Pritje{% endif %}
                 </span>
             </div>
 
             <div class="booking-info">
                 <span><i class="fa-solid fa-user-tie"></i> {{ booking.tour.guide.user.get_full_name|default:booking.tour.guide.user.username }}</span>
-                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.location_start }}</span>
+                <span><i class="fa-solid fa-location-dot"></i> {{ booking.tour.meeting_point }}</span>
             </div>
 
             <div class="booking-info" style="border-top:1px solid var(--border); padding-top:1.2rem;">
-                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
+                <span><i class="fa-regular fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
                 <span><i class="fa-regular fa-clock"></i> {{ booking.tour.time_start|time:"H:i" }}</span>
                 <span><i class="fa-solid fa-users"></i> {{ booking.num_people }} persona</span>
             </div>
 
-            <div class="price-big">{{ booking.total_price }} Lekë</div>
+            <div class="price-big">{{ booking.total_price }} {{ booking.tour.get_currency_display }}</div>
 
             <div class="action-buttons">
                 {% if booking.status == 'confirmed' and not booking.is_confirmed_24h %}
-                <form action="{% url 'users:confirm_participation' booking.id %}" method="post" style="display:inline;">
+                <form action="{% url 'users:tourist_booking_confirm' booking.id %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-warning">✓ Konfirmo 24h</button>
                 </form>
                 {% endif %}
 
                 <a href="{% url 'tours:tour_detail' booking.tour.slug %}" class="btn btn-primary">Shiko Detajet</a>
+                <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-outline-primary">Rezervimi</a>
 
-                {% if booking.status != 'cancelled' %}
-                <form action="{% url 'users:cancel_booking' booking.id %}" method="post" style="display:inline;"
-                      onsubmit="return confirm('Vërtet dëshiron ta anulosh?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger">Anullo</button>
-                </form>
+                                {% if booking.can_be_cancelled %}
+                                <a href="{% url 'bookings:booking_cancel' booking.id %}" class="btn btn-outline-danger"
+                       onclick="return confirm('Vërtet dëshiron ta anulosh?');">
+                    <i class="fa-solid fa-ban"></i> Anullo
+                </a>
                 {% endif %}
             </div>
         </div>
@@ -133,11 +149,17 @@
         <div class="booking-content" style="grid-column: 1 / -1;">
             <div class="booking-header">
                 <h3 class="booking-title" style="font-size:1.28rem;">{{ booking.tour.title }}</h3>
+                {% if booking.status == 'cancelled' %}
+                <span class="status-badge" style="background:#fee2e2; color:#b91c1c;">Anuluar</span>
+                {% elif booking.status == 'no_show' %}
+                <span class="status-badge" style="background:#f3f4f6; color:#6b7280;">Nuk u paraqit</span>
+                {% else %}
                 <span class="status-badge" style="background:#e5e7eb; color:#4b5563;">Përfunduar</span>
+                {% endif %}
             </div>
             <div class="booking-info" style="margin-top:0.8rem;">
-                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d MMMM yyyy" }}</span>
-                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} Lekë</span>
+                <span><i class="fa-solid fa-calendar"></i> {{ booking.tour.date|date:"d F Y" }}</span>
+                <span><i class="fa-solid fa-coins"></i> {{ booking.total_price }} {{ booking.tour.get_currency_display }}</span>
             </div>
             <div style="margin-top:1.4rem;">
                 <a href="{% url 'tours:create_review' booking.tour.slug %}" class="btn btn-primary" 

@@ -14,7 +14,7 @@
         <div class="footer-top">
             <!-- Brand Column -->
             <div class="footer-col footer-brand">
-                <a href="{% url 'home' %}" class="footer-logo">
+                <a href="{% url 'core:home' %}" class="footer-logo">
                     <img src="{% static 'images/logo.png' %}" alt="Open Map Logo" class="footer-logo-img">
                     <div class="footer-logo-text">
                         <h3>Open Map</h3>
@@ -28,22 +28,22 @@
                     <div class="stat">
                         <i class="fas fa-mountain"></i>
                         <div>
-                            <strong>24+</strong>
+                            <strong>{{ tours_count|default:0 }}+</strong>
                             <span>Ture aktive</span>
                         </div>
                     </div>
                     <div class="stat">
                         <i class="fas fa-users"></i>
                         <div>
-                            <strong>12+</strong>
-                            <span>Guida</span>
+                            <strong>{{ guides_count|default:0 }}+</strong>
+                            <span>Guida lokale</span>
                         </div>
                     </div>
                     <div class="stat">
                         <i class="fas fa-star"></i>
                         <div>
-                            <strong>4.9</strong>
-                            <span>Vlerësim</span>
+                            <strong>{{ site_avg_rating|floatformat:1|default:"0.0" }}</strong>
+                            <span>Vlerësim mesatar</span>
                         </div>
                     </div>
                 </div>
@@ -70,15 +70,15 @@
                     </li>
                     
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:about' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Rreth Nesh</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:faq_list' %}">
                             <i class="fas fa-chevron-right"></i>
-                            <span>Blog & Këshilla</span>
+                            <span>Pyetje të Shpeshta</span>
                         </a>
                     </li>
                    
@@ -94,25 +94,25 @@
                 <ul class="footer-links">
                     
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:contact' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Kontakti</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:terms' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Kushtet e Përdorimit</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:privacy' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Politika e Privatësisë</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'core:faq_list' %}">
                             <i class="fas fa-chevron-right"></i>
                             <span>Pyetje të Shpeshta</span>
                         </a>
@@ -137,7 +137,9 @@
                     Merr njoftime për ture të reja, oferta speciale dhe këshilla për aventura në natyrë.
                 </p>
                 
-                <form class="newsletter-form" id="footerNewsletterForm">
+                <form class="newsletter-form" id="footerNewsletterForm" method="post" action="{% url 'core:newsletter_subscribe' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="agree_privacy" value="1">
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
                         <input type="email" name="email" placeholder="Email-i juaj..." required aria-label="Email address">

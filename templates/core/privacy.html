@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Politika e Privatësisë — Open Map{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="container" style="padding: 4rem 0 5rem;">
+        <div class="hero-card" style="padding: 2.5rem; margin-bottom: 2rem;">
+            <div class="hero-content">
+                <div>
+                    <p class="eyebrow">Politika e Privatësisë</p>
+                    <h1 style="margin-bottom: 1rem;">Si e mbrojmë dhe e përdorim informacionin tuaj personal</h1>
+                    <p class="hero-description">
+                        Ne jemi të angazhuar të mbrojmë privatësinë tuaj dhe të përdorim informacionin vetëm për qëllimet e shërbimit dhe përmirësimit të përvojës suaj në platformë.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>1. Informacionet që mbledhim</h2>
+            <p>Ne mund të mbledhim të dhëna si emrin, email-in, numrin e telefonit, informacionin e profilit dhe detajet e rezervimeve për të ofruar shërbim më të mirë.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>2. Përdorimi i të dhënave</h2>
+            <p>Të dhënat përdoren për të menaxhuar llogaritë, rezervimet, komunikimet dhe për të përmirësuar platformën dhe shërbimet tona.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>3. Ndarja e të dhënave</h2>
+            <p>Ne nuk do t’i shesim ose ndajmë të dhënat tuaja personale me palë të treta pa pëlqimin tuaj, përveç rasteve të nevojshme për shërbimin ose sipas ligjit.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem;">
+            <h2>4. Drejtat tuaja</h2>
+            <p>Ju keni të drejtë të kërkoni të shihni, korrigjoni ose fshini informacionin tuaj personal, si dhe të ndaloni komunikimet e padëshiruara.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

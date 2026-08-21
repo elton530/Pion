@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Anulo Prenotimin - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1 class="cancel-title">
+                    <i class="fas fa-times-circle"></i> Anulo Prenotimin
+                </h1>
+                <p>Përpara se të vazhdosh, lexo politikën e anulimit më poshtë</p>
+            </div>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="cancel-warning" role="alert">
+            <div class="cancel-warning-icon">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            </div>
+            <div>
+                <h3>Paralajmërim</h3>
+                <p>
+                    Anulimi i prenotimit është një veprim përfundimtar. Pas anulimit, do të jetë i vështirë të rikthehet në të njëjtën prenotim.
+                    Kontakto guidën nëse ke pyetje ose nëse do të anulosh për një arsye të vlefshme.
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="booking-grid">
+            <!-- Cancellation Form -->
+            <div class="booking-form-card">
+                <h2>Forma e Anulimit</h2>
+                
+                <form method="post" class="booking-form cancel-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="booking-alert" role="alert">
+                        <strong>Gabim:</strong>
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            <label class="cancel-confirm" for="{{ field.id_for_label }}">
+                                {{ field }}
+                                <span class="cancel-confirm-text">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="req">*</span>{% endif %}
+                                </span>
+                            </label>
+                            {% if field.help_text %}
+                                <span class="form-note">{{ field.help_text|safe }}</span>
+                            {% endif %}
+                            {% if field.errors %}
+                                <span class="field-error">
+                                    {% for error in field.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <div class="form-group">
+                                {% if field.label %}
+                                    <label for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                        {% if field.field.required %}<span class="req">*</span>{% endif %}
+                                    </label>
+                                {% endif %}
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <span class="form-note">
+                                        {{ field.help_text|safe }}
+                                    </span>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <span class="field-error">
+                                        {% for error in field.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Refund Info -->
+                    <div class="cancel-refund">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        <div>
+                            <strong>Informacioni i Rimbursimit</strong>
+                            <span class="refund-amount">
+                                {{ refund_amount }} {{ booking.tour.get_currency_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="booking-footer">
+                        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kthehu Prapa
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-check"></i> Konfirmo Anulimin
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Booking Summary -->
+            <div class="tour-summary">
+                <div class="tour-card-mini">
+                    <h2>{{ booking.tour.title }}</h2>
+                    
+                    <div class="cancel-summary-list">
+                        <p>
+                            <strong><i class="fas fa-calendar-alt"></i> Data e Turit:</strong><br>
+                            {{ booking.tour.date|date:"d F Y" }} në {{ booking.tour.time_start|time:"H:i" }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-users"></i> Numri i Personave:</strong><br>
+                            {{ booking.num_people }}
+                        </p>
+
+                        <hr class="cancel-divider">
+
+                        <p>
+                            <strong><i class="fas fa-tag"></i> Çmimi Total:</strong><br>
+                            <span class="cancel-total">
+                                {{ booking.total_price }} {{ booking.tour.get_currency_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Cancellation Policy -->
+                <div class="tour-card-mini">
+                    <h3>Politika e Anulimit</h3>
+                    {% if booking.tour.cancellation_policy %}
+                        <p class="cancel-policy-text">
+                            {{ booking.tour.cancellation_policy|linebreaks }}
+                        </p>
+                    {% else %}
+                        <p class="cancel-policy-text">
+                            Anulimet pranë guidës shoqërohen me një politikë specifike rimbursimi.
+                            Kontakto guidën për më shumë detaje.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vlerëso Turin - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-star"></i> Vlerëso Turin
+                </h1>
+                <p>Ndaje përvojën tënde me komunitetin tonë</p>
+            </div>
+        </div>
+
+        <!-- Review Form -->
+        <div class="booking-grid">
+            <div class="booking-form-card">
+                <h2>Forma e Vlerësimit</h2>
+                
+                <form method="post" class="booking-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="booking-alert" role="alert">
+                        <strong>Gabim:</strong>
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="form-group">
+                            {% if field.label %}
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span style="color: var(--danger);">*</span>{% endif %}
+                                </label>
+                            {% endif %}
+                            
+                            {% if field.widget.input_type == 'hidden' %}
+                                {{ field }}
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            
+                            {% if field.help_text %}
+                                <span class="form-note">
+                                    {{ field.help_text|safe }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <span style="color: var(--danger); font-size: 0.9rem;">
+                                    {% for error in field.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="booking-footer">
+                        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kthehu
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Dërgo Vlerësimin
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tour Summary -->
+            <div class="tour-summary">
+                <div class="tour-card-mini">
+                    {% if tour.main_image %}
+                    <img src="{{ tour.main_image.url }}" alt="{{ tour.title }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; display: block;">
+                    {% endif %}
+                    
+                    <h2>{{ tour.title }}</h2>
+                    
+                    <div style="display: grid; gap: 0.8rem;">
+                        <p>
+                            <strong><i class="fas fa-calendar-alt"></i> Data:</strong><br>
+                            {{ tour.date|date:"d F Y" }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-user-shield"></i> Udhëzuesi:</strong><br>
+                            {{ tour.guide.user.get_full_name|default:tour.guide.user.username }}
+                        </p>
+
+                        <p>
+                            <strong><i class="fas fa-hourglass-end"></i> Kohëzgjatja:</strong><br>
+                            {{ tour.duration_formatted }}
+                        </p>
+
+                        <p>
+                            <strong><i class="fas fa-star"></i> Vlerësim Mesatar:</strong><br>
+                            <span style="font-size: 1.4rem; color: var(--warning);">
+                                ★★★★★ {{ tour.average_rating|floatformat:1 }}/5.0
+                            </span>
+                            <span style="display: block; color: var(--text-light); font-size: 0.9rem;">
+                                ({{ tour.reviews_count }} vlerësime)
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="tour-card-mini">
+                    <h3><i class="fas fa-info-circle"></i> Këshilla për Vlerësim</h3>
+                    <ul style="color: var(--text-light); font-size: 0.95rem; margin: 0; padding-left: 1.2rem;">
+                        <li>Jep vlerësim të sinqertë dhe të drejtë</li>
+                        <li>Përshkruaj përvojën tënde në detaje</li>
+                        <li>Bëj të qartë çfarë të pëlqeu dhe çfarë mund të përmirësohet</li>
+                        <li>Qëndro kurtez dhe respektues ndaj guida-s</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

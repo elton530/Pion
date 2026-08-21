@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edito Profilin — Turist{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/turist_dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile_edit.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container profile-edit">
+    <form id="profile-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grid">
+            <aside class="profile-card">
+                <div id="photo-area">
+                    {% if form.photo.value %}
+                        <img id="preview-image" src="{{ form.photo.value.url }}" alt="Foto profil" />
+                    {% else %}
+                        <div id="photo-placeholder" class="photo-placeholder">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="profile-meta">
+                    <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+                    <p>{{ request.user.email }}</p>
+                    <label class="btn" style="margin-top:10px;">
+                        <span class="fa fa-upload"></span>
+                        {{ form.photo }}
+                    </label>
+                    <div style="margin-top:8px; font-size:0.9em; color:#64748b;">Foto: JPG/PNG max 5MB</div>
+                </div>
+            </aside>
+
+            <section class="form-section">
+                <h1 style="margin:0 0 6px 0;">Edito Profilin</h1>
+                <p style="margin:0 0 10px 0; color:var(--text-lighter);">Përditëso informacionin që shfaqet tek guidat dhe rezervimet.</p>
+
+                <div class="field-row">
+                    <div class="form-group">{{ form.phone.label_tag }}{{ form.phone }}</div>
+                    <div class="form-group">{{ form.date_of_birth.label_tag }}{{ form.date_of_birth }}</div>
+                </div>
+
+                <div class="field-row">
+                    <div class="form-group">{{ form.country.label_tag }}{{ form.country }}</div>
+                    <div class="form-group">{{ form.experience_level.label_tag }}{{ form.experience_level }}</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_bio">{{ form.bio.label }}</label>
+                    {{ form.bio }}
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                        <small style="color:#94a3b8;">Përshkrimi që do të shfaqet në profil</small>
+                        <div><span id="bio-count">{{ form.bio.value|length|default:0 }}</span>/500</div>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="form-group">{{ form.preferred_tour_types.label_tag }}{{ form.preferred_tour_types }}</div>
+                    <div class="form-group">{{ form.languages.label_tag }}{{ form.languages }}</div>
+                </div>
+
+                <div class="field-row">
+                    <div class="form-group">{{ form.emergency_contact_name.label_tag }}{{ form.emergency_contact_name }}</div>
+                    <div class="form-group">{{ form.emergency_contact_phone.label_tag }}{{ form.emergency_contact_phone }}</div>
+                </div>
+
+                <div class="field-row">
+                    <div class="form-group">{{ form.health_conditions.label_tag }}{{ form.health_conditions }}</div>
+                    <div class="form-group">{{ form.allergies.label_tag }}{{ form.allergies }}</div>
+                </div>
+
+                <div style="display:flex; gap:1rem; align-items:center; margin-top:6px;">
+                    <label class="form-check">{{ form.email_notifications }} {{ form.email_notifications.label_tag }}</label>
+                    <label class="form-check">{{ form.sms_notifications }} {{ form.sms_notifications.label_tag }}</label>
+                    <label class="form-check">{{ form.newsletter }} {{ form.newsletter.label_tag }}</label>
+                </div>
+
+                <div class="form-actions">
+                    <button id="submit-btn" type="submit" class="btn btn-primary">Ruaj Ndryshimet</button>
+                    <a href="{% url 'users:tourist_dashboard' %}" class="btn btn-outline-danger">Anulo</a>
+                </div>
+            </section>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/guide_profile_edit.js' %}"></script>
+{% endblock %}

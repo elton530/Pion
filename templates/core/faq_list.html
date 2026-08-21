@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pyetje të Shpeshta — Open Map{% endblock %}
+
+{% block meta_description %}
+Gjej përgjigje për pyetjet më të shpeshta rreth Open Map, tureve dhe mënyrës se si të vijohet.
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/faq.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="faq-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Pyetje të Shpeshta</h1>
+            <p class="hero-subtitle">Gjej përgjigje për pyetjet më të zakonshme</p>
+            
+            <div class="search-box">
+                <input type="text" id="faq-search" class="faq-search" placeholder="Kërko në pyetje...">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ List Section -->
+    <section class="faq-list-section">
+        <div class="container">
+            {% if object_list %}
+                <div class="faq-list">
+                    {% for faq in object_list %}
+                        <div class="faq-item" data-category="{{ faq.category|lower }}">
+                            <button class="faq-question" onclick="toggleFAQ(this)">
+                                <span class="question-text">{{ faq.question }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <div class="answer-content">
+                                    {{ faq.answer|safe }}
+                                </div>
+                                <a href="{% url 'core:faq_detail' faq.id %}" class="btn btn-text btn-sm">
+                                    Shiko më shumë
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-question-circle"></i>
+                    <h3>Nuk ka pyetje të disponueshme</h3>
+                    <p>Nëse keni pyetje, ju lutemi <a href="{% url 'core:contact' %}">na kontaktoni</a></p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Contact CTA Section -->
+    <section class="contact-cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <h2>Ende nuk gjen përgjigjen?</h2>
+                <p>Kontakto ekipin tonë të mbështetjes dhe ne do të ndihmojmë me plakën.</p>
+                <a href="{% url 'core:contact' %}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i>
+                    <span>Na Kontakto</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        function toggleFAQ(button) {
+            const answer = button.nextElementSibling;
+            const isOpen = answer.style.display !== 'none';
+            
+            // Close other open FAQs
+            document.querySelectorAll('.faq-answer').forEach(item => {
+                if (item !== answer) {
+                    item.style.display = 'none';
+                    item.previousElementSibling.classList.remove('active');
+                }
+            });
+            
+            // Toggle current
+            answer.style.display = isOpen ? 'none' : 'block';
+            button.classList.toggle('active');
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('faq-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    const question = item.querySelector('.question-text').textContent.toLowerCase();
+                    const answer = item.querySelector('.answer-content').textContent.toLowerCase();
+                    
+                    if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+    </script>
+{% endblock %}

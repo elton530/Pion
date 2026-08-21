@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kushtet e Përdorimit — Open Map{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="container" style="padding: 4rem 0 5rem;">
+        <div class="hero-card" style="padding: 2.5rem; margin-bottom: 2rem;">
+            <div class="hero-content">
+                <div>
+                    <p class="eyebrow">Kushtet e Përdorimit</p>
+                    <h1 style="margin-bottom: 1rem;">Kushtet dhe rregullat e përdorimit të platformës Open Map</h1>
+                    <p class="hero-description">
+                        Këto kushte rregullojnë përdorimin e platformës tonë, rezervimet, komunikimin me guide-t dhe përgjegjësitë e secilit përdorues.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>1. Përdorimi i platformës</h2>
+            <p>Përdoruesit duhet të ofrojnë informacione të sakta dhe të përdorin platformën në përputhje me ligjet dhe rregullat në fuqi.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>2. Rezervimet dhe pagesat</h2>
+            <p>Rezervimet janë të lidhura me kushtet e ofruarit të turit dhe pagesa mund të verifikohen përpara konfirmimit të fundit.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>3. Përgjegjësitë e guide-ve dhe turistëve</h2>
+            <p>Guide-t duhet të ofrojnë shërbim të mirë dhe të respektojnë oraret e caktuara. Turistët duhet të respektojnë udhëzimet dhe të mbajnë sjellje të përshtatshme.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h2>4. Anulim dhe ndërrime</h2>
+            <p>Nëse një rezervim anulohet, politikat e anulimit mund të aplikohen sipas datës dhe kushteve të turit.</p>
+        </div>
+
+        <div class="info-card" style="padding: 2rem;">
+            <h2>5. Ndryshimet në këto kushte</h2>
+            <p>Open Map rezervon të drejtën të përditësojë këto kushte me kohë. Ndryshimet do të publikohen në këtë faqe.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

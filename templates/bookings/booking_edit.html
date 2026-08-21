@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Redakto Prenotimin - Open Map{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+    <div class="bookings-shell">
+        <!-- Header -->
+        <div class="bookings-header">
+            <div>
+                <h1>
+                    <i class="fas fa-edit"></i> Redakto Prenotimin
+                </h1>
+                <p>Përditëso detajet e prenotimit tënd</p>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="booking-grid">
+            <div class="booking-form-card">
+                <h2>Detajet e Prenotimit</h2>
+                
+                <form method="post" class="booking-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="booking-alert" role="alert">
+                        <strong>Gabim:</strong>
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="form-group">
+                            {% if field.label %}
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span style="color: var(--danger);">*</span>{% endif %}
+                                </label>
+                            {% endif %}
+                            
+                            {{ field }}
+                            
+                            {% if field.help_text %}
+                                <span class="form-note">
+                                    {{ field.help_text|safe }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <span style="color: var(--danger); font-size: 0.9rem;">
+                                    {% for error in field.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="booking-footer">
+                        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Anulo
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Ruaj Ndryshimet
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tour Summary -->
+            <div class="tour-summary">
+                <div class="tour-card-mini">
+                    <h2>{{ booking.tour.title }}</h2>
+                    
+                    <div style="display: grid; gap: 0.8rem;">
+                        <p>
+                            <strong><i class="fas fa-calendar-alt"></i> Data:</strong><br>
+                            {{ booking.tour.date|date:"d F Y" }} në {{ booking.tour.time_start|time:"H:i" }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-map-pin"></i> Vendi i Takimit:</strong><br>
+                            {{ booking.tour.meeting_point }}
+                        </p>
+                        
+                        <p>
+                            <strong><i class="fas fa-hourglass-end"></i> Kohëzgjatja:</strong><br>
+                            {{ booking.tour.duration_formatted }}
+                        </p>
+
+                        <hr style="border: none; border-top: 1px solid rgba(14, 165, 233, 0.12); margin: 0.5rem 0;">
+
+                        <p>
+                            <strong><i class="fas fa-tag"></i> Çmimi:</strong><br>
+                            <span style="font-size: 1.4rem; color: var(--primary); font-weight: 700;">
+                                {{ booking.tour.price_per_person }} {{ booking.tour.get_currency_display }}
+                            </span>
+                            <span style="color: var(--text-light); font-size: 0.9rem;">per person</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Booking Status -->
+                <div class="tour-card-mini">
+                    <h3>Statusi i Prenotimit</h3>
+                    <p>
+                        <strong>Statusi Aktual:</strong><br>
+                        <span class="booking-badge {{ booking.status }}">
+                            <i class="fas fa-circle"></i> {{ booking.get_status_display }}
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Kryer më:</strong><br>
+                        {{ booking.created_at|date:"d M Y" }} {{ booking.created_at|time:"H:i" }}
+                    </p>
+                    <p>
+                        <strong>Numri i Prenotimit:</strong><br>
+                        <span style="font-family: monospace;">{{ booking.id }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
